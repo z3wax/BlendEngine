@@ -1,0 +1,28 @@
+{
+  "blend_file": "NeonQuarantineWindows.blend",
+  "created_by": "BlendEngine",
+  "files": [
+    "game_data.json",
+    "platform_config.json",
+    "manifest.json",
+    "NeonQuarantineWindows.blend",
+    "run_game.py",
+    "run_game.sh",
+    "run_game.bat",
+    "run_game.command",
+    "README.txt"
+  ],
+  "game_data": "game_data.json",
+  "name": "NeonQuarantineWindows",
+  "platform": "WINDOWS",
+  "summary": "Title: Neon Quarantine; Platform: WINDOWS; Resolution: 1280x720; Folder: //builds/NeonQuarantineExport; Packages: playable project, asset manifest, scene package",
+  "supported_targets": [
+    "WINDOWS",
+    "LINUX",
+    "MACOS",
+    "IOS",
+    "ANDROID",
+    "WEB"
+  ],
+  "title": "Neon Quarantine"
+}

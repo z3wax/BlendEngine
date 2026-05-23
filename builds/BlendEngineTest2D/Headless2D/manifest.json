@@ -1,0 +1,26 @@
+{
+  "blend_file": "Headless2D.blend",
+  "created_by": "BlendEngine",
+  "files": [
+    "game_data.json",
+    "platform_config.json",
+    "manifest.json",
+    "Headless2D.blend",
+    "run_game.py",
+    "run_game.sh",
+    "README.txt"
+  ],
+  "game_data": "game_data.json",
+  "name": "Headless2D",
+  "platform": "WINDOWS",
+  "summary": "Title: My BlendEngine Game; Platform: WINDOWS; Resolution: 1280x720; Folder: //builds/BlendEngineTest2D; Packages: playable project, asset manifest, scene package",
+  "supported_targets": [
+    "WINDOWS",
+    "LINUX",
+    "MACOS",
+    "IOS",
+    "ANDROID",
+    "WEB"
+  ],
+  "title": "My BlendEngine Game"
+}

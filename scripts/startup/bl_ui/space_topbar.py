@@ -25,6 +25,24 @@ class TOPBAR_HT_upper_bar(Header):
         window = context.window
         screen = context.screen
 
+        if getattr(context.preferences, "app_template", "") == "BlendEngine":
+            if bpy.types.Menu.bl_rna_get_subclass_py("TOPBAR_MT_blendengine"):
+                layout.menu("TOPBAR_MT_blendengine", text="BlendEngine", icon='PLAY')
+            else:
+                layout.label(text="BlendEngine", icon='PLAY')
+            layout.separator()
+            row = layout.row(align=True)
+            for page, text, icon in (
+                ("STUDIO", "Studio", 'WINDOW'),
+                ("WORLD", "World", 'WORLD'),
+                ("LOGIC", "Logic", 'NODETREE'),
+                ("PLAY", "Play Mode", 'PLAY'),
+                ("BUILD", "Ship", 'EXPORT'),
+            ):
+                op = row.operator("blendengine.open_page", text=text, icon=icon)
+                op.page = page
+            return
+
         TOPBAR_MT_editor_menus.draw_collapsible(context, layout)
 
         layout.separator()
@@ -48,6 +66,19 @@ class TOPBAR_HT_upper_bar(Header):
         window = context.window
         screen = context.screen
         scene = window.scene
+
+        if getattr(context.preferences, "app_template", "") == "BlendEngine":
+            project = getattr(scene, "blendengine_project", None)
+            row = layout.row(align=True)
+            if project is not None and getattr(project, "test_running", False):
+                row.operator("blendengine.stop_test_run", text="Stop", icon='PAUSE')
+            else:
+                row.operator("blendengine.test_run_scene", text="Run", icon='PLAY')
+            row.operator("blendengine.prepare_build", text="Build", icon='EXPORT')
+            row.operator("blendengine.optimize_for_one_gb", text="1GB", icon='MOD_SIMPLIFY')
+            if project is not None:
+                layout.label(text=getattr(project, "test_status", "Ready"))
+            return
 
         # If statusbar is hidden, still show messages at the top
         if not screen.show_statusbar:
@@ -193,6 +224,12 @@ class TOPBAR_MT_editor_menus(Menu):
 
     def draw(self, context):
         layout = self.layout
+        if getattr(context.preferences, "app_template", "") == "BlendEngine":
+            if bpy.types.Menu.bl_rna_get_subclass_py("TOPBAR_MT_blendengine"):
+                layout.menu("TOPBAR_MT_blendengine", text="BlendEngine", icon='PLAY')
+            else:
+                layout.menu("TOPBAR_MT_blender", text="BlendEngine", icon='PLAY')
+            return
 
         # Allow calling this menu directly (this might not be a header area).
         if getattr(context.area, "show_menus", False):
@@ -212,8 +249,14 @@ class TOPBAR_MT_editor_menus(Menu):
 class TOPBAR_MT_blender(Menu):
     bl_label = "Blender"
 
-    def draw(self, _context):
+    def draw(self, context):
         layout = self.layout
+        if getattr(context.preferences, "app_template", "") == "BlendEngine":
+            layout.operator("wm.splash", text="BlendEngine Start")
+            layout.operator("wm.splash_about", text="About BlendEngine")
+            layout.separator()
+            layout.menu("TOPBAR_MT_blender_system", text="System")
+            return
 
         layout.operator("wm.splash")
         layout.operator("wm.splash_about")

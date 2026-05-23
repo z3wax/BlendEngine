@@ -1,0 +1,11 @@
+{
+  "desktop": true,
+  "memory_budget_mb": 1024,
+  "mobile": false,
+  "native_toolchain_required": false,
+  "notes": "Desktop packages can be opened with Blender directly. iOS, Android, and Web packages include runtime data and optimization profiles for a native shell/toolchain.",
+  "runtime": "BlendEngine Python runtime inside Blender-compatible shell",
+  "target": "WINDOWS",
+  "touch_controls": false,
+  "web": false
+}

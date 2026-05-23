@@ -1,0 +1,31 @@
+{
+  "blend_file": "BlendEngineWebStarter.blend",
+  "created_by": "BlendEngine",
+  "files": [
+    "game_data.json",
+    "platform_config.json",
+    "manifest.json",
+    "BlendEngineWebStarter.blend",
+    "run_game.py",
+    "run_game.sh",
+    "run_game.bat",
+    "run_game.command",
+    "web_player/index.html",
+    "web_player/player.js",
+    "web_player/game_data.json",
+    "README.txt"
+  ],
+  "game_data": "game_data.json",
+  "name": "BlendEngineWebStarter",
+  "platform": "WEB",
+  "summary": "Title: New BlendEngine Game; Platform: WEB; Resolution: 1280x720; Folder: //builds/FinalGameExport; Packages: playable project, asset manifest, scene package",
+  "supported_targets": [
+    "WINDOWS",
+    "LINUX",
+    "MACOS",
+    "IOS",
+    "ANDROID",
+    "WEB"
+  ],
+  "title": "New BlendEngine Game"
+}

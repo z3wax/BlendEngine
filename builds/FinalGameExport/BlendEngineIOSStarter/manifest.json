@@ -1,0 +1,37 @@
+{
+  "blend_file": "BlendEngineIOSStarter.blend",
+  "created_by": "BlendEngine",
+  "files": [
+    "game_data.json",
+    "platform_config.json",
+    "manifest.json",
+    "BlendEngineIOSStarter.blend",
+    "run_game.py",
+    "run_game.sh",
+    "run_game.bat",
+    "run_game.command",
+    "ios_project/Assets/game_data.json",
+    "ios_project/Assets/platform_config.json",
+    "ios_project/web_player/index.html",
+    "ios_project/web_player/player.js",
+    "ios_project/web_player/game_data.json",
+    "ios_project/BlendEnginePlayer.swift",
+    "ios_project/Info.plist",
+    "ios_project/build_ios_ipa.sh",
+    "ios_project/README.md",
+    "README.txt"
+  ],
+  "game_data": "game_data.json",
+  "name": "BlendEngineIOSStarter",
+  "platform": "IOS",
+  "summary": "Title: New BlendEngine Game; Platform: IOS; Resolution: 1280x720; Folder: //builds/FinalGameExport; Packages: playable project, asset manifest, scene package",
+  "supported_targets": [
+    "WINDOWS",
+    "LINUX",
+    "MACOS",
+    "IOS",
+    "ANDROID",
+    "WEB"
+  ],
+  "title": "New BlendEngine Game"
+}

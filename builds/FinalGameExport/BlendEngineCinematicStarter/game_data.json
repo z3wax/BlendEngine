@@ -1,0 +1,5782 @@
+{
+  "editor_tools": {
+    "ai_navigation_preview": false,
+    "camera_preview": true,
+    "collision_preview": false,
+    "grid_snap": true,
+    "lighting_preview": true,
+    "multiplayer_preview": false,
+    "object_snap": true,
+    "performance_heatmap": false,
+    "physics_preview": false
+  },
+  "format": "BlendEngineGameData",
+  "input": [
+    {
+      "action": "MOVE_FORWARD",
+      "custom_action": "",
+      "device": "KEYBOARD",
+      "key": "W",
+      "name": "Move Forward",
+      "scale": 1.0
+    },
+    {
+      "action": "MOVE_BACKWARD",
+      "custom_action": "",
+      "device": "KEYBOARD",
+      "key": "S",
+      "name": "Move Backward",
+      "scale": 1.0
+    },
+    {
+      "action": "MOVE_LEFT",
+      "custom_action": "",
+      "device": "KEYBOARD",
+      "key": "A",
+      "name": "Move Left",
+      "scale": 1.0
+    },
+    {
+      "action": "MOVE_RIGHT",
+      "custom_action": "",
+      "device": "KEYBOARD",
+      "key": "D",
+      "name": "Move Right",
+      "scale": 1.0
+    },
+    {
+      "action": "JUMP",
+      "custom_action": "",
+      "device": "KEYBOARD",
+      "key": "SPACE",
+      "name": "Jump",
+      "scale": 1.0
+    },
+    {
+      "action": "SPRINT",
+      "custom_action": "",
+      "device": "KEYBOARD",
+      "key": "LEFT_SHIFT",
+      "name": "Sprint",
+      "scale": 1.0
+    },
+    {
+      "action": "CROUCH",
+      "custom_action": "",
+      "device": "KEYBOARD",
+      "key": "LEFT_CTRL",
+      "name": "Crouch",
+      "scale": 1.0
+    },
+    {
+      "action": "INTERACT",
+      "custom_action": "",
+      "device": "KEYBOARD",
+      "key": "E",
+      "name": "Interact",
+      "scale": 1.0
+    },
+    {
+      "action": "ATTACK",
+      "custom_action": "",
+      "device": "KEYBOARD",
+      "key": "F",
+      "name": "Attack",
+      "scale": 1.0
+    },
+    {
+      "action": "AIM",
+      "custom_action": "",
+      "device": "KEYBOARD",
+      "key": "R",
+      "name": "Aim",
+      "scale": 1.0
+    },
+    {
+      "action": "PAUSE",
+      "custom_action": "",
+      "device": "KEYBOARD",
+      "key": "ESC",
+      "name": "Pause",
+      "scale": 1.0
+    },
+    {
+      "action": "INVENTORY",
+      "custom_action": "",
+      "device": "KEYBOARD",
+      "key": "I",
+      "name": "Inventory",
+      "scale": 1.0
+    }
+  ],
+  "metrics": {
+    "bone_count_visible": 0,
+    "camera_count": 1,
+    "draw_calls_estimated": 51,
+    "dynamic_light_count": 2,
+    "dynamic_object_count": 16,
+    "high_poly_objects": 0,
+    "light_count": 3,
+    "material_count": 13,
+    "max_texture_size": 0,
+    "mesh_count": 51,
+    "object_count": 57,
+    "objects_without_lod": 0,
+    "particle_count_estimated": 0,
+    "particle_system_count": 0,
+    "rigidbody_count": 0,
+    "shadow_caster_count": 1,
+    "static_rigidbody_count": 0,
+    "texture_count": 1,
+    "texture_memory_mb": 0.0,
+    "triangle_count": 4012
+  },
+  "multiplayer": {
+    "enabled": false,
+    "max_players": 4,
+    "mode": "SINGLE_PLAYER",
+    "port": 7777,
+    "predicted_movement": true,
+    "rollback_safety": false,
+    "server_tick_rate": 30,
+    "sync_animation": true,
+    "sync_health": true,
+    "sync_inventory": true,
+    "sync_position": true
+  },
+  "objects": [
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Mesh Renderer",
+          "notes": "",
+          "tag": "",
+          "type": "MESH_RENDERER"
+        },
+        {
+          "enabled": true,
+          "name": "Collider",
+          "notes": "Collider data. Add Rigidbody to enable Blender physics preview.",
+          "tag": "Ground",
+          "type": "COLLIDER"
+        },
+        {
+          "enabled": true,
+          "name": "Static Object",
+          "notes": "Marked as static for future batching, culling, and baked lighting.",
+          "tag": "",
+          "type": "STATIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Merge Candidate",
+          "notes": "Can be merged with nearby static objects later.",
+          "tag": "",
+          "type": "MERGE_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting when possible.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "LOD Group",
+          "notes": "LOD marker used by reports, runtime planning, and build packages.",
+          "tag": "",
+          "type": "LOD_GROUP"
+        },
+        {
+          "enabled": true,
+          "name": "Disable When Far",
+          "notes": "Can switch to cheaper detail or disable when far away.",
+          "tag": "",
+          "type": "DISABLE_WHEN_FAR"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "name": "BE_ForestRuins_Terrain",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": true,
+        "dynamic_object": false,
+        "instancing_candidate": false,
+        "lod_group": true,
+        "physics_sleep": false,
+        "static_object": true
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Ground",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [
+        {
+          "actions": [
+            {
+              "animation": "",
+              "name": "Show Log",
+              "number_value": 1.0,
+              "scene": "",
+              "target_object": "",
+              "text_value": "BlendEngine test run started.",
+              "type": "SHOW_LOG",
+              "variable_name": "",
+              "vector_value": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            }
+          ],
+          "conditions": [],
+          "description": "When the scene starts, write a friendly test log.",
+          "enabled": true,
+          "events": [
+            {
+              "custom_event": "",
+              "key": "SPACE",
+              "name": "On Start",
+              "tag": "",
+              "timer_seconds": 1.0,
+              "type": "ON_START"
+            }
+          ],
+          "name": "On Start Welcome"
+        }
+      ],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Player Controller",
+          "notes": "",
+          "tag": "Player",
+          "type": "PLAYER_CONTROLLER"
+        },
+        {
+          "enabled": true,
+          "name": "Dynamic Object",
+          "notes": "Marked as moving or changing during gameplay.",
+          "tag": "",
+          "type": "DYNAMIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Collider",
+          "notes": "Collider data. Add Rigidbody to enable Blender physics preview.",
+          "tag": "Player",
+          "type": "COLLIDER"
+        },
+        {
+          "enabled": true,
+          "name": "Health",
+          "notes": "",
+          "tag": "",
+          "type": "HEALTH"
+        },
+        {
+          "enabled": true,
+          "name": "Animation Controller",
+          "notes": "",
+          "tag": "",
+          "type": "ANIMATION_CONTROLLER"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": true,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        0.0,
+        0.0,
+        0.8999999761581421
+      ],
+      "name": "BE_Player",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": false,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": false,
+        "dynamic_object": true,
+        "instancing_candidate": false,
+        "lod_group": false,
+        "physics_sleep": false,
+        "static_object": false
+      },
+      "player_controller": {
+        "camera_follow": "BE_GameCamera",
+        "controller_type": "THIRD_PERSON",
+        "enabled": true,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 5.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Player",
+      "type": "MESH",
+      "variables": [
+        {
+          "description": "Collect coins to increase score.",
+          "name": "Score",
+          "type": "INT",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Trigger Zone",
+          "notes": "",
+          "tag": "Spawn",
+          "type": "TRIGGER_ZONE"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "BE_PlayerSpawn",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": false,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": false,
+        "dynamic_object": false,
+        "instancing_candidate": false,
+        "lod_group": false,
+        "physics_sleep": false,
+        "static_object": false
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Spawn",
+      "type": "EMPTY",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Trigger Zone",
+          "notes": "Trigger Zone runs On Enter Trigger events in the runtime.",
+          "tag": "Trigger",
+          "type": "TRIGGER_ZONE"
+        },
+        {
+          "enabled": true,
+          "name": "LOD Group",
+          "notes": "LOD marker used by reports, runtime planning, and build packages.",
+          "tag": "",
+          "type": "LOD_GROUP"
+        },
+        {
+          "enabled": true,
+          "name": "Disable When Far",
+          "notes": "Can switch to cheaper detail or disable when far away.",
+          "tag": "",
+          "type": "DISABLE_WHEN_FAR"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        14.0,
+        0.0,
+        1.399999976158142
+      ],
+      "name": "BE_Exit_Portal",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": false,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": true,
+        "dynamic_object": false,
+        "instancing_candidate": false,
+        "lod_group": true,
+        "physics_sleep": false,
+        "static_object": false
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        1.5707963705062866,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Trigger",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "UI Element",
+          "notes": "",
+          "tag": "WorldLabel",
+          "type": "UI_ELEMENT"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        0.0,
+        -8.5,
+        0.20000000298023224
+      ],
+      "name": "BE_Label_Collect_6_coins,_avoid_rifts,_reach_portal",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": false,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": false,
+        "dynamic_object": false,
+        "instancing_candidate": false,
+        "lod_group": false,
+        "physics_sleep": false,
+        "static_object": false
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        1.186823844909668,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "WorldLabel",
+      "type": "FONT",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Mesh Renderer",
+          "notes": "",
+          "tag": "",
+          "type": "MESH_RENDERER"
+        },
+        {
+          "enabled": true,
+          "name": "Collider",
+          "notes": "Collider data. Add Rigidbody to enable Blender physics preview.",
+          "tag": "Wall",
+          "type": "COLLIDER"
+        },
+        {
+          "enabled": true,
+          "name": "Static Object",
+          "notes": "Marked as static for future batching, culling, and baked lighting.",
+          "tag": "",
+          "type": "STATIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Merge Candidate",
+          "notes": "Can be merged with nearby static objects later.",
+          "tag": "",
+          "type": "MERGE_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting when possible.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "LOD Group",
+          "notes": "LOD marker used by reports, runtime planning, and build packages.",
+          "tag": "",
+          "type": "LOD_GROUP"
+        },
+        {
+          "enabled": true,
+          "name": "Disable When Far",
+          "notes": "Can switch to cheaper detail or disable when far away.",
+          "tag": "",
+          "type": "DISABLE_WHEN_FAR"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        -14.0,
+        0.0,
+        1.0
+      ],
+      "name": "BE_Arena_Wall_X_0",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": true,
+        "dynamic_object": false,
+        "instancing_candidate": false,
+        "lod_group": true,
+        "physics_sleep": false,
+        "static_object": true
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Wall",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Mesh Renderer",
+          "notes": "",
+          "tag": "",
+          "type": "MESH_RENDERER"
+        },
+        {
+          "enabled": true,
+          "name": "Collider",
+          "notes": "Collider data. Add Rigidbody to enable Blender physics preview.",
+          "tag": "Wall",
+          "type": "COLLIDER"
+        },
+        {
+          "enabled": true,
+          "name": "Static Object",
+          "notes": "Marked as static for future batching, culling, and baked lighting.",
+          "tag": "",
+          "type": "STATIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Merge Candidate",
+          "notes": "Can be merged with nearby static objects later.",
+          "tag": "",
+          "type": "MERGE_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting when possible.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "LOD Group",
+          "notes": "LOD marker used by reports, runtime planning, and build packages.",
+          "tag": "",
+          "type": "LOD_GROUP"
+        },
+        {
+          "enabled": true,
+          "name": "Disable When Far",
+          "notes": "Can switch to cheaper detail or disable when far away.",
+          "tag": "",
+          "type": "DISABLE_WHEN_FAR"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        14.0,
+        0.0,
+        1.0
+      ],
+      "name": "BE_Arena_Wall_X_1",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": true,
+        "dynamic_object": false,
+        "instancing_candidate": false,
+        "lod_group": true,
+        "physics_sleep": false,
+        "static_object": true
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Wall",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Mesh Renderer",
+          "notes": "",
+          "tag": "",
+          "type": "MESH_RENDERER"
+        },
+        {
+          "enabled": true,
+          "name": "Collider",
+          "notes": "Collider data. Add Rigidbody to enable Blender physics preview.",
+          "tag": "Wall",
+          "type": "COLLIDER"
+        },
+        {
+          "enabled": true,
+          "name": "Static Object",
+          "notes": "Marked as static for future batching, culling, and baked lighting.",
+          "tag": "",
+          "type": "STATIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Merge Candidate",
+          "notes": "Can be merged with nearby static objects later.",
+          "tag": "",
+          "type": "MERGE_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting when possible.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "LOD Group",
+          "notes": "LOD marker used by reports, runtime planning, and build packages.",
+          "tag": "",
+          "type": "LOD_GROUP"
+        },
+        {
+          "enabled": true,
+          "name": "Disable When Far",
+          "notes": "Can switch to cheaper detail or disable when far away.",
+          "tag": "",
+          "type": "DISABLE_WHEN_FAR"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        0.0,
+        -14.0,
+        1.0
+      ],
+      "name": "BE_Arena_Wall_Y_0",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": true,
+        "dynamic_object": false,
+        "instancing_candidate": false,
+        "lod_group": true,
+        "physics_sleep": false,
+        "static_object": true
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Wall",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Mesh Renderer",
+          "notes": "",
+          "tag": "",
+          "type": "MESH_RENDERER"
+        },
+        {
+          "enabled": true,
+          "name": "Collider",
+          "notes": "Collider data. Add Rigidbody to enable Blender physics preview.",
+          "tag": "Wall",
+          "type": "COLLIDER"
+        },
+        {
+          "enabled": true,
+          "name": "Static Object",
+          "notes": "Marked as static for future batching, culling, and baked lighting.",
+          "tag": "",
+          "type": "STATIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Merge Candidate",
+          "notes": "Can be merged with nearby static objects later.",
+          "tag": "",
+          "type": "MERGE_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting when possible.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "LOD Group",
+          "notes": "LOD marker used by reports, runtime planning, and build packages.",
+          "tag": "",
+          "type": "LOD_GROUP"
+        },
+        {
+          "enabled": true,
+          "name": "Disable When Far",
+          "notes": "Can switch to cheaper detail or disable when far away.",
+          "tag": "",
+          "type": "DISABLE_WHEN_FAR"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        0.0,
+        14.0,
+        1.0
+      ],
+      "name": "BE_Arena_Wall_Y_1",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": true,
+        "dynamic_object": false,
+        "instancing_candidate": false,
+        "lod_group": true,
+        "physics_sleep": false,
+        "static_object": true
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Wall",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Mesh Renderer",
+          "notes": "",
+          "tag": "",
+          "type": "MESH_RENDERER"
+        },
+        {
+          "enabled": true,
+          "name": "Collider",
+          "notes": "Collider data. Add Rigidbody to enable Blender physics preview.",
+          "tag": "Cover",
+          "type": "COLLIDER"
+        },
+        {
+          "enabled": true,
+          "name": "Static Object",
+          "notes": "Marked as static for future batching, culling, and baked lighting.",
+          "tag": "",
+          "type": "STATIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Merge Candidate",
+          "notes": "Can be merged with nearby static objects later.",
+          "tag": "",
+          "type": "MERGE_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting when possible.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "LOD Group",
+          "notes": "LOD marker used by reports, runtime planning, and build packages.",
+          "tag": "",
+          "type": "LOD_GROUP"
+        },
+        {
+          "enabled": true,
+          "name": "Disable When Far",
+          "notes": "Can switch to cheaper detail or disable when far away.",
+          "tag": "",
+          "type": "DISABLE_WHEN_FAR"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        -7.0,
+        -4.0,
+        0.6000000238418579
+      ],
+      "name": "BE_Cover_01",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": true,
+        "dynamic_object": false,
+        "instancing_candidate": false,
+        "lod_group": true,
+        "physics_sleep": false,
+        "static_object": true
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Cover",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Mesh Renderer",
+          "notes": "",
+          "tag": "",
+          "type": "MESH_RENDERER"
+        },
+        {
+          "enabled": true,
+          "name": "Collider",
+          "notes": "Collider data. Add Rigidbody to enable Blender physics preview.",
+          "tag": "Cover",
+          "type": "COLLIDER"
+        },
+        {
+          "enabled": true,
+          "name": "Static Object",
+          "notes": "Marked as static for future batching, culling, and baked lighting.",
+          "tag": "",
+          "type": "STATIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Merge Candidate",
+          "notes": "Can be merged with nearby static objects later.",
+          "tag": "",
+          "type": "MERGE_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting when possible.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "LOD Group",
+          "notes": "LOD marker used by reports, runtime planning, and build packages.",
+          "tag": "",
+          "type": "LOD_GROUP"
+        },
+        {
+          "enabled": true,
+          "name": "Disable When Far",
+          "notes": "Can switch to cheaper detail or disable when far away.",
+          "tag": "",
+          "type": "DISABLE_WHEN_FAR"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        -3.0,
+        5.0,
+        0.6000000238418579
+      ],
+      "name": "BE_Cover_02",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": true,
+        "dynamic_object": false,
+        "instancing_candidate": false,
+        "lod_group": true,
+        "physics_sleep": false,
+        "static_object": true
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Cover",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Mesh Renderer",
+          "notes": "",
+          "tag": "",
+          "type": "MESH_RENDERER"
+        },
+        {
+          "enabled": true,
+          "name": "Collider",
+          "notes": "Collider data. Add Rigidbody to enable Blender physics preview.",
+          "tag": "Cover",
+          "type": "COLLIDER"
+        },
+        {
+          "enabled": true,
+          "name": "Static Object",
+          "notes": "Marked as static for future batching, culling, and baked lighting.",
+          "tag": "",
+          "type": "STATIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Merge Candidate",
+          "notes": "Can be merged with nearby static objects later.",
+          "tag": "",
+          "type": "MERGE_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting when possible.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "LOD Group",
+          "notes": "LOD marker used by reports, runtime planning, and build packages.",
+          "tag": "",
+          "type": "LOD_GROUP"
+        },
+        {
+          "enabled": true,
+          "name": "Disable When Far",
+          "notes": "Can switch to cheaper detail or disable when far away.",
+          "tag": "",
+          "type": "DISABLE_WHEN_FAR"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        4.0,
+        -6.0,
+        0.6000000238418579
+      ],
+      "name": "BE_Cover_03",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": true,
+        "dynamic_object": false,
+        "instancing_candidate": false,
+        "lod_group": true,
+        "physics_sleep": false,
+        "static_object": true
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Cover",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Mesh Renderer",
+          "notes": "",
+          "tag": "",
+          "type": "MESH_RENDERER"
+        },
+        {
+          "enabled": true,
+          "name": "Collider",
+          "notes": "Collider data. Add Rigidbody to enable Blender physics preview.",
+          "tag": "Cover",
+          "type": "COLLIDER"
+        },
+        {
+          "enabled": true,
+          "name": "Static Object",
+          "notes": "Marked as static for future batching, culling, and baked lighting.",
+          "tag": "",
+          "type": "STATIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Merge Candidate",
+          "notes": "Can be merged with nearby static objects later.",
+          "tag": "",
+          "type": "MERGE_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting when possible.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "LOD Group",
+          "notes": "LOD marker used by reports, runtime planning, and build packages.",
+          "tag": "",
+          "type": "LOD_GROUP"
+        },
+        {
+          "enabled": true,
+          "name": "Disable When Far",
+          "notes": "Can switch to cheaper detail or disable when far away.",
+          "tag": "",
+          "type": "DISABLE_WHEN_FAR"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        8.0,
+        3.0,
+        0.6000000238418579
+      ],
+      "name": "BE_Cover_04",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": true,
+        "dynamic_object": false,
+        "instancing_candidate": false,
+        "lod_group": true,
+        "physics_sleep": false,
+        "static_object": true
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Cover",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Mesh Renderer",
+          "notes": "",
+          "tag": "",
+          "type": "MESH_RENDERER"
+        },
+        {
+          "enabled": true,
+          "name": "Collider",
+          "notes": "Collider data. Add Rigidbody to enable Blender physics preview.",
+          "tag": "Cover",
+          "type": "COLLIDER"
+        },
+        {
+          "enabled": true,
+          "name": "Static Object",
+          "notes": "Marked as static for future batching, culling, and baked lighting.",
+          "tag": "",
+          "type": "STATIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Merge Candidate",
+          "notes": "Can be merged with nearby static objects later.",
+          "tag": "",
+          "type": "MERGE_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting when possible.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "LOD Group",
+          "notes": "LOD marker used by reports, runtime planning, and build packages.",
+          "tag": "",
+          "type": "LOD_GROUP"
+        },
+        {
+          "enabled": true,
+          "name": "Disable When Far",
+          "notes": "Can switch to cheaper detail or disable when far away.",
+          "tag": "",
+          "type": "DISABLE_WHEN_FAR"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        0.0,
+        9.0,
+        0.6000000238418579
+      ],
+      "name": "BE_Cover_05",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": true,
+        "dynamic_object": false,
+        "instancing_candidate": false,
+        "lod_group": true,
+        "physics_sleep": false,
+        "static_object": true
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Cover",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Mesh Renderer",
+          "notes": "",
+          "tag": "",
+          "type": "MESH_RENDERER"
+        },
+        {
+          "enabled": true,
+          "name": "Collider",
+          "notes": "Collider data. Add Rigidbody to enable Blender physics preview.",
+          "tag": "Water",
+          "type": "COLLIDER"
+        },
+        {
+          "enabled": true,
+          "name": "Static Object",
+          "notes": "Marked as static for future batching, culling, and baked lighting.",
+          "tag": "",
+          "type": "STATIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Merge Candidate",
+          "notes": "Can be merged with nearby static objects later.",
+          "tag": "",
+          "type": "MERGE_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting when possible.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        -4.5,
+        11.0,
+        0.05000000074505806
+      ],
+      "name": "BE_Shallow_River",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": false,
+        "dynamic_object": false,
+        "instancing_candidate": false,
+        "lod_group": false,
+        "physics_sleep": false,
+        "static_object": true
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        -0.20943951606750488
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Water",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Mesh Renderer",
+          "notes": "",
+          "tag": "",
+          "type": "MESH_RENDERER"
+        },
+        {
+          "enabled": true,
+          "name": "Collider",
+          "notes": "Collider data. Add Rigidbody to enable Blender physics preview.",
+          "tag": "Path",
+          "type": "COLLIDER"
+        },
+        {
+          "enabled": true,
+          "name": "Static Object",
+          "notes": "Marked as static for future batching, culling, and baked lighting.",
+          "tag": "",
+          "type": "STATIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Merge Candidate",
+          "notes": "Can be merged with nearby static objects later.",
+          "tag": "",
+          "type": "MERGE_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting when possible.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        3.0,
+        -8.0,
+        0.03999999910593033
+      ],
+      "name": "BE_Player_Path",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": false,
+        "dynamic_object": false,
+        "instancing_candidate": false,
+        "lod_group": false,
+        "physics_sleep": false,
+        "static_object": true
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.296705961227417
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Path",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Static Object",
+          "notes": "Marked as static for future batching, culling, and baked lighting.",
+          "tag": "",
+          "type": "STATIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Merge Candidate",
+          "notes": "Can be merged with nearby static objects later.",
+          "tag": "",
+          "type": "MERGE_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting when possible.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Instancing Candidate",
+          "notes": "Future runtime can draw repeated copies more cheaply.",
+          "tag": "",
+          "type": "INSTANCING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Collider",
+          "notes": "Collider data. Add Rigidbody to enable Blender physics preview.",
+          "tag": "Tree",
+          "type": "COLLIDER"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        -12.0,
+        -7.0,
+        0.5950000286102295
+      ],
+      "name": "BE_Tree_01_Trunk",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": false,
+        "dynamic_object": false,
+        "instancing_candidate": true,
+        "lod_group": false,
+        "physics_sleep": false,
+        "static_object": true
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Tree",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Static Object",
+          "notes": "Marked as static for future batching, culling, and baked lighting.",
+          "tag": "",
+          "type": "STATIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Merge Candidate",
+          "notes": "Can be merged with nearby static objects later.",
+          "tag": "",
+          "type": "MERGE_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting when possible.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Instancing Candidate",
+          "notes": "Future runtime can draw repeated copies more cheaply.",
+          "tag": "",
+          "type": "INSTANCING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "LOD Group",
+          "notes": "LOD marker used by reports, runtime planning, and build packages.",
+          "tag": "",
+          "type": "LOD_GROUP"
+        },
+        {
+          "enabled": true,
+          "name": "Disable When Far",
+          "notes": "Can switch to cheaper detail or disable when far away.",
+          "tag": "",
+          "type": "DISABLE_WHEN_FAR"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        -12.0,
+        -7.0,
+        1.4874999523162842
+      ],
+      "name": "BE_Tree_01_Leaves",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": true,
+        "dynamic_object": false,
+        "instancing_candidate": true,
+        "lod_group": true,
+        "physics_sleep": false,
+        "static_object": true
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Static Object",
+          "notes": "Marked as static for future batching, culling, and baked lighting.",
+          "tag": "",
+          "type": "STATIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Merge Candidate",
+          "notes": "Can be merged with nearby static objects later.",
+          "tag": "",
+          "type": "MERGE_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting when possible.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Instancing Candidate",
+          "notes": "Future runtime can draw repeated copies more cheaply.",
+          "tag": "",
+          "type": "INSTANCING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Collider",
+          "notes": "Collider data. Add Rigidbody to enable Blender physics preview.",
+          "tag": "Tree",
+          "type": "COLLIDER"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        -10.0,
+        6.0,
+        0.699999988079071
+      ],
+      "name": "BE_Tree_02_Trunk",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": false,
+        "dynamic_object": false,
+        "instancing_candidate": true,
+        "lod_group": false,
+        "physics_sleep": false,
+        "static_object": true
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Tree",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Static Object",
+          "notes": "Marked as static for future batching, culling, and baked lighting.",
+          "tag": "",
+          "type": "STATIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Merge Candidate",
+          "notes": "Can be merged with nearby static objects later.",
+          "tag": "",
+          "type": "MERGE_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting when possible.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Instancing Candidate",
+          "notes": "Future runtime can draw repeated copies more cheaply.",
+          "tag": "",
+          "type": "INSTANCING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "LOD Group",
+          "notes": "LOD marker used by reports, runtime planning, and build packages.",
+          "tag": "",
+          "type": "LOD_GROUP"
+        },
+        {
+          "enabled": true,
+          "name": "Disable When Far",
+          "notes": "Can switch to cheaper detail or disable when far away.",
+          "tag": "",
+          "type": "DISABLE_WHEN_FAR"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        -10.0,
+        6.0,
+        1.75
+      ],
+      "name": "BE_Tree_02_Leaves",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": true,
+        "dynamic_object": false,
+        "instancing_candidate": true,
+        "lod_group": true,
+        "physics_sleep": false,
+        "static_object": true
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Static Object",
+          "notes": "Marked as static for future batching, culling, and baked lighting.",
+          "tag": "",
+          "type": "STATIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Merge Candidate",
+          "notes": "Can be merged with nearby static objects later.",
+          "tag": "",
+          "type": "MERGE_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting when possible.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Instancing Candidate",
+          "notes": "Future runtime can draw repeated copies more cheaply.",
+          "tag": "",
+          "type": "INSTANCING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Collider",
+          "notes": "Collider data. Add Rigidbody to enable Blender physics preview.",
+          "tag": "Tree",
+          "type": "COLLIDER"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        -6.0,
+        12.0,
+        0.8050000071525574
+      ],
+      "name": "BE_Tree_03_Trunk",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": false,
+        "dynamic_object": false,
+        "instancing_candidate": true,
+        "lod_group": false,
+        "physics_sleep": false,
+        "static_object": true
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Tree",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Static Object",
+          "notes": "Marked as static for future batching, culling, and baked lighting.",
+          "tag": "",
+          "type": "STATIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Merge Candidate",
+          "notes": "Can be merged with nearby static objects later.",
+          "tag": "",
+          "type": "MERGE_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting when possible.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Instancing Candidate",
+          "notes": "Future runtime can draw repeated copies more cheaply.",
+          "tag": "",
+          "type": "INSTANCING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "LOD Group",
+          "notes": "LOD marker used by reports, runtime planning, and build packages.",
+          "tag": "",
+          "type": "LOD_GROUP"
+        },
+        {
+          "enabled": true,
+          "name": "Disable When Far",
+          "notes": "Can switch to cheaper detail or disable when far away.",
+          "tag": "",
+          "type": "DISABLE_WHEN_FAR"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        -6.0,
+        12.0,
+        2.012500047683716
+      ],
+      "name": "BE_Tree_03_Leaves",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": true,
+        "dynamic_object": false,
+        "instancing_candidate": true,
+        "lod_group": true,
+        "physics_sleep": false,
+        "static_object": true
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Static Object",
+          "notes": "Marked as static for future batching, culling, and baked lighting.",
+          "tag": "",
+          "type": "STATIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Merge Candidate",
+          "notes": "Can be merged with nearby static objects later.",
+          "tag": "",
+          "type": "MERGE_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting when possible.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Instancing Candidate",
+          "notes": "Future runtime can draw repeated copies more cheaply.",
+          "tag": "",
+          "type": "INSTANCING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Collider",
+          "notes": "Collider data. Add Rigidbody to enable Blender physics preview.",
+          "tag": "Tree",
+          "type": "COLLIDER"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        5.0,
+        11.0,
+        0.5950000286102295
+      ],
+      "name": "BE_Tree_04_Trunk",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": false,
+        "dynamic_object": false,
+        "instancing_candidate": true,
+        "lod_group": false,
+        "physics_sleep": false,
+        "static_object": true
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Tree",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Static Object",
+          "notes": "Marked as static for future batching, culling, and baked lighting.",
+          "tag": "",
+          "type": "STATIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Merge Candidate",
+          "notes": "Can be merged with nearby static objects later.",
+          "tag": "",
+          "type": "MERGE_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting when possible.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Instancing Candidate",
+          "notes": "Future runtime can draw repeated copies more cheaply.",
+          "tag": "",
+          "type": "INSTANCING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "LOD Group",
+          "notes": "LOD marker used by reports, runtime planning, and build packages.",
+          "tag": "",
+          "type": "LOD_GROUP"
+        },
+        {
+          "enabled": true,
+          "name": "Disable When Far",
+          "notes": "Can switch to cheaper detail or disable when far away.",
+          "tag": "",
+          "type": "DISABLE_WHEN_FAR"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        5.0,
+        11.0,
+        1.4874999523162842
+      ],
+      "name": "BE_Tree_04_Leaves",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": true,
+        "dynamic_object": false,
+        "instancing_candidate": true,
+        "lod_group": true,
+        "physics_sleep": false,
+        "static_object": true
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Static Object",
+          "notes": "Marked as static for future batching, culling, and baked lighting.",
+          "tag": "",
+          "type": "STATIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Merge Candidate",
+          "notes": "Can be merged with nearby static objects later.",
+          "tag": "",
+          "type": "MERGE_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting when possible.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Instancing Candidate",
+          "notes": "Future runtime can draw repeated copies more cheaply.",
+          "tag": "",
+          "type": "INSTANCING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Collider",
+          "notes": "Collider data. Add Rigidbody to enable Blender physics preview.",
+          "tag": "Tree",
+          "type": "COLLIDER"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        12.0,
+        6.0,
+        0.699999988079071
+      ],
+      "name": "BE_Tree_05_Trunk",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": false,
+        "dynamic_object": false,
+        "instancing_candidate": true,
+        "lod_group": false,
+        "physics_sleep": false,
+        "static_object": true
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Tree",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Static Object",
+          "notes": "Marked as static for future batching, culling, and baked lighting.",
+          "tag": "",
+          "type": "STATIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Merge Candidate",
+          "notes": "Can be merged with nearby static objects later.",
+          "tag": "",
+          "type": "MERGE_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting when possible.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Instancing Candidate",
+          "notes": "Future runtime can draw repeated copies more cheaply.",
+          "tag": "",
+          "type": "INSTANCING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "LOD Group",
+          "notes": "LOD marker used by reports, runtime planning, and build packages.",
+          "tag": "",
+          "type": "LOD_GROUP"
+        },
+        {
+          "enabled": true,
+          "name": "Disable When Far",
+          "notes": "Can switch to cheaper detail or disable when far away.",
+          "tag": "",
+          "type": "DISABLE_WHEN_FAR"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        12.0,
+        6.0,
+        1.75
+      ],
+      "name": "BE_Tree_05_Leaves",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": true,
+        "dynamic_object": false,
+        "instancing_candidate": true,
+        "lod_group": true,
+        "physics_sleep": false,
+        "static_object": true
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Static Object",
+          "notes": "Marked as static for future batching, culling, and baked lighting.",
+          "tag": "",
+          "type": "STATIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Merge Candidate",
+          "notes": "Can be merged with nearby static objects later.",
+          "tag": "",
+          "type": "MERGE_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting when possible.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Instancing Candidate",
+          "notes": "Future runtime can draw repeated copies more cheaply.",
+          "tag": "",
+          "type": "INSTANCING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Collider",
+          "notes": "Collider data. Add Rigidbody to enable Blender physics preview.",
+          "tag": "Tree",
+          "type": "COLLIDER"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        11.0,
+        -12.0,
+        0.8050000071525574
+      ],
+      "name": "BE_Tree_06_Trunk",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": false,
+        "dynamic_object": false,
+        "instancing_candidate": true,
+        "lod_group": false,
+        "physics_sleep": false,
+        "static_object": true
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Tree",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Static Object",
+          "notes": "Marked as static for future batching, culling, and baked lighting.",
+          "tag": "",
+          "type": "STATIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Merge Candidate",
+          "notes": "Can be merged with nearby static objects later.",
+          "tag": "",
+          "type": "MERGE_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting when possible.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Instancing Candidate",
+          "notes": "Future runtime can draw repeated copies more cheaply.",
+          "tag": "",
+          "type": "INSTANCING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "LOD Group",
+          "notes": "LOD marker used by reports, runtime planning, and build packages.",
+          "tag": "",
+          "type": "LOD_GROUP"
+        },
+        {
+          "enabled": true,
+          "name": "Disable When Far",
+          "notes": "Can switch to cheaper detail or disable when far away.",
+          "tag": "",
+          "type": "DISABLE_WHEN_FAR"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        11.0,
+        -12.0,
+        2.012500047683716
+      ],
+      "name": "BE_Tree_06_Leaves",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": true,
+        "dynamic_object": false,
+        "instancing_candidate": true,
+        "lod_group": true,
+        "physics_sleep": false,
+        "static_object": true
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Static Object",
+          "notes": "Marked as static for future batching, culling, and baked lighting.",
+          "tag": "",
+          "type": "STATIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Merge Candidate",
+          "notes": "Can be merged with nearby static objects later.",
+          "tag": "",
+          "type": "MERGE_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting when possible.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Instancing Candidate",
+          "notes": "Future runtime can draw repeated copies more cheaply.",
+          "tag": "",
+          "type": "INSTANCING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Collider",
+          "notes": "Collider data. Add Rigidbody to enable Blender physics preview.",
+          "tag": "Tree",
+          "type": "COLLIDER"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        -13.0,
+        10.0,
+        0.5950000286102295
+      ],
+      "name": "BE_Tree_07_Trunk",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": false,
+        "dynamic_object": false,
+        "instancing_candidate": true,
+        "lod_group": false,
+        "physics_sleep": false,
+        "static_object": true
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Tree",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Static Object",
+          "notes": "Marked as static for future batching, culling, and baked lighting.",
+          "tag": "",
+          "type": "STATIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Merge Candidate",
+          "notes": "Can be merged with nearby static objects later.",
+          "tag": "",
+          "type": "MERGE_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting when possible.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Instancing Candidate",
+          "notes": "Future runtime can draw repeated copies more cheaply.",
+          "tag": "",
+          "type": "INSTANCING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "LOD Group",
+          "notes": "LOD marker used by reports, runtime planning, and build packages.",
+          "tag": "",
+          "type": "LOD_GROUP"
+        },
+        {
+          "enabled": true,
+          "name": "Disable When Far",
+          "notes": "Can switch to cheaper detail or disable when far away.",
+          "tag": "",
+          "type": "DISABLE_WHEN_FAR"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        -13.0,
+        10.0,
+        1.4874999523162842
+      ],
+      "name": "BE_Tree_07_Leaves",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": true,
+        "dynamic_object": false,
+        "instancing_candidate": true,
+        "lod_group": true,
+        "physics_sleep": false,
+        "static_object": true
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Static Object",
+          "notes": "Marked as static for future batching, culling, and baked lighting.",
+          "tag": "",
+          "type": "STATIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Merge Candidate",
+          "notes": "Can be merged with nearby static objects later.",
+          "tag": "",
+          "type": "MERGE_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting when possible.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Instancing Candidate",
+          "notes": "Future runtime can draw repeated copies more cheaply.",
+          "tag": "",
+          "type": "INSTANCING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Collider",
+          "notes": "Collider data. Add Rigidbody to enable Blender physics preview.",
+          "tag": "Tree",
+          "type": "COLLIDER"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        3.0,
+        -12.0,
+        0.699999988079071
+      ],
+      "name": "BE_Tree_08_Trunk",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": false,
+        "dynamic_object": false,
+        "instancing_candidate": true,
+        "lod_group": false,
+        "physics_sleep": false,
+        "static_object": true
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Tree",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Static Object",
+          "notes": "Marked as static for future batching, culling, and baked lighting.",
+          "tag": "",
+          "type": "STATIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Merge Candidate",
+          "notes": "Can be merged with nearby static objects later.",
+          "tag": "",
+          "type": "MERGE_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting when possible.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Instancing Candidate",
+          "notes": "Future runtime can draw repeated copies more cheaply.",
+          "tag": "",
+          "type": "INSTANCING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "LOD Group",
+          "notes": "LOD marker used by reports, runtime planning, and build packages.",
+          "tag": "",
+          "type": "LOD_GROUP"
+        },
+        {
+          "enabled": true,
+          "name": "Disable When Far",
+          "notes": "Can switch to cheaper detail or disable when far away.",
+          "tag": "",
+          "type": "DISABLE_WHEN_FAR"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        3.0,
+        -12.0,
+        1.75
+      ],
+      "name": "BE_Tree_08_Leaves",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": true,
+        "dynamic_object": false,
+        "instancing_candidate": true,
+        "lod_group": true,
+        "physics_sleep": false,
+        "static_object": true
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Static Object",
+          "notes": "Marked as static for future batching, culling, and baked lighting.",
+          "tag": "",
+          "type": "STATIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Merge Candidate",
+          "notes": "Can be merged with nearby static objects later.",
+          "tag": "",
+          "type": "MERGE_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting when possible.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "LOD Group",
+          "notes": "LOD marker used by reports, runtime planning, and build packages.",
+          "tag": "",
+          "type": "LOD_GROUP"
+        },
+        {
+          "enabled": true,
+          "name": "Disable When Far",
+          "notes": "Can switch to cheaper detail or disable when far away.",
+          "tag": "",
+          "type": "DISABLE_WHEN_FAR"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        -11.0,
+        3.0,
+        0.44999998807907104
+      ],
+      "name": "BE_Rock_01",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": true,
+        "dynamic_object": false,
+        "instancing_candidate": false,
+        "lod_group": true,
+        "physics_sleep": false,
+        "static_object": true
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0199999809265137,
+        0.6800000071525574,
+        0.4675000011920929
+      ],
+      "tag": "",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Static Object",
+          "notes": "Marked as static for future batching, culling, and baked lighting.",
+          "tag": "",
+          "type": "STATIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Merge Candidate",
+          "notes": "Can be merged with nearby static objects later.",
+          "tag": "",
+          "type": "MERGE_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting when possible.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "LOD Group",
+          "notes": "LOD marker used by reports, runtime planning, and build packages.",
+          "tag": "",
+          "type": "LOD_GROUP"
+        },
+        {
+          "enabled": true,
+          "name": "Disable When Far",
+          "notes": "Can switch to cheaper detail or disable when far away.",
+          "tag": "",
+          "type": "DISABLE_WHEN_FAR"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        -6.0,
+        -10.0,
+        0.4000000059604645
+      ],
+      "name": "BE_Rock_02",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": true,
+        "dynamic_object": false,
+        "instancing_candidate": false,
+        "lod_group": true,
+        "physics_sleep": false,
+        "static_object": true
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.1160000562667847,
+        0.7440000176429749,
+        0.5115000009536743
+      ],
+      "tag": "",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Static Object",
+          "notes": "Marked as static for future batching, culling, and baked lighting.",
+          "tag": "",
+          "type": "STATIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Merge Candidate",
+          "notes": "Can be merged with nearby static objects later.",
+          "tag": "",
+          "type": "MERGE_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting when possible.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "LOD Group",
+          "notes": "LOD marker used by reports, runtime planning, and build packages.",
+          "tag": "",
+          "type": "LOD_GROUP"
+        },
+        {
+          "enabled": true,
+          "name": "Disable When Far",
+          "notes": "Can switch to cheaper detail or disable when far away.",
+          "tag": "",
+          "type": "DISABLE_WHEN_FAR"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        1.0,
+        12.0,
+        0.4000000059604645
+      ],
+      "name": "BE_Rock_03",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": true,
+        "dynamic_object": false,
+        "instancing_candidate": false,
+        "lod_group": true,
+        "physics_sleep": false,
+        "static_object": true
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.2120000123977661,
+        0.8080000281333923,
+        0.5554999709129333
+      ],
+      "tag": "",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Static Object",
+          "notes": "Marked as static for future batching, culling, and baked lighting.",
+          "tag": "",
+          "type": "STATIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Merge Candidate",
+          "notes": "Can be merged with nearby static objects later.",
+          "tag": "",
+          "type": "MERGE_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting when possible.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "LOD Group",
+          "notes": "LOD marker used by reports, runtime planning, and build packages.",
+          "tag": "",
+          "type": "LOD_GROUP"
+        },
+        {
+          "enabled": true,
+          "name": "Disable When Far",
+          "notes": "Can switch to cheaper detail or disable when far away.",
+          "tag": "",
+          "type": "DISABLE_WHEN_FAR"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        13.0,
+        -4.0,
+        0.3499999940395355
+      ],
+      "name": "BE_Rock_04",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": true,
+        "dynamic_object": false,
+        "instancing_candidate": false,
+        "lod_group": true,
+        "physics_sleep": false,
+        "static_object": true
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.3079999685287476,
+        0.871999979019165,
+        0.5995000004768372
+      ],
+      "tag": "",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Static Object",
+          "notes": "Marked as static for future batching, culling, and baked lighting.",
+          "tag": "",
+          "type": "STATIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Merge Candidate",
+          "notes": "Can be merged with nearby static objects later.",
+          "tag": "",
+          "type": "MERGE_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting when possible.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "LOD Group",
+          "notes": "LOD marker used by reports, runtime planning, and build packages.",
+          "tag": "",
+          "type": "LOD_GROUP"
+        },
+        {
+          "enabled": true,
+          "name": "Disable When Far",
+          "notes": "Can switch to cheaper detail or disable when far away.",
+          "tag": "",
+          "type": "DISABLE_WHEN_FAR"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        7.0,
+        12.0,
+        0.3499999940395355
+      ],
+      "name": "BE_Rock_05",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": true,
+        "dynamic_object": false,
+        "instancing_candidate": false,
+        "lod_group": true,
+        "physics_sleep": false,
+        "static_object": true
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.4040000438690186,
+        0.9359999895095825,
+        0.6434999704360962
+      ],
+      "tag": "",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [
+        {
+          "actions": [
+            {
+              "animation": "",
+              "name": "Coin Log",
+              "number_value": 1.0,
+              "scene": "",
+              "target_object": "",
+              "text_value": "Coin collected.",
+              "type": "SHOW_LOG",
+              "variable_name": "",
+              "vector_value": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            }
+          ],
+          "conditions": [],
+          "description": "",
+          "enabled": true,
+          "events": [
+            {
+              "custom_event": "",
+              "key": "SPACE",
+              "name": "Player Touch",
+              "tag": "Player",
+              "timer_seconds": 1.0,
+              "type": "ON_ENTER_TRIGGER"
+            }
+          ],
+          "name": "Collect Coin"
+        }
+      ],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Trigger Zone",
+          "notes": "Trigger Zone runs On Enter Trigger events in the runtime.",
+          "tag": "Trigger",
+          "type": "TRIGGER_ZONE"
+        },
+        {
+          "enabled": true,
+          "name": "Dynamic Object",
+          "notes": "Marked as moving or changing during gameplay.",
+          "tag": "",
+          "type": "DYNAMIC_OBJECT"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        -9.0,
+        2.0,
+        0.3499999940395355
+      ],
+      "name": "BE_Coin_01",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": false,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": false,
+        "dynamic_object": true,
+        "instancing_candidate": false,
+        "lod_group": false,
+        "physics_sleep": false,
+        "static_object": false
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Coin",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [
+        {
+          "actions": [
+            {
+              "animation": "",
+              "name": "Coin Log",
+              "number_value": 1.0,
+              "scene": "",
+              "target_object": "",
+              "text_value": "Coin collected.",
+              "type": "SHOW_LOG",
+              "variable_name": "",
+              "vector_value": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            }
+          ],
+          "conditions": [],
+          "description": "",
+          "enabled": true,
+          "events": [
+            {
+              "custom_event": "",
+              "key": "SPACE",
+              "name": "Player Touch",
+              "tag": "Player",
+              "timer_seconds": 1.0,
+              "type": "ON_ENTER_TRIGGER"
+            }
+          ],
+          "name": "Collect Coin"
+        }
+      ],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Trigger Zone",
+          "notes": "Trigger Zone runs On Enter Trigger events in the runtime.",
+          "tag": "Trigger",
+          "type": "TRIGGER_ZONE"
+        },
+        {
+          "enabled": true,
+          "name": "Dynamic Object",
+          "notes": "Marked as moving or changing during gameplay.",
+          "tag": "",
+          "type": "DYNAMIC_OBJECT"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        -5.0,
+        -8.0,
+        0.3499999940395355
+      ],
+      "name": "BE_Coin_02",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": false,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": false,
+        "dynamic_object": true,
+        "instancing_candidate": false,
+        "lod_group": false,
+        "physics_sleep": false,
+        "static_object": false
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Coin",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [
+        {
+          "actions": [
+            {
+              "animation": "",
+              "name": "Coin Log",
+              "number_value": 1.0,
+              "scene": "",
+              "target_object": "",
+              "text_value": "Coin collected.",
+              "type": "SHOW_LOG",
+              "variable_name": "",
+              "vector_value": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            }
+          ],
+          "conditions": [],
+          "description": "",
+          "enabled": true,
+          "events": [
+            {
+              "custom_event": "",
+              "key": "SPACE",
+              "name": "Player Touch",
+              "tag": "Player",
+              "timer_seconds": 1.0,
+              "type": "ON_ENTER_TRIGGER"
+            }
+          ],
+          "name": "Collect Coin"
+        }
+      ],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Trigger Zone",
+          "notes": "Trigger Zone runs On Enter Trigger events in the runtime.",
+          "tag": "Trigger",
+          "type": "TRIGGER_ZONE"
+        },
+        {
+          "enabled": true,
+          "name": "Dynamic Object",
+          "notes": "Marked as moving or changing during gameplay.",
+          "tag": "",
+          "type": "DYNAMIC_OBJECT"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        2.0,
+        6.0,
+        0.3499999940395355
+      ],
+      "name": "BE_Coin_03",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": false,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": false,
+        "dynamic_object": true,
+        "instancing_candidate": false,
+        "lod_group": false,
+        "physics_sleep": false,
+        "static_object": false
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Coin",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [
+        {
+          "actions": [
+            {
+              "animation": "",
+              "name": "Coin Log",
+              "number_value": 1.0,
+              "scene": "",
+              "target_object": "",
+              "text_value": "Coin collected.",
+              "type": "SHOW_LOG",
+              "variable_name": "",
+              "vector_value": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            }
+          ],
+          "conditions": [],
+          "description": "",
+          "enabled": true,
+          "events": [
+            {
+              "custom_event": "",
+              "key": "SPACE",
+              "name": "Player Touch",
+              "tag": "Player",
+              "timer_seconds": 1.0,
+              "type": "ON_ENTER_TRIGGER"
+            }
+          ],
+          "name": "Collect Coin"
+        }
+      ],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Trigger Zone",
+          "notes": "Trigger Zone runs On Enter Trigger events in the runtime.",
+          "tag": "Trigger",
+          "type": "TRIGGER_ZONE"
+        },
+        {
+          "enabled": true,
+          "name": "Dynamic Object",
+          "notes": "Marked as moving or changing during gameplay.",
+          "tag": "",
+          "type": "DYNAMIC_OBJECT"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        6.0,
+        -2.0,
+        0.3499999940395355
+      ],
+      "name": "BE_Coin_04",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": false,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": false,
+        "dynamic_object": true,
+        "instancing_candidate": false,
+        "lod_group": false,
+        "physics_sleep": false,
+        "static_object": false
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Coin",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [
+        {
+          "actions": [
+            {
+              "animation": "",
+              "name": "Coin Log",
+              "number_value": 1.0,
+              "scene": "",
+              "target_object": "",
+              "text_value": "Coin collected.",
+              "type": "SHOW_LOG",
+              "variable_name": "",
+              "vector_value": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            }
+          ],
+          "conditions": [],
+          "description": "",
+          "enabled": true,
+          "events": [
+            {
+              "custom_event": "",
+              "key": "SPACE",
+              "name": "Player Touch",
+              "tag": "Player",
+              "timer_seconds": 1.0,
+              "type": "ON_ENTER_TRIGGER"
+            }
+          ],
+          "name": "Collect Coin"
+        }
+      ],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Trigger Zone",
+          "notes": "Trigger Zone runs On Enter Trigger events in the runtime.",
+          "tag": "Trigger",
+          "type": "TRIGGER_ZONE"
+        },
+        {
+          "enabled": true,
+          "name": "Dynamic Object",
+          "notes": "Marked as moving or changing during gameplay.",
+          "tag": "",
+          "type": "DYNAMIC_OBJECT"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        10.0,
+        8.0,
+        0.3499999940395355
+      ],
+      "name": "BE_Coin_05",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": false,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": false,
+        "dynamic_object": true,
+        "instancing_candidate": false,
+        "lod_group": false,
+        "physics_sleep": false,
+        "static_object": false
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Coin",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [
+        {
+          "actions": [
+            {
+              "animation": "",
+              "name": "Coin Log",
+              "number_value": 1.0,
+              "scene": "",
+              "target_object": "",
+              "text_value": "Coin collected.",
+              "type": "SHOW_LOG",
+              "variable_name": "",
+              "vector_value": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            }
+          ],
+          "conditions": [],
+          "description": "",
+          "enabled": true,
+          "events": [
+            {
+              "custom_event": "",
+              "key": "SPACE",
+              "name": "Player Touch",
+              "tag": "Player",
+              "timer_seconds": 1.0,
+              "type": "ON_ENTER_TRIGGER"
+            }
+          ],
+          "name": "Collect Coin"
+        }
+      ],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Trigger Zone",
+          "notes": "Trigger Zone runs On Enter Trigger events in the runtime.",
+          "tag": "Trigger",
+          "type": "TRIGGER_ZONE"
+        },
+        {
+          "enabled": true,
+          "name": "Dynamic Object",
+          "notes": "Marked as moving or changing during gameplay.",
+          "tag": "",
+          "type": "DYNAMIC_OBJECT"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        12.0,
+        -7.0,
+        0.3499999940395355
+      ],
+      "name": "BE_Coin_06",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": false,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": false,
+        "dynamic_object": true,
+        "instancing_candidate": false,
+        "lod_group": false,
+        "physics_sleep": false,
+        "static_object": false
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Coin",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Mesh Renderer",
+          "notes": "",
+          "tag": "",
+          "type": "MESH_RENDERER"
+        },
+        {
+          "enabled": true,
+          "name": "Dynamic Object",
+          "notes": "Marked as moving or changing during gameplay.",
+          "tag": "",
+          "type": "DYNAMIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Trigger Zone",
+          "notes": "Trigger Zone runs On Enter Trigger events in the runtime.",
+          "tag": "Trigger",
+          "type": "TRIGGER_ZONE"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        -11.0,
+        -10.0,
+        0.3499999940395355
+      ],
+      "name": "BE_HealthPickup_01",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": false,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": false,
+        "dynamic_object": true,
+        "instancing_candidate": false,
+        "lod_group": false,
+        "physics_sleep": false,
+        "static_object": false
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Health",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Mesh Renderer",
+          "notes": "",
+          "tag": "",
+          "type": "MESH_RENDERER"
+        },
+        {
+          "enabled": true,
+          "name": "Dynamic Object",
+          "notes": "Marked as moving or changing during gameplay.",
+          "tag": "",
+          "type": "DYNAMIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Trigger Zone",
+          "notes": "Trigger Zone runs On Enter Trigger events in the runtime.",
+          "tag": "Trigger",
+          "type": "TRIGGER_ZONE"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        9.0,
+        -10.0,
+        0.3499999940395355
+      ],
+      "name": "BE_HealthPickup_02",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": false,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": false,
+        "dynamic_object": true,
+        "instancing_candidate": false,
+        "lod_group": false,
+        "physics_sleep": false,
+        "static_object": false
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Health",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [
+        {
+          "actions": [
+            {
+              "animation": "",
+              "name": "Damage Log",
+              "number_value": 1.0,
+              "scene": "",
+              "target_object": "",
+              "text_value": "Damage zone touched.",
+              "type": "SHOW_LOG",
+              "variable_name": "",
+              "vector_value": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            }
+          ],
+          "conditions": [],
+          "description": "",
+          "enabled": true,
+          "events": [
+            {
+              "custom_event": "",
+              "key": "SPACE",
+              "name": "Player Enter",
+              "tag": "Player",
+              "timer_seconds": 1.0,
+              "type": "ON_ENTER_TRIGGER"
+            }
+          ],
+          "name": "Damage Player"
+        }
+      ],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Mesh Renderer",
+          "notes": "",
+          "tag": "",
+          "type": "MESH_RENDERER"
+        },
+        {
+          "enabled": true,
+          "name": "Dynamic Object",
+          "notes": "Marked as moving or changing during gameplay.",
+          "tag": "",
+          "type": "DYNAMIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Trigger Zone",
+          "notes": "Trigger Zone runs On Enter Trigger events in the runtime.",
+          "tag": "Trigger",
+          "type": "TRIGGER_ZONE"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        -2.0,
+        -2.0,
+        0.11999999731779099
+      ],
+      "name": "BE_DamageZone_01",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": false,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": false,
+        "dynamic_object": true,
+        "instancing_candidate": false,
+        "lod_group": false,
+        "physics_sleep": false,
+        "static_object": false
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Damage",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [
+        {
+          "actions": [
+            {
+              "animation": "",
+              "name": "Damage Log",
+              "number_value": 1.0,
+              "scene": "",
+              "target_object": "",
+              "text_value": "Damage zone touched.",
+              "type": "SHOW_LOG",
+              "variable_name": "",
+              "vector_value": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            }
+          ],
+          "conditions": [],
+          "description": "",
+          "enabled": true,
+          "events": [
+            {
+              "custom_event": "",
+              "key": "SPACE",
+              "name": "Player Enter",
+              "tag": "Player",
+              "timer_seconds": 1.0,
+              "type": "ON_ENTER_TRIGGER"
+            }
+          ],
+          "name": "Damage Player"
+        }
+      ],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Mesh Renderer",
+          "notes": "",
+          "tag": "",
+          "type": "MESH_RENDERER"
+        },
+        {
+          "enabled": true,
+          "name": "Dynamic Object",
+          "notes": "Marked as moving or changing during gameplay.",
+          "tag": "",
+          "type": "DYNAMIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Trigger Zone",
+          "notes": "Trigger Zone runs On Enter Trigger events in the runtime.",
+          "tag": "Trigger",
+          "type": "TRIGGER_ZONE"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        4.0,
+        5.0,
+        0.11999999731779099
+      ],
+      "name": "BE_DamageZone_02",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": false,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": false,
+        "dynamic_object": true,
+        "instancing_candidate": false,
+        "lod_group": false,
+        "physics_sleep": false,
+        "static_object": false
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Damage",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [
+        {
+          "actions": [
+            {
+              "animation": "",
+              "name": "Damage Log",
+              "number_value": 1.0,
+              "scene": "",
+              "target_object": "",
+              "text_value": "Damage zone touched.",
+              "type": "SHOW_LOG",
+              "variable_name": "",
+              "vector_value": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            }
+          ],
+          "conditions": [],
+          "description": "",
+          "enabled": true,
+          "events": [
+            {
+              "custom_event": "",
+              "key": "SPACE",
+              "name": "Player Enter",
+              "tag": "Player",
+              "timer_seconds": 1.0,
+              "type": "ON_ENTER_TRIGGER"
+            }
+          ],
+          "name": "Damage Player"
+        }
+      ],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Mesh Renderer",
+          "notes": "",
+          "tag": "",
+          "type": "MESH_RENDERER"
+        },
+        {
+          "enabled": true,
+          "name": "Dynamic Object",
+          "notes": "Marked as moving or changing during gameplay.",
+          "tag": "",
+          "type": "DYNAMIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Trigger Zone",
+          "notes": "Trigger Zone runs On Enter Trigger events in the runtime.",
+          "tag": "Trigger",
+          "type": "TRIGGER_ZONE"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        10.0,
+        0.0,
+        0.11999999731779099
+      ],
+      "name": "BE_DamageZone_03",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": false,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": false,
+        "dynamic_object": true,
+        "instancing_candidate": false,
+        "lod_group": false,
+        "physics_sleep": false,
+        "static_object": false
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Damage",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Collider",
+          "notes": "Collider data. Add Rigidbody to enable Blender physics preview.",
+          "tag": "Enemy",
+          "type": "COLLIDER"
+        },
+        {
+          "enabled": true,
+          "name": "Health",
+          "notes": "",
+          "tag": "",
+          "type": "HEALTH"
+        },
+        {
+          "enabled": true,
+          "name": "NPC Controller",
+          "notes": "",
+          "tag": "NPC",
+          "type": "NPC_CONTROLLER"
+        },
+        {
+          "enabled": true,
+          "name": "Dynamic Object",
+          "notes": "Marked as moving or changing during gameplay.",
+          "tag": "",
+          "type": "DYNAMIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Animation Controller",
+          "notes": "",
+          "tag": "",
+          "type": "ANIMATION_CONTROLLER"
+        }
+      ],
+      "health": {
+        "current_health": 50.0,
+        "destroy_on_death": false,
+        "enabled": true,
+        "game_over_on_death": false,
+        "max_health": 50.0
+      },
+      "location": [
+        -8.0,
+        8.0,
+        0.8999999761581421
+      ],
+      "name": "BE_Enemy_01",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "PATROL",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": true,
+        "move_speed": 2.200000047683716,
+        "patrol_radius": 3.0,
+        "quest_id": "",
+        "target_object": "BE_Player"
+      },
+      "optimization": {
+        "baked_lighting_candidate": false,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": false,
+        "dynamic_object": true,
+        "instancing_candidate": false,
+        "lod_group": false,
+        "physics_sleep": false,
+        "static_object": false
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Enemy",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Collider",
+          "notes": "Collider data. Add Rigidbody to enable Blender physics preview.",
+          "tag": "Enemy",
+          "type": "COLLIDER"
+        },
+        {
+          "enabled": true,
+          "name": "Health",
+          "notes": "",
+          "tag": "",
+          "type": "HEALTH"
+        },
+        {
+          "enabled": true,
+          "name": "NPC Controller",
+          "notes": "",
+          "tag": "NPC",
+          "type": "NPC_CONTROLLER"
+        },
+        {
+          "enabled": true,
+          "name": "Dynamic Object",
+          "notes": "Marked as moving or changing during gameplay.",
+          "tag": "",
+          "type": "DYNAMIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Animation Controller",
+          "notes": "",
+          "tag": "",
+          "type": "ANIMATION_CONTROLLER"
+        }
+      ],
+      "health": {
+        "current_health": 75.0,
+        "destroy_on_death": false,
+        "enabled": true,
+        "game_over_on_death": false,
+        "max_health": 75.0
+      },
+      "location": [
+        7.0,
+        7.0,
+        0.8999999761581421
+      ],
+      "name": "BE_Enemy_02",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "FOLLOW_PLAYER",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": true,
+        "move_speed": 2.700000047683716,
+        "patrol_radius": 4.0,
+        "quest_id": "",
+        "target_object": "BE_Player"
+      },
+      "optimization": {
+        "baked_lighting_candidate": false,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": false,
+        "dynamic_object": true,
+        "instancing_candidate": false,
+        "lod_group": false,
+        "physics_sleep": false,
+        "static_object": false
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Enemy",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Collider",
+          "notes": "Collider data. Add Rigidbody to enable Blender physics preview.",
+          "tag": "Enemy",
+          "type": "COLLIDER"
+        },
+        {
+          "enabled": true,
+          "name": "Health",
+          "notes": "",
+          "tag": "",
+          "type": "HEALTH"
+        },
+        {
+          "enabled": true,
+          "name": "NPC Controller",
+          "notes": "",
+          "tag": "NPC",
+          "type": "NPC_CONTROLLER"
+        },
+        {
+          "enabled": true,
+          "name": "Dynamic Object",
+          "notes": "Marked as moving or changing during gameplay.",
+          "tag": "",
+          "type": "DYNAMIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Animation Controller",
+          "notes": "",
+          "tag": "",
+          "type": "ANIMATION_CONTROLLER"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": true,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        9.0,
+        -8.0,
+        0.8999999761581421
+      ],
+      "name": "BE_Enemy_03",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "ATTACK",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": true,
+        "move_speed": 3.200000047683716,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": "BE_Player"
+      },
+      "optimization": {
+        "baked_lighting_candidate": false,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": false,
+        "dynamic_object": true,
+        "instancing_candidate": false,
+        "lod_group": false,
+        "physics_sleep": false,
+        "static_object": false
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Enemy",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Mesh Renderer",
+          "notes": "",
+          "tag": "",
+          "type": "MESH_RENDERER"
+        },
+        {
+          "enabled": true,
+          "name": "Collider",
+          "notes": "Collider data. Add Rigidbody to enable Blender physics preview.",
+          "tag": "Door",
+          "type": "COLLIDER"
+        },
+        {
+          "enabled": true,
+          "name": "Static Object",
+          "notes": "Marked as static for future batching, culling, and baked lighting.",
+          "tag": "",
+          "type": "STATIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Merge Candidate",
+          "notes": "Can be merged with nearby static objects later.",
+          "tag": "",
+          "type": "MERGE_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting when possible.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        },
+        {
+          "enabled": true,
+          "name": "Door",
+          "notes": "",
+          "tag": "Door",
+          "type": "DOOR"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        12.5,
+        0.0,
+        1.399999976158142
+      ],
+      "name": "BE_LockedGate",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": false,
+        "dynamic_object": false,
+        "instancing_candidate": false,
+        "lod_group": false,
+        "physics_sleep": false,
+        "static_object": true
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Gate",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Mesh Renderer",
+          "notes": "",
+          "tag": "",
+          "type": "MESH_RENDERER"
+        },
+        {
+          "enabled": true,
+          "name": "Dynamic Object",
+          "notes": "Marked as moving or changing during gameplay.",
+          "tag": "",
+          "type": "DYNAMIC_OBJECT"
+        },
+        {
+          "enabled": true,
+          "name": "Trigger Zone",
+          "notes": "Trigger Zone runs On Enter Trigger events in the runtime.",
+          "tag": "Trigger",
+          "type": "TRIGGER_ZONE"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        -12.0,
+        0.0,
+        0.6000000238418579
+      ],
+      "name": "BE_Checkpoint",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": false,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": false,
+        "dynamic_object": true,
+        "instancing_candidate": false,
+        "lod_group": false,
+        "physics_sleep": false,
+        "static_object": false
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "Checkpoint",
+      "type": "MESH",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Baked Lighting Candidate",
+          "notes": "Prefer baked lighting over real-time lighting for this object.",
+          "tag": "",
+          "type": "BAKED_LIGHTING_CANDIDATE"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        0.0,
+        -4.0,
+        6.0
+      ],
+      "name": "BE_Sun",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": true,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": false,
+        "dynamic_object": false,
+        "instancing_candidate": false,
+        "lod_group": false,
+        "physics_sleep": false,
+        "static_object": false
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        0.9075711965560913,
+        0.0,
+        0.5585053563117981
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "",
+      "type": "LIGHT",
+      "variables": []
+    },
+    {
+      "behaviors": [],
+      "components": [
+        {
+          "enabled": true,
+          "name": "Camera Controller",
+          "notes": "",
+          "tag": "MainCamera",
+          "type": "CAMERA_CONTROLLER"
+        }
+      ],
+      "health": {
+        "current_health": 100.0,
+        "destroy_on_death": false,
+        "enabled": false,
+        "game_over_on_death": false,
+        "max_health": 100.0
+      },
+      "location": [
+        0.0,
+        -7.800000190734863,
+        4.300000190734863
+      ],
+      "name": "BE_GameCamera",
+      "npc_behavior": {
+        "attack_range": 2.0,
+        "behavior_template": "IDLE",
+        "detection_range": 10.0,
+        "dialogue_text": "Hello!",
+        "enabled": false,
+        "move_speed": 3.0,
+        "patrol_radius": 5.0,
+        "quest_id": "",
+        "target_object": ""
+      },
+      "optimization": {
+        "baked_lighting_candidate": false,
+        "collider_simplification": false,
+        "disable_distance": 80.0,
+        "disable_when_far": false,
+        "dynamic_object": false,
+        "instancing_candidate": false,
+        "lod_group": false,
+        "physics_sleep": false,
+        "static_object": false
+      },
+      "player_controller": {
+        "camera_follow": "",
+        "controller_type": "THIRD_PERSON",
+        "enabled": false,
+        "gravity": 9.8100004196167,
+        "jump_force": 6.0,
+        "run_speed": 8.0,
+        "walk_speed": 4.0
+      },
+      "rotation": [
+        1.0995573997497559,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tag": "MainCamera",
+      "type": "CAMERA",
+      "variables": []
+    }
+  ],
+  "performance_budget": {
+    "max_bones_visible": 700,
+    "max_draw_calls_estimated": 800,
+    "max_dynamic_lights": 4,
+    "max_particles": 15000,
+    "max_rigidbodies": 80,
+    "max_shadow_casters": 2,
+    "max_texture_memory_mb": 512,
+    "max_triangles_visible": 300000,
+    "target_fps": 60
+  },
+  "project": {
+    "debug_mode": true,
+    "default_scene": "Scene",
+    "display_mode": "WINDOWED",
+    "game_dimension": "THREE_D",
+    "quality_level": "MEDIUM",
+    "resolution": [
+      1280,
+      720
+    ],
+    "show_fps": true,
+    "target_platform": "WINDOWS",
+    "title": "New BlendEngine Game"
+  },
+  "quality": {
+    "anti_aliasing": "TAA_2X",
+    "max_dynamic_lights": 4,
+    "max_shadow_casters": 2,
+    "preset": "BALANCED",
+    "resolution_scale": 1.0,
+    "shadow_quality": "MEDIUM",
+    "target_fps": 60,
+    "texture_quality": "MEDIUM"
+  },
+  "quality_profile": {
+    "anti_aliasing": "TAA_2X",
+    "max_dynamic_lights": 4,
+    "max_shadow_casters": 2,
+    "preset": "BALANCED",
+    "resolution_scale": 1.0,
+    "shadow_quality": "MEDIUM",
+    "target_fps": 60,
+    "texture_quality": "MEDIUM"
+  },
+  "rendering": {
+    "ambient_occlusion": true,
+    "bloom": true,
+    "engine": "BLENDER_EEVEE",
+    "exposure": 0.0,
+    "fps": 60,
+    "gamma": 1.0,
+    "look": "Medium High Contrast",
+    "resolution_percentage": 100,
+    "screen_space_reflections": true,
+    "soft_shadows": true,
+    "view_transform": "Filmic",
+    "world_color": [
+      0.017999999225139618,
+      0.024000000208616257,
+      0.03200000151991844
+    ]
+  },
+  "runtime_optimization": {
+    "async_asset_loading": true,
+    "camera_frustum_generation": true,
+    "dynamic_resolution": true,
+    "emergency_quality_drop": true,
+    "frustum_culling": true,
+    "generation_budget_ms": 2.0,
+    "hidden_surface_culling": true,
+    "hide_behind_camera": true,
+    "level_streaming": true,
+    "lod_strategy": true,
+    "max_runtime_ram_mb": 1024,
+    "max_visible_objects": 180,
+    "mesh_streaming": true,
+    "occlusion_culling": true,
+    "one_gb_ram_mode": true,
+    "texture_streaming": true,
+    "visible_cell_radius": 2,
+    "world_cell_size": 20.0
+  },
+  "version": 1
+}

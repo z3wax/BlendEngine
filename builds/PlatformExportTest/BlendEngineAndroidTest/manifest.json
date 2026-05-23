@@ -1,0 +1,38 @@
+{
+  "blend_file": "BlendEngineAndroidTest.blend",
+  "created_by": "BlendEngine",
+  "files": [
+    "game_data.json",
+    "platform_config.json",
+    "manifest.json",
+    "BlendEngineAndroidTest.blend",
+    "run_game.py",
+    "run_game.sh",
+    "run_game.bat",
+    "run_game.command",
+    "android_project/web_player/index.html",
+    "android_project/web_player/player.js",
+    "android_project/web_player/game_data.json",
+    "android_project/settings.gradle",
+    "android_project/build.gradle",
+    "android_project/app/build.gradle",
+    "android_project/app/src/main/AndroidManifest.xml",
+    "android_project/app/src/main/java/com/blendengine/export/MainActivity.java",
+    "android_project/build_android_apk.sh",
+    "android_project/README.md",
+    "README.txt"
+  ],
+  "game_data": "game_data.json",
+  "name": "BlendEngineAndroidTest",
+  "platform": "ANDROID",
+  "summary": "Title: New BlendEngine Game; Platform: ANDROID; Resolution: 1280x720; Folder: //builds/PlatformExportTest; Packages: playable project, asset manifest, scene package",
+  "supported_targets": [
+    "WINDOWS",
+    "LINUX",
+    "MACOS",
+    "IOS",
+    "ANDROID",
+    "WEB"
+  ],
+  "title": "New BlendEngine Game"
+}

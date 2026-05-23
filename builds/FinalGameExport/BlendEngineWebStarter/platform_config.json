@@ -1,0 +1,14 @@
+{
+  "android_apk_script": false,
+  "desktop": false,
+  "desktop_launcher": false,
+  "ios_xcode_required": false,
+  "memory_budget_mb": 1024,
+  "mobile": false,
+  "native_toolchain_required": true,
+  "notes": "Desktop packages run through BlendEngine/Blender. Android/iOS/Web packages include runtime data and player scaffolds; APK/IPA creation requires the platform SDK and signing.",
+  "runtime": "BlendEngine Python runtime for desktop plus exported WebView player scaffolds for mobile/web",
+  "target": "WEB",
+  "touch_controls": false,
+  "web": true
+}

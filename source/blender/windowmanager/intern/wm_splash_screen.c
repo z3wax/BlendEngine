@@ -277,7 +277,7 @@ static uiBlock *wm_block_create_about(bContext *C, ARegion *region, void *UNUSED
   uiLayout *layout = UI_block_layout(
       block, UI_LAYOUT_VERTICAL, UI_LAYOUT_PANEL, 0, 0, dialog_width, 0, 0, style);
 
-  /* Blender logo. */
+  /* BlendEngine logo. */
 #ifndef WITH_HEADLESS
   extern char datatoc_blender_logo_png[];
   extern int datatoc_blender_logo_png_size;
@@ -314,7 +314,7 @@ static uiBlock *wm_block_create_about(bContext *C, ARegion *region, void *UNUSED
 
   uiLayout *col = uiLayoutColumn(layout, true);
 
-  uiItemL_ex(col, IFACE_("Blender"), ICON_NONE, true, false);
+  uiItemL_ex(col, IFACE_("BlendEngine"), ICON_NONE, true, false);
 
   MenuType *mt = WM_menutype_find("WM_MT_splash_about", true);
   if (mt) {
@@ -335,9 +335,9 @@ static int wm_about_invoke(bContext *C, wmOperator *UNUSED(op), const wmEvent *U
 
 void WM_OT_splash_about(wmOperatorType *ot)
 {
-  ot->name = "About Blender";
+  ot->name = "About BlendEngine";
   ot->idname = "WM_OT_splash_about";
-  ot->description = "Open a window with information about Blender";
+  ot->description = "Open a window with information about BlendEngine";
 
   ot->invoke = wm_about_invoke;
   ot->poll = WM_operator_winactive;

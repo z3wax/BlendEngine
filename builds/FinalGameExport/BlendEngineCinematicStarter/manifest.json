@@ -1,0 +1,28 @@
+{
+  "blend_file": "BlendEngineCinematicStarter.blend",
+  "created_by": "BlendEngine",
+  "files": [
+    "game_data.json",
+    "platform_config.json",
+    "manifest.json",
+    "BlendEngineCinematicStarter.blend",
+    "run_game.py",
+    "run_game.sh",
+    "run_game.bat",
+    "run_game.command",
+    "README.txt"
+  ],
+  "game_data": "game_data.json",
+  "name": "BlendEngineCinematicStarter",
+  "platform": "WINDOWS",
+  "summary": "Title: New BlendEngine Game; Platform: WINDOWS; Resolution: 1280x720; Folder: //builds/FinalGameExport; Packages: playable project, asset manifest, scene package",
+  "supported_targets": [
+    "WINDOWS",
+    "LINUX",
+    "MACOS",
+    "IOS",
+    "ANDROID",
+    "WEB"
+  ],
+  "title": "New BlendEngine Game"
+}

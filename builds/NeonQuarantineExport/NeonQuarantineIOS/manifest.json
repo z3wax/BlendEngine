@@ -1,0 +1,32 @@
+{
+  "blend_file": "",
+  "created_by": "BlendEngine",
+  "files": [
+    "game_data.json",
+    "platform_config.json",
+    "manifest.json",
+    "ios_project/Assets/game_data.json",
+    "ios_project/Assets/platform_config.json",
+    "ios_project/web_player/index.html",
+    "ios_project/web_player/player.js",
+    "ios_project/web_player/game_data.json",
+    "ios_project/BlendEnginePlayer.swift",
+    "ios_project/Info.plist",
+    "ios_project/build_ios_ipa.sh",
+    "ios_project/README.md",
+    "README.txt"
+  ],
+  "game_data": "game_data.json",
+  "name": "NeonQuarantineIOS",
+  "platform": "IOS",
+  "summary": "Title: Neon Quarantine; Platform: IOS; Resolution: 1280x720; Folder: //builds/NeonQuarantineExport; Packages: playable project, asset manifest, scene package",
+  "supported_targets": [
+    "WINDOWS",
+    "LINUX",
+    "MACOS",
+    "IOS",
+    "ANDROID",
+    "WEB"
+  ],
+  "title": "Neon Quarantine"
+}
