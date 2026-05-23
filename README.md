@@ -38,12 +38,6 @@ Rather than functioning only as a content creation suite, BlendEngine is intende
 
 ---
 
-## Visual Preview
-
-<p align="center">
-  <sub>Replace this preview with your actual editor screenshot, viewport design, or engine dashboard image.</sub>
-</p>
-
 ---
 
 ## Project Highlights
