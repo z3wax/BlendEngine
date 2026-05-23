@@ -1,7 +1,4 @@
 <div align="center">
-
-<img src="docs/assets/brand/blendengine-logo.png" alt="BlendEngine Logo" width="160" />
-
 # BlendEngine
 
 ### A game-development-focused 3D engine built on top of the Blender source foundation
