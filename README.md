@@ -1,5 +1,5 @@
 <div align="center">
-## BlendEngine
+***BlendEngine
 
 ### A game-development-focused 3D engine built on top of the Blender source foundation
 
