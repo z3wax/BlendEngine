@@ -1,3 +1,15 @@
+<!-- z3wax:presentation:start -->
+![BlendEngine](docs/brand/banner.svg)
+
+[Loyiha xaritasi va misol](docs/PROJECT_GUIDE.md) · [Roadmap](ROADMAP.md) · [Baholash](docs/EVALUATION.md) · [Changelog](CHANGELOG.md) · [Relizlar](docs/RELEASING.md)
+
+[![Documentation](https://github.com/z3wax/BlendEngine/actions/workflows/documentation.yml/badge.svg)](https://github.com/z3wax/BlendEngine/actions/workflows/documentation.yml)
+
+**Tekshiruvlar:** [Documentation workflow](https://github.com/z3wax/BlendEngine/actions/workflows/documentation.yml)
+
+Hujjatlar CI holati dastur yoki model testlari holatidan alohida.
+<!-- z3wax:presentation:end -->
+
 # BlendEngine
 
 Blender manba kodiga tayangan, o'yin ishlab chiqish va interaktiv 3D ish jarayonlarini o'rganishga yo'naltirilgan engine loyihasi.
