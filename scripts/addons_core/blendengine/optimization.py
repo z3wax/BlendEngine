@@ -4,7 +4,7 @@
 
 import bpy
 
-from . import utils
+from . import graphics, utils
 
 
 PRESET_VALUES = {
@@ -143,6 +143,8 @@ def apply_preset(scene, preset=None):
 
     preset = preset or profile.preset
     if preset == "CUSTOM":
+        profile.preset = "CUSTOM"
+        graphics.apply_profile(scene, profile)
         return profile
 
     values = PRESET_VALUES[preset]
@@ -165,6 +167,8 @@ def apply_preset(scene, preset=None):
     ) = values["budget"]
 
     optimization.weak_hardware_target = preset in {"ULTRA_LOW", "LOW", "BALANCED"}
+    if preset in {"HIGH", "CINEMATIC"}:
+        optimization.one_gb_ram_mode = False
     optimization.prefer_baked_lighting = preset in {"ULTRA_LOW", "LOW", "BALANCED", "HIGH"}
     optimization.use_lod_strategy = True
     optimization.use_impostors = preset in {"ULTRA_LOW", "LOW", "BALANCED"}
@@ -182,6 +186,7 @@ def apply_preset(scene, preset=None):
     optimization.dynamic_resolution = True
     optimization.emergency_quality_drop = True
     optimization.scalable_post_processing = True
+    graphics.apply_profile(scene, profile)
     optimization.last_report_summary = "Applied %s optimization preset." % values["name"]
     return profile
 
@@ -361,15 +366,18 @@ def platform_defaults(scene, platform):
     elif platform == "MACOS":
         project.resolution_x = 1600
         project.resolution_y = 900
-        apply_preset(scene, "BALANCED")
+        scene.blendengine_optimization.one_gb_ram_mode = False
+        apply_preset(scene, "HIGH")
     elif platform == "LINUX":
         project.resolution_x = 1280
         project.resolution_y = 720
-        apply_preset(scene, "BALANCED")
+        scene.blendengine_optimization.one_gb_ram_mode = False
+        apply_preset(scene, "HIGH")
     else:
         project.resolution_x = 1280
         project.resolution_y = 720
-        apply_preset(scene, "BALANCED")
+        scene.blendengine_optimization.one_gb_ram_mode = False
+        apply_preset(scene, "HIGH")
     scene.render.resolution_x = project.resolution_x
     scene.render.resolution_y = project.resolution_y
     return project

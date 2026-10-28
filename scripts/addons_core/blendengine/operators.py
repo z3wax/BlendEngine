@@ -196,7 +196,6 @@ class BE_OT_easy_create_game(Operator):
             context.scene.blendengine_project.game_dimension = "THREE_D"
 
         optimization.platform_defaults(context.scene, self.target_platform)
-        optimization.apply_one_gb_runtime_plan(context.scene)
         utils.activate_engine_page(context, "STUDIO")
         self.report({"INFO"}, "Game is ready: %s" % created["player"].name)
         return {"FINISHED"}
@@ -751,8 +750,6 @@ class BE_OT_apply_optimization_preset(Operator):
 
     def execute(self, context):
         preset = self.preset
-        if preset == "CUSTOM":
-            preset = context.scene.blendengine_quality_profile.preset
         optimization.apply_preset(context.scene, preset)
         self.report({"INFO"}, "Applied %s optimization preset." % preset.replace("_", " ").title())
         return {"FINISHED"}

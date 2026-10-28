@@ -14,6 +14,8 @@ Hujjatlar CI holati dastur yoki model testlari holatidan alohida.
 
 Blender manba kodiga tayangan, o'yin ishlab chiqish va interaktiv 3D ish jarayonlarini o'rganishga yo'naltirilgan engine loyihasi.
 
+**Grafika:** [High/Cinematic rejimlari, namuna sahna va ishga tushirish](docs/GRAPHICS.md).
+
 **Repozitoriy egasi:** [z3wax](https://github.com/z3wax)  
 **Asos:** Blender va uning uchinchi tomon komponentlari.
 

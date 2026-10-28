@@ -9,7 +9,7 @@ import zipfile
 import bpy
 from mathutils import Vector
 
-from . import components, input_system, optimization, utils
+from . import components, graphics, input_system, optimization, utils
 
 
 MODEL_ASSET_DIR = "/home/abdulhodiy/Desktop/MODELS"
@@ -20,7 +20,8 @@ SOLDIER_MODEL = os.path.join(MODEL_ASSET_DIR, "soldier_infranty_1980_ex_-_wolf._
 ZOMBIE_MODEL = os.path.join(MODEL_ASSET_DIR, "sexy_zombie_girl.glb")
 
 
-def _material(name, color, roughness=0.72, metallic=0.0, alpha=1.0, emission=None, emission_strength=0.0):
+def _material(name, color, roughness=0.72, metallic=0.0, alpha=1.0, emission=None, emission_strength=0.0,
+              surface_scale=None):
     mat = bpy.data.materials.get(name)
     if mat is None:
         mat = bpy.data.materials.new(name)
@@ -38,7 +39,43 @@ def _material(name, color, roughness=0.72, metallic=0.0, alpha=1.0, emission=Non
         if emission is not None:
             _set_node_input(node, ("Emission", "Emission Color"), emission)
             _set_node_input(node, ("Emission Strength",), emission_strength)
+        if surface_scale is not None:
+            _surface_detail(mat, node, color, roughness, surface_scale)
     return mat
+
+
+def _surface_detail(material, shader, color, roughness, scale):
+    """Give generated starter surfaces relief and roughness without texture files."""
+    nodes, links = material.node_tree.nodes, material.node_tree.links
+
+    def owned_node(kind, name, location):
+        name = "BE_Surface_" + name
+        node = nodes.get(name)
+        if node is None:
+            node = nodes.new(kind)
+            node.name = name
+        node.location = location
+        return node
+
+    noise = owned_node("ShaderNodeTexNoise", "Grain", (-650, 120))
+    noise.inputs["Scale"].default_value = scale
+    noise.inputs["Detail"].default_value = 3.0
+    noise.inputs["Roughness"].default_value = 0.7
+    color_ramp = owned_node("ShaderNodeValToRGB", "Color", (-400, 230))
+    color_ramp.color_ramp.elements[0].color = tuple(channel * 0.65 for channel in color[:3]) + (1.0,)
+    color_ramp.color_ramp.elements[1].color = tuple(min(1.0, channel * 1.12) for channel in color[:3]) + (1.0,)
+    roughness_map = owned_node("ShaderNodeMapRange", "Roughness", (-400, -40))
+    roughness_map.inputs["To Min"].default_value = roughness * 0.72
+    roughness_map.inputs["To Max"].default_value = min(1.0, roughness * 1.08)
+    bump = owned_node("ShaderNodeBump", "Relief", (-150, -160))
+    bump.inputs["Strength"].default_value = 0.18
+    bump.inputs["Distance"].default_value = 0.06
+    links.new(noise.outputs["Fac"], color_ramp.inputs["Fac"])
+    links.new(noise.outputs["Fac"], roughness_map.inputs["Value"])
+    links.new(noise.outputs["Fac"], bump.inputs["Height"])
+    links.new(color_ramp.outputs["Color"], shader.inputs["Base Color"])
+    links.new(roughness_map.outputs["Result"], shader.inputs["Roughness"])
+    links.new(bump.outputs["Normal"], shader.inputs["Normal"])
 
 
 def _set_node_input(node, names, value):
@@ -293,44 +330,11 @@ def _add_neon_set_dressing(context, cyan, magenta, green, asphalt):
 
 
 def _setup_realtime_rendering(scene):
-    try:
-        scene.render.engine = "BLENDER_EEVEE"
-    except Exception:
-        pass
+    graphics.configure_realtime(scene)
+    optimization.apply_preset(scene, "HIGH")
     scene.render.fps = 60
-    scene.render.resolution_percentage = 100
-    scene.view_settings.view_transform = "Filmic"
-    scene.view_settings.look = "High Contrast"
     scene.view_settings.exposure = -0.15
     scene.view_settings.gamma = 1.0
-
-    eevee = getattr(scene, "eevee", None)
-    if eevee is not None:
-        for name, value in (
-            ("use_gtao", True),
-            ("use_bloom", True),
-            ("use_soft_shadows", True),
-            ("use_ssr", True),
-            ("use_ssr_refraction", False),
-            ("use_taa_reprojection", True),
-        ):
-            if hasattr(eevee, name):
-                setattr(eevee, name, value)
-        for name, value in (
-            ("gtao_distance", 4.0),
-            ("gtao_factor", 1.5),
-            ("bloom_intensity", 0.08),
-            ("bloom_radius", 5.2),
-            ("taa_samples", 32),
-            ("taa_render_samples", 64),
-            ("shadow_cube_size", "1024"),
-            ("shadow_cascade_size", "1024"),
-        ):
-            if hasattr(eevee, name):
-                try:
-                    setattr(eevee, name, value)
-                except Exception:
-                    pass
     if scene.world is None:
         scene.world = bpy.data.worlds.new("BE_World")
     scene.world.color = (0.006, 0.009, 0.018)
@@ -445,7 +449,6 @@ def generate_basic_game_template(context, clean_scene=True):
     project.debug_mode = True
     scene.render.resolution_x = project.resolution_x
     scene.render.resolution_y = project.resolution_y
-    optimization.apply_preset(scene, "BALANCED")
     _setup_realtime_rendering(scene)
 
     if clean_scene:
@@ -453,10 +456,10 @@ def generate_basic_game_template(context, clean_scene=True):
     else:
         bpy.ops.object.select_all(action="DESELECT")
 
-    ground_mat = _material("BE_PBR_MossyGround", (0.16, 0.34, 0.22, 1.0), roughness=0.95)
-    stone_mat = _material("BE_PBR_WetStone", (0.34, 0.36, 0.34, 1.0), roughness=0.78)
-    wall_mat = _material("BE_PBR_RuinedWall", (0.42, 0.43, 0.39, 1.0), roughness=0.86)
-    wood_mat = _material("BE_PBR_DarkWood", (0.23, 0.12, 0.065, 1.0), roughness=0.8)
+    ground_mat = _material("BE_PBR_MossyGround", (0.16, 0.34, 0.22, 1.0), roughness=0.95, surface_scale=38.0)
+    stone_mat = _material("BE_PBR_WetStone", (0.34, 0.36, 0.34, 1.0), roughness=0.5, surface_scale=12.0)
+    wall_mat = _material("BE_PBR_RuinedWall", (0.42, 0.43, 0.39, 1.0), roughness=0.86, surface_scale=18.0)
+    wood_mat = _material("BE_PBR_DarkWood", (0.23, 0.12, 0.065, 1.0), roughness=0.8, surface_scale=9.0)
     leaf_mat = _material("BE_PBR_ForestLeaves", (0.08, 0.34, 0.17, 1.0), roughness=0.9)
     water_mat = _material("BE_PBR_ShallowWater", (0.15, 0.42, 0.5, 1.0), roughness=0.28, alpha=0.55)
     player_mat = _material("BE_Hero_CyanArmor", (0.0, 0.72, 0.64, 1.0), roughness=0.35, metallic=0.1)
@@ -732,7 +735,6 @@ def generate_cyberpunk_shooter_template(context, clean_scene=True):
     scene.render.resolution_x = project.resolution_x
     scene.render.resolution_y = project.resolution_y
     _setup_realtime_rendering(scene)
-    optimization.apply_preset(scene, "BALANCED")
 
     if clean_scene:
         _delete_scene_objects(context)
@@ -741,14 +743,14 @@ def generate_cyberpunk_shooter_template(context, clean_scene=True):
 
     neon_cyan = _material("BE_Neon_Cyan", (0.0, 0.75, 1.0, 1.0), roughness=0.25, emission=(0.0, 0.8, 1.0, 1.0), emission_strength=1.4)
     neon_magenta = _material("BE_Neon_Magenta", (1.0, 0.05, 0.48, 1.0), roughness=0.28, emission=(1.0, 0.0, 0.35, 1.0), emission_strength=1.2)
-    asphalt = _material("BE_Wet_Asphalt", (0.025, 0.028, 0.032, 1.0), roughness=0.42, metallic=0.0)
+    asphalt = _material("BE_Wet_Asphalt", (0.025, 0.028, 0.032, 1.0), roughness=0.3, metallic=0.0, surface_scale=65.0)
     skin = _material("BE_FirstPerson_Sleeves", (0.12, 0.15, 0.18, 1.0), roughness=0.62)
     weapon_mat = _material("BE_SCAR_DarkMetal", (0.05, 0.055, 0.06, 1.0), roughness=0.35, metallic=0.55)
     zombie_tint = _material("BE_Zombie_Tint", (0.28, 0.46, 0.36, 1.0), roughness=0.7)
     city_materials = {
         "road": asphalt,
         "metal": _material("BE_City_DarkMetal", (0.055, 0.06, 0.075, 1.0), roughness=0.38, metallic=0.35),
-        "wall": _material("BE_City_BlackConcrete", (0.035, 0.038, 0.045, 1.0), roughness=0.72, metallic=0.0),
+        "wall": _material("BE_City_BlackConcrete", (0.035, 0.038, 0.045, 1.0), roughness=0.72, metallic=0.0, surface_scale=24.0),
         "glass": _material("BE_City_Glass_Cyan", (0.02, 0.16, 0.2, 0.58), roughness=0.16, metallic=0.0, alpha=0.58, emission=(0.0, 0.35, 0.55, 1.0), emission_strength=0.35),
         "screen": _material("BE_City_Emissive_Screen", (0.04, 0.7, 1.0, 1.0), roughness=0.25, emission=(0.0, 0.75, 1.0, 1.0), emission_strength=1.15),
     }
