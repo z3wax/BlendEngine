@@ -1,0 +1,42 @@
+{
+  "label": "before",
+  "blender_version": "3.6.23",
+  "runtime_source_sha256": "57dfbc8b5ca2a0f4a000c6351b28930b02e1105c7303ee8170d71254e3f89144",
+  "measurement": "GameSession.step CPU logic time; no rendering, not rendered FPS",
+  "scene": {
+    "objects": 394,
+    "colliders": 389,
+    "exhaustive_collider_pairs": 75466,
+    "npc_count": 4,
+    "trigger_count": 3
+  },
+  "sample_frames": 240,
+  "warmup_frames": 20,
+  "simulation_dt_seconds": 0.016666666666666666,
+  "logic_ms": {
+    "median": 166.37377249998053,
+    "mean": 169.42050365416725,
+    "p95": 190.0880780000307,
+    "max": 245.0916959999745
+  },
+  "outcome": {
+    "player_location": [
+      3.999999,
+      9.999996,
+      0.9
+    ],
+    "player_health": 100.0,
+    "trigger_entries": {
+      "Route trigger 0": 1,
+      "Route trigger 1": 1,
+      "Route trigger 2": 1
+    },
+    "active_collision_pairs": [
+      [
+        "Obstacle 0013",
+        "Player"
+      ]
+    ],
+    "stop_requested": false
+  }
+}

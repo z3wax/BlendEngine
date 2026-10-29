@@ -16,6 +16,8 @@ Blender manba kodiga tayangan, o'yin ishlab chiqish va interaktiv 3D ish jarayon
 
 **Grafika:** [High/Cinematic rejimlari, namuna sahna va ishga tushirish](docs/GRAPHICS.md).
 
+**Editor va o'yin:** [Native editor, Neon Relay va runtime optimizatsiyasi](docs/PERFORMANCE_EDITOR.md).
+
 **Repozitoriy egasi:** [z3wax](https://github.com/z3wax)  
 **Asos:** Blender va uning uchinchi tomon komponentlari.
 

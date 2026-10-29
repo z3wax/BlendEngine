@@ -1,0 +1,529 @@
+{
+  "success": true,
+  "error": null,
+  "run_id": "ae0ed724e77d4159a68f76520e724f0a",
+  "game_won": true,
+  "victory_gameplay": {
+    "state": "WON",
+    "score": 5,
+    "collected": [
+      "Energy Core 05",
+      "Energy Core 02",
+      "Energy Core 03",
+      "Energy Core 04",
+      "Energy Core 01"
+    ],
+    "elapsed": 9.801643341999835,
+    "health": 100.0
+  },
+  "video_metadata": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "width": 1280,
+        "height": 800,
+        "r_frame_rate": "24/1",
+        "avg_frame_rate": "144/7",
+        "nb_frames": "1362"
+      }
+    ],
+    "format": {
+      "duration": "66.208333",
+      "size": "2495771"
+    }
+  },
+  "capture_fps": 24,
+  "retimed": false,
+  "input_method": "X11 OS keyboard events using xdotool; actual runtime movement",
+  "recording": "/workspace/artifacts/blendengine-playable/NeonRelay-gameplay.mp4",
+  "wall_seconds": 78.12731614900008,
+  "metrics": {
+    "fps": {
+      "median": 3.8150945511475296,
+      "minimum": 1.212446526955597,
+      "maximum": 4.7342669231949905,
+      "samples": 96
+    },
+    "viewport_fps": {
+      "median": 3.8587846248397986,
+      "minimum": 1.6365977481010672,
+      "maximum": 4.135530236122676,
+      "samples": 96
+    },
+    "logic_ms": {
+      "median": 0.4911734999950568,
+      "minimum": 0.32697400001779897,
+      "maximum": 5.147754999825338,
+      "samples": 96
+    }
+  },
+  "metrics_by_preview_mode": {
+    "FAST": {
+      "fps": {
+        "median": 3.840921075755751,
+        "minimum": 1.212446526955597,
+        "maximum": 4.7342669231949905,
+        "samples": 88
+      },
+      "viewport_fps": {
+        "median": 3.8862063683138084,
+        "minimum": 1.7199661409678373,
+        "maximum": 4.135530236122676,
+        "samples": 88
+      },
+      "logic_ms": {
+        "median": 0.4763834999721439,
+        "minimum": 0.32697400001779897,
+        "maximum": 5.147754999825338,
+        "samples": 88
+      }
+    },
+    "LIT": {
+      "fps": {
+        "median": 1.8821910860090452,
+        "minimum": 1.4336238569692605,
+        "maximum": 2.028424396258571,
+        "samples": 8
+      },
+      "viewport_fps": {
+        "median": 1.6893981035412837,
+        "minimum": 1.6365977481010672,
+        "maximum": 1.8032776547314775,
+        "samples": 8
+      },
+      "logic_ms": {
+        "median": 0.8385735001184003,
+        "minimum": 0.45031299987385864,
+        "maximum": 1.078206000102,
+        "samples": 8
+      }
+    }
+  },
+  "fast_preview_requested": true,
+  "metrics_notes": {
+    "fps": "Measured simulation update cadence, not rendered frames",
+    "viewport_fps": "Measured viewport redraw cadence",
+    "logic_ms": "Measured CPU logic time per simulation update"
+  },
+  "events": [
+    {
+      "event": "editor_ready",
+      "wall_seconds": 2.868145401999982,
+      "pid": 3609,
+      "window": "2097154"
+    },
+    {
+      "event": "capture_started",
+      "wall_seconds": 9.7996802319999,
+      "path": "/workspace/artifacts/blendengine-playable/NeonRelay-gameplay.mp4",
+      "capture_fps": 24,
+      "note": "Raw real-time X11 screen capture; no retiming"
+    },
+    {
+      "event": "editor_command",
+      "wall_seconds": 14.017827706999924,
+      "action": "play",
+      "result": [
+        "RUNNING_MODAL"
+      ]
+    },
+    {
+      "event": "editor_command",
+      "wall_seconds": 21.879530792999958,
+      "action": "fast_preview",
+      "result": "Fast Preview"
+    },
+    {
+      "event": "waypoint_started",
+      "wall_seconds": 23.900786982,
+      "index": 0,
+      "target": [
+        0.0,
+        -6.5
+      ]
+    },
+    {
+      "event": "os_keys",
+      "wall_seconds": 23.953624440999874,
+      "keys": [
+        "w"
+      ]
+    },
+    {
+      "event": "os_keys",
+      "wall_seconds": 25.73818308,
+      "keys": []
+    },
+    {
+      "event": "waypoint_reached",
+      "wall_seconds": 25.7382219000001,
+      "index": 0,
+      "position": [
+        0.0,
+        -6.6399993896484375,
+        0.9200000166893005
+      ],
+      "gameplay": {
+        "state": "RUNNING",
+        "score": 1,
+        "collected": [
+          "Energy Core 01"
+        ],
+        "elapsed": 2.301643341999853,
+        "health": 100.0
+      }
+    },
+    {
+      "event": "waypoint_started",
+      "wall_seconds": 26.18835249499989,
+      "index": 1,
+      "target": [
+        -3.0,
+        -2.5
+      ]
+    },
+    {
+      "event": "os_keys",
+      "wall_seconds": 26.259024081999996,
+      "keys": [
+        "a",
+        "w"
+      ]
+    },
+    {
+      "event": "os_keys",
+      "wall_seconds": 28.66567738499998,
+      "keys": [
+        "w"
+      ]
+    },
+    {
+      "event": "os_keys",
+      "wall_seconds": 29.17464196800006,
+      "keys": []
+    },
+    {
+      "event": "waypoint_reached",
+      "wall_seconds": 29.175925517999985,
+      "index": 1,
+      "position": [
+        -2.969848871231079,
+        -2.8301520347595215,
+        0.9200000166893005
+      ],
+      "gameplay": {
+        "state": "RUNNING",
+        "score": 2,
+        "collected": [
+          "Energy Core 02",
+          "Energy Core 01"
+        ],
+        "elapsed": 3.6016433419998544,
+        "health": 100.0
+      }
+    },
+    {
+      "event": "waypoint_started",
+      "wall_seconds": 29.637841062999996,
+      "index": 2,
+      "target": [
+        -3.0,
+        1.5
+      ]
+    },
+    {
+      "event": "os_keys",
+      "wall_seconds": 29.663220305000095,
+      "keys": [
+        "w"
+      ]
+    },
+    {
+      "event": "os_keys",
+      "wall_seconds": 32.302532405999955,
+      "keys": []
+    },
+    {
+      "event": "waypoint_reached",
+      "wall_seconds": 32.30462472499994,
+      "index": 2,
+      "position": [
+        -2.969848871231079,
+        1.3698477745056152,
+        0.9200000166893005
+      ],
+      "gameplay": {
+        "state": "RUNNING",
+        "score": 2,
+        "collected": [
+          "Energy Core 02",
+          "Energy Core 01"
+        ],
+        "elapsed": 4.801643341999852,
+        "health": 100.0
+      }
+    },
+    {
+      "event": "waypoint_started",
+      "wall_seconds": 32.75755131300002,
+      "index": 3,
+      "target": [
+        3.0,
+        1.5
+      ]
+    },
+    {
+      "event": "os_keys",
+      "wall_seconds": 32.7773723549999,
+      "keys": [
+        "d"
+      ]
+    },
+    {
+      "event": "os_keys",
+      "wall_seconds": 36.185651231000065,
+      "keys": []
+    },
+    {
+      "event": "waypoint_reached",
+      "wall_seconds": 36.18569562399989,
+      "index": 3,
+      "position": [
+        2.910151243209839,
+        1.3698477745056152,
+        0.9200000166893005
+      ],
+      "gameplay": {
+        "state": "RUNNING",
+        "score": 3,
+        "collected": [
+          "Energy Core 02",
+          "Energy Core 03",
+          "Energy Core 01"
+        ],
+        "elapsed": 6.401643341999846,
+        "health": 100.0
+      }
+    },
+    {
+      "event": "waypoint_started",
+      "wall_seconds": 36.63780833800001,
+      "index": 4,
+      "target": [
+        -2.0,
+        5.5
+      ]
+    },
+    {
+      "event": "os_keys",
+      "wall_seconds": 36.67501167899991,
+      "keys": [
+        "a",
+        "w"
+      ]
+    },
+    {
+      "event": "os_keys",
+      "wall_seconds": 40.34634698400009,
+      "keys": []
+    },
+    {
+      "event": "waypoint_reached",
+      "wall_seconds": 40.34640661000003,
+      "index": 4,
+      "position": [
+        -1.6676371097564697,
+        5.527635097503662,
+        0.9200000166893005
+      ],
+      "gameplay": {
+        "state": "RUNNING",
+        "score": 4,
+        "collected": [
+          "Energy Core 02",
+          "Energy Core 03",
+          "Energy Core 04",
+          "Energy Core 01"
+        ],
+        "elapsed": 8.001643341999841,
+        "health": 100.0
+      }
+    },
+    {
+      "event": "waypoint_started",
+      "wall_seconds": 40.79660326499993,
+      "index": 5,
+      "target": [
+        0.0,
+        9.0
+      ]
+    },
+    {
+      "event": "os_keys",
+      "wall_seconds": 40.88643509899998,
+      "keys": [
+        "d",
+        "w"
+      ]
+    },
+    {
+      "event": "os_keys",
+      "wall_seconds": 41.94560779599988,
+      "keys": [
+        "w"
+      ]
+    },
+    {
+      "event": "os_keys",
+      "wall_seconds": 43.178032582000014,
+      "keys": []
+    },
+    {
+      "event": "waypoint_reached",
+      "wall_seconds": 43.17808938200005,
+      "index": 5,
+      "position": [
+        -0.059697747230529785,
+        8.815573692321777,
+        0.9200000166893005
+      ],
+      "gameplay": {
+        "state": "RUNNING",
+        "score": 5,
+        "collected": [
+          "Energy Core 05",
+          "Energy Core 02",
+          "Energy Core 03",
+          "Energy Core 04",
+          "Energy Core 01"
+        ],
+        "elapsed": 9.101643341999837,
+        "health": 100.0
+      }
+    },
+    {
+      "event": "waypoint_started",
+      "wall_seconds": 43.63781249999988,
+      "index": 6,
+      "target": [
+        0.0,
+        12.0
+      ]
+    },
+    {
+      "event": "os_keys",
+      "wall_seconds": 43.66569795600003,
+      "keys": [
+        "w"
+      ]
+    },
+    {
+      "event": "os_keys",
+      "wall_seconds": 45.05766302200004,
+      "keys": []
+    },
+    {
+      "event": "game_won",
+      "wall_seconds": 45.05875503600009,
+      "gameplay": {
+        "state": "WON",
+        "score": 5,
+        "collected": [
+          "Energy Core 05",
+          "Energy Core 02",
+          "Energy Core 03",
+          "Energy Core 04",
+          "Energy Core 01"
+        ],
+        "elapsed": 9.801643341999835,
+        "health": 100.0
+      },
+      "session": {
+        "elapsed": 9.801643341999835,
+        "frame": 99,
+        "fps": 3.7319239876655197,
+        "frame_ms": 267.95829799993953,
+        "logic_ms": 0.44262100004743843,
+        "viewport_fps": 3.9014419061206276,
+        "stop_requested": false,
+        "input_state": [
+          "W"
+        ],
+        "_runtime_stats": {
+          "collision_candidates": 1,
+          "collision_exhaustive_pairs": 1,
+          "collision_checks": 1
+        },
+        "logs": [
+          "[000.00] Test Run started for Neon Relay.",
+          "[000.00] Neon Relay started. Collect 5 cores and reach the cyan portal.",
+          "[002.10] Energy core 1 / 5 collected",
+          "[003.50] Energy core 2 / 5 collected",
+          "[006.20] Energy core 3 / 5 collected",
+          "[007.90] Energy core 4 / 5 collected",
+          "[009.00] All cores collected! Reach the cyan portal",
+          "[009.80] RELAY ONLINE! Completed in 9.80 seconds."
+        ]
+      }
+    },
+    {
+      "event": "editor_command",
+      "wall_seconds": 49.186227146999954,
+      "action": "pause",
+      "result": "Paused"
+    },
+    {
+      "event": "editor_command",
+      "wall_seconds": 50.96207733000006,
+      "action": "step",
+      "result": [
+        "FINISHED"
+      ]
+    },
+    {
+      "event": "editor_command",
+      "wall_seconds": 51.88674826400006,
+      "action": "resume",
+      "result": "Running"
+    },
+    {
+      "event": "editor_command",
+      "wall_seconds": 53.50886461699997,
+      "action": "fast_preview",
+      "result": "Lit Preview"
+    },
+    {
+      "event": "editor_command",
+      "wall_seconds": 55.608247699,
+      "action": "stop",
+      "result": [
+        "FINISHED"
+      ]
+    },
+    {
+      "event": "editor_command",
+      "wall_seconds": 68.10580913099989,
+      "action": "layout",
+      "result": [
+        "FINISHED"
+      ]
+    },
+    {
+      "event": "editor_command",
+      "wall_seconds": 75.233138005,
+      "action": "save",
+      "result": [
+        "FINISHED"
+      ]
+    },
+    {
+      "event": "raw_video_stills_extracted",
+      "wall_seconds": 78.00170402799995,
+      "files": [
+        "NeonRelay-editor.png",
+        "NeonRelay-win.png"
+      ]
+    }
+  ]
+}
