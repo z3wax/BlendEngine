@@ -3,6 +3,7 @@
 # Small helpers shared by BlendEngine modules.
 
 import bpy
+import math
 
 
 COMPONENT_LABELS = {
@@ -275,7 +276,13 @@ def enter_camera_view(context):
             region_3d = getattr(space, "region_3d", None)
             if region_3d is not None:
                 region_3d.view_perspective = "CAMERA"
-                _set_space_region(region_3d, "view_camera_zoom", 42.0)
+                window_region = next((region for region in area.regions if region.type == "WINDOW"), None)
+                camera_aspect = scene.render.resolution_x / max(scene.render.resolution_y, 1)
+                fit = 0.94
+                if window_region and window_region.width and window_region.height:
+                    fit *= min(1.0, window_region.height * camera_aspect / window_region.width)
+                zoom = 50.0 * (math.sqrt(4.0 * fit) - math.sqrt(2.0))
+                _set_space_region(region_3d, "view_camera_zoom", zoom)
                 _set_space_region(region_3d, "view_camera_offset", (0.0, 0.0))
                 changed = True
             _set_space_region(space, "lock_camera", True)
@@ -287,107 +294,8 @@ def enter_camera_view(context):
 
 
 def configure_current_screen_for_blendengine(context):
-    screen = context.screen
-    if screen is None:
-        return
-
-    scene = context.scene
-    editor = getattr(scene, "blendengine_editor", None)
-    project = getattr(scene, "blendengine_project", None)
-    workspace_name = _workspace_name(context)
-    is_play_mode = workspace_name == "Play Mode"
-    is_build_page = workspace_name == "Build & Export"
-
-    for area in screen.areas:
-        _set_area_menus(area, False)
-        if is_play_mode and area.type in {
-            "IMAGE_EDITOR",
-            "FILE_BROWSER",
-            "NODE_EDITOR",
-            "DOPESHEET_EDITOR",
-            "GRAPH_EDITOR",
-            "NLA_EDITOR",
-            "SEQUENCE_EDITOR",
-            "TEXT_EDITOR",
-            "INFO",
-        }:
-            area.type = "CONSOLE"
-        elif is_build_page and area.type in {
-            "IMAGE_EDITOR",
-            "FILE_BROWSER",
-            "NODE_EDITOR",
-            "DOPESHEET_EDITOR",
-            "GRAPH_EDITOR",
-            "NLA_EDITOR",
-            "SEQUENCE_EDITOR",
-            "TEXT_EDITOR",
-        }:
-            area.type = "INFO"
-        elif workspace_name in {"BlendEngine", "World Builder"} and area.type in {
-            "IMAGE_EDITOR",
-            "NODE_EDITOR",
-        }:
-            try:
-                area.type = "FILE_BROWSER"
-            except TypeError:
-                pass
-        elif workspace_name == "Logic Lab" and area.type in {
-            "IMAGE_EDITOR",
-            "FILE_BROWSER",
-            "DOPESHEET_EDITOR",
-            "GRAPH_EDITOR",
-            "NLA_EDITOR",
-            "SEQUENCE_EDITOR",
-        }:
-            try:
-                area.type = "NODE_EDITOR"
-            except TypeError:
-                pass
-
-        for space in area.spaces:
-            if space.type != "PROPERTIES":
-                _set_space_region(space, "show_region_header", False)
-
-        if area.type == "VIEW_3D":
-            for space in area.spaces:
-                if space.type == "VIEW_3D":
-                    _set_space_region(space, "show_region_toolbar", False)
-                    space.show_region_ui = not is_play_mode
-                    space.shading.type = "RENDERED" if is_play_mode else "MATERIAL"
-                    if hasattr(space.shading, "light"):
-                        space.shading.light = "STUDIO"
-                    if hasattr(space.shading, "color_type"):
-                        space.shading.color_type = "MATERIAL"
-                    if hasattr(space.overlay, "show_overlays"):
-                        space.overlay.show_overlays = not is_play_mode
-                    space.overlay.show_floor = not is_play_mode
-                    space.overlay.show_axis_x = not is_play_mode
-                    space.overlay.show_axis_y = not is_play_mode
-                    space.overlay.show_relationship_lines = False
-                    if hasattr(space.overlay, "show_face_orientation"):
-                        space.overlay.show_face_orientation = False
-                    _set_space_region(space, "show_gizmo", not is_play_mode)
-                    _set_space_region(space, "show_gizmo_object_translate", not is_play_mode)
-                    _set_space_region(space, "show_gizmo_object_rotate", not is_play_mode)
-                    _set_space_region(space, "show_gizmo_object_scale", not is_play_mode)
-                    if project is not None and hasattr(space.overlay, "show_text"):
-                        space.overlay.show_text = bool(project.show_fps or project.show_logs)
-                    if is_play_mode:
-                        enter_camera_view(context)
-        elif area.type == "PROPERTIES":
-            for space in area.spaces:
-                if space.type == "PROPERTIES":
-                    space.context = "OBJECT"
-        elif area.type in {"DOPESHEET_EDITOR", "GRAPH_EDITOR", "NLA_EDITOR", "SEQUENCE_EDITOR"}:
-            if editor is not None and editor.active_bottom_tab == "CONSOLE":
-                area.type = "CONSOLE"
-            elif editor is not None and editor.active_bottom_tab == "ASSETS":
-                try:
-                    area.type = "FILE_BROWSER"
-                except TypeError:
-                    pass
-            elif editor is not None and editor.active_bottom_tab == "PROFILER":
-                area.type = "INFO"
+    from . import editor
+    editor.configure_screen(context)
 
 
 def activate_or_duplicate_workspace(context, name="BlendEngine", source_name="BlendEngine"):
@@ -398,7 +306,7 @@ def activate_or_duplicate_workspace(context, name="BlendEngine", source_name="Bl
     existing = bpy.data.workspaces.get(name)
     if existing:
         window.workspace = existing
-        if window.workspace == existing:
+        if bpy.app.background:
             configure_current_screen_for_blendengine(context)
         else:
             _schedule_screen_configuration(name)
@@ -420,7 +328,7 @@ def activate_or_duplicate_workspace(context, name="BlendEngine", source_name="Bl
             break
     workspace.name = name
     window.workspace = workspace
-    if window.workspace == workspace:
+    if bpy.app.background:
         configure_current_screen_for_blendengine(context)
     else:
         _schedule_screen_configuration(name)
@@ -432,5 +340,8 @@ def activate_engine_page(context, page="STUDIO"):
     source = "BlendEngine"
     workspace = activate_or_duplicate_workspace(context, name, source_name=source)
     if workspace is not None:
-        configure_current_screen_for_blendengine(context)
+        if bpy.app.background:
+            configure_current_screen_for_blendengine(context)
+        else:
+            _schedule_screen_configuration(name)
     return workspace

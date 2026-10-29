@@ -46,6 +46,103 @@ def draw_topbar_menu(self, _context):
     self.layout.menu(TOPBAR_MT_blendengine.bl_idname)
 
 
+class BE_MT_editor_quality(Menu):
+    bl_idname = "BE_MT_editor_quality"
+    bl_label = "Preview Quality"
+
+    def draw(self, _context):
+        for preset in ("LOW", "BALANCED", "HIGH", "CINEMATIC"):
+            op = self.layout.operator("blendengine.apply_optimization_preset", text=preset.title())
+            op.preset = preset
+
+
+def _draw_engine_view_header(self, context):
+    from . import editor
+    if not editor.is_engine_workspace(context):
+        _ORIGINAL_VIEW_HEADER(self, context)
+        return
+    layout = self.layout
+    project = context.scene.blendengine_project
+    row = layout.row(align=True)
+    row.label(text="BLENDENGINE", icon="CUBE")
+    row.operator("blendengine.create_playable_demo", text="New Demo", icon="ADD")
+    layout.separator()
+    row = layout.row(align=True)
+    for page, label in (("STUDIO", "Scene"), ("PLAY", "Game")):
+        op = row.operator("blendengine.open_page", text=label,
+                          depress=context.window.workspace.name == utils.engine_page_name(page))
+        op.page = page
+    layout.separator_spacer()
+    row = layout.row(align=True)
+    if project.test_running:
+        row.operator("blendengine.pause_test_run", text="Resume" if project.test_paused else "Pause",
+                     icon="PLAY" if project.test_paused else "PAUSE", depress=project.test_paused)
+        step = row.row(align=True)
+        step.enabled = project.test_paused
+        step.operator("blendengine.step_test_run", text="", icon="FRAME_NEXT")
+        row.operator("blendengine.stop_test_run", text="Stop", icon="CANCEL")
+    else:
+        row.operator("blendengine.test_run_scene", text="Play", icon="PLAY")
+    layout.separator_spacer()
+    if project.test_running and project.runtime_viewport_fps > 0:
+        layout.label(text="Viewport %.1f Hz" % project.runtime_viewport_fps)
+    profile = context.scene.blendengine_quality_profile
+    layout.menu("BE_MT_editor_quality", text=profile.preset.replace("_", " ").title(), icon="SHADING_RENDERED")
+    layout.operator("blendengine.toggle_fast_preview", text="Fast Preview", icon="SHADING_SOLID",
+                    depress=bool(context.screen.get("blendengine_fast_preview", False)))
+
+
+def _draw_engine_outliner_header(self, context):
+    from . import editor
+    if editor.is_engine_workspace(context):
+        self.layout.label(text="Hierarchy", icon="OUTLINER")
+
+
+def _draw_engine_properties_header(self, context):
+    from . import editor
+    if editor.is_engine_workspace(context):
+        self.layout.label(text="Inspector", icon="PROPERTIES")
+
+
+class OBJECT_PT_blendengine_inspector(Panel):
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "WINDOW"
+    bl_context = "object"
+    bl_label = "Game Object"
+    bl_order = -100
+
+    @classmethod
+    def poll(cls, context):
+        from . import editor
+        return context.object is not None and editor.is_engine_workspace(context)
+
+    def draw(self, context):
+        layout = self.layout
+        obj = context.object
+        project = context.scene.blendengine_project
+        settings = obj.blendengine_object
+        row = layout.row()
+        row.prop(obj, "name", text="", icon="OBJECT_DATA")
+        layout.use_property_split = True
+        layout.use_property_decorate = False
+        layout.prop(settings, "object_tag", text="Tag")
+        layout.prop(obj, "location")
+        layout.prop(obj, "rotation_euler", text="Rotation")
+        layout.prop(obj, "scale")
+        if settings.player_controller.enabled:
+            layout.separator()
+            layout.label(text="Player Controller", icon="OUTLINER_OB_ARMATURE")
+            layout.prop(settings.player_controller, "walk_speed", text="Walk Speed")
+            layout.prop(settings.player_controller, "run_speed", text="Run Speed")
+            layout.prop(settings.player_controller, "jump_force", text="Jump Force")
+        layout.separator()
+        layout.label(text="Simulation: " + project.test_status,
+                     icon="PAUSE" if project.test_paused else "PLAY")
+        if project.test_running:
+            layout.label(text="Logic %.2f ms / updates %.1f Hz" %
+                         (project.runtime_frame_ms, project.runtime_fps))
+
+
 class BE_UL_components(UIList):
     def draw_item(self, _context, layout, _data, item, _icon, _active_data, _active_propname, _index):
         component = item
@@ -618,8 +715,8 @@ def _draw_test_run(layout, scene):
     layout.separator()
     layout.label(text="Live Play HUD", icon="SEQ_HISTOGRAM")
     grid = layout.grid_flow(row_major=True, columns=2, even_columns=True, even_rows=True, align=True)
-    grid.label(text="FPS %.0f" % project.runtime_fps, icon="TIME")
-    grid.label(text="Frame %.1f ms" % project.runtime_frame_ms, icon="PREVIEW_RANGE")
+    grid.label(text="Updates %.1f Hz" % project.runtime_fps, icon="TIME")
+    grid.label(text="Logic %.2f ms" % project.runtime_frame_ms, icon="PREVIEW_RANGE")
     grid.label(text="RAM %.0f MB" % project.runtime_memory_mb, icon="MEMORY")
     grid.label(text="Visible %d" % project.runtime_visible_objects, icon="HIDE_OFF")
     grid.label(text="Tris %d" % project.runtime_triangles_visible, icon="MESH_DATA")
@@ -833,7 +930,7 @@ def _draw_profiler(layout, scene):
     ), icon="SEQ_HISTOGRAM")
     layout.separator()
     layout.label(text="Play Mode Runtime", icon="PLAY")
-    layout.label(text="FPS %.0f | %.1f ms | RAM %.0f MB" % (
+    layout.label(text="Updates %.1f Hz | Logic %.2f ms | RAM %.0f MB" % (
         project.runtime_fps,
         project.runtime_frame_ms,
         project.runtime_memory_mb,
@@ -1417,6 +1514,8 @@ class OBJECT_PT_blendengine_optimization(BE_ObjectPanel, Panel):
 
 classes = (
     TOPBAR_MT_blendengine,
+    BE_MT_editor_quality,
+    OBJECT_PT_blendengine_inspector,
     BE_UL_components,
     BE_UL_behaviors,
     BE_UL_events,
@@ -1471,12 +1570,23 @@ classes = (
 
 
 def register():
+    global _ORIGINAL_VIEW_HEADER
     for cls in classes:
         bpy.utils.register_class(cls)
     bpy.types.TOPBAR_MT_editor_menus.append(draw_topbar_menu)
+    _ORIGINAL_VIEW_HEADER = bpy.types.VIEW3D_HT_header.draw
+    bpy.types.VIEW3D_HT_header.draw = _draw_engine_view_header
+    bpy.types.OUTLINER_HT_header.prepend(_draw_engine_outliner_header)
+    bpy.types.PROPERTIES_HT_header.prepend(_draw_engine_properties_header)
 
 
 def unregister():
+    bpy.types.VIEW3D_HT_header.draw = _ORIGINAL_VIEW_HEADER
+    bpy.types.OUTLINER_HT_header.remove(_draw_engine_outliner_header)
+    bpy.types.PROPERTIES_HT_header.remove(_draw_engine_properties_header)
     bpy.types.TOPBAR_MT_editor_menus.remove(draw_topbar_menu)
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
+
+
+_ORIGINAL_VIEW_HEADER = None

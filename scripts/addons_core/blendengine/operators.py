@@ -3,6 +3,7 @@
 # BlendEngine operators.
 
 import bpy
+import time
 from bpy.props import BoolProperty, EnumProperty
 from bpy.types import Operator
 
@@ -53,6 +54,39 @@ class BE_OT_create_workspace(Operator):
             self.report({"ERROR"}, "Could not create a BlendEngine workspace from the current workspace.")
             return {"CANCELLED"}
         self.report({"INFO"}, "BlendEngine workspace is ready.")
+        return {"FINISHED"}
+
+
+class BE_OT_create_playable_demo(Operator):
+    bl_idname = "blendengine.create_playable_demo"
+    bl_label = "New Neon Relay Demo"
+    bl_description = "Create a separate playable Neon Relay scene and open the game editor"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        if runtime.ACTIVE_SESSION is not None:
+            self.report({"WARNING"}, "Stop the current game before creating a new demo.")
+            return {"CANCELLED"}
+        from . import demo_game
+        demo_game.create_demo(context)
+        utils.activate_engine_page(context, "STUDIO")
+        self.report({"INFO"}, "Neon Relay ready. Press Play; WASD moves, Space jumps.")
+        return {"FINISHED"}
+
+
+class BE_OT_toggle_fast_preview(Operator):
+    bl_idname = "blendengine.toggle_fast_preview"
+    bl_label = "Fast Preview"
+    bl_description = "Use Workbench material colors, studio lighting and cavity for faster prototyping; toggle off to restore authored lighting"
+
+    @classmethod
+    def poll(cls, context):
+        return context.screen is not None
+
+    def execute(self, context):
+        from . import editor
+        enabled = editor.toggle_fast_preview(context)
+        self.report({"INFO"}, "Fast Preview: studio lighting" if enabled else "Authored lighting restored")
         return {"FINISHED"}
 
 
@@ -605,8 +639,14 @@ class BE_OT_test_run_scene(Operator):
 
     _timer = None
     _session = None
+    _last_tick = 0.0
+
+    @classmethod
+    def poll(cls, context):
+        return context.window is not None and not context.scene.blendengine_project.test_running
 
     def execute(self, context):
+        context.scene.blendengine_project.test_paused = False
         previous_workspace = context.window.workspace if context.window else None
         utils.activate_engine_page(context, "PLAY")
         self._session, result = runtime.start_test_run(context)
@@ -619,6 +659,7 @@ class BE_OT_test_run_scene(Operator):
             return {"CANCELLED"}
 
         self._timer = context.window_manager.event_timer_add(1.0 / 60.0, window=context.window)
+        self._last_tick = time.perf_counter()
         context.window_manager.modal_handler_add(self)
         if result.warnings:
             self.report({"WARNING"}, result.summary())
@@ -635,13 +676,31 @@ class BE_OT_test_run_scene(Operator):
             return self._finish(context, "Stopped")
 
         if event.type == "TIMER":
-            self._session.step(1.0 / 60.0)
+            if getattr(event, "timer", self._timer) != self._timer:
+                return {"PASS_THROUGH"}
+            now = time.perf_counter()
+            dt = min(max(now - self._last_tick, 0.0), 0.1)
+            self._last_tick = now
+            if not context.scene.blendengine_project.test_paused:
+                self._session.step(dt)
             if self._session.stop_requested or not context.scene.blendengine_project.test_running:
                 return self._finish(context, "Stopped")
             return {"PASS_THROUGH"}
 
         if event.value in {"PRESS", "RELEASE"}:
-            if self._session.handle_event(event):
+            # Header and inspector clicks must reach Play/Pause/Stop controls.
+            # Releases still reach the session after the pointer leaves Game.
+            in_game = any(
+                area.type == "VIEW_3D" and any(
+                    region.type == "WINDOW" and
+                    region.x <= event.mouse_x < region.x + region.width and
+                    region.y <= event.mouse_y < region.y + region.height
+                    for region in area.regions
+                ) for area in context.screen.areas
+            ) if context.screen else False
+            if context.scene.blendengine_project.test_paused:
+                return {"PASS_THROUGH"}
+            if (in_game or event.value == "RELEASE") and self._session.handle_event(event):
                 return {"RUNNING_MODAL"}
 
         return {"PASS_THROUGH"}
@@ -651,6 +710,7 @@ class BE_OT_test_run_scene(Operator):
             context.window_manager.event_timer_remove(self._timer)
             self._timer = None
         runtime.finish_active_session(status)
+        context.scene.blendengine_project.test_paused = False
         self._session = None
         return {"FINISHED"}
 
@@ -664,6 +724,42 @@ class BE_OT_stop_test_run(Operator):
     def execute(self, context):
         runtime.request_stop(context.scene)
         self.report({"INFO"}, "BlendEngine Test Run stopped.")
+        return {"FINISHED"}
+
+
+class BE_OT_pause_test_run(Operator):
+    bl_idname = "blendengine.pause_test_run"
+    bl_label = "Pause / Resume Game"
+    bl_description = "Pause simulation without leaving the Game view"
+
+    @classmethod
+    def poll(cls, context):
+        return context.scene.blendengine_project.test_running
+
+    def execute(self, context):
+        project = context.scene.blendengine_project
+        project.test_paused = not project.test_paused
+        project.test_status = "Paused" if project.test_paused else "Running"
+        if runtime.ACTIVE_SESSION is not None:
+            runtime.ACTIVE_SESSION.input_state.clear()
+        for area in context.screen.areas if context.screen else ():
+            area.tag_redraw()
+        return {"FINISHED"}
+
+
+class BE_OT_step_test_run(Operator):
+    bl_idname = "blendengine.step_test_run"
+    bl_label = "Step Simulation"
+    bl_description = "Advance a paused game by one 1/60 second simulation step"
+
+    @classmethod
+    def poll(cls, context):
+        project = context.scene.blendengine_project
+        return project.test_running and project.test_paused
+
+    def execute(self, context):
+        if runtime.ACTIVE_SESSION is not None:
+            runtime.ACTIVE_SESSION.step(1.0 / 60.0)
         return {"FINISHED"}
 
 
@@ -978,6 +1074,8 @@ class BE_OT_prepare_build(Operator):
 
 classes = (
     BE_OT_create_workspace,
+    BE_OT_create_playable_demo,
+    BE_OT_toggle_fast_preview,
     BE_OT_open_engine_page,
     BE_OT_open_play_mode_workspace,
     BE_OT_generate_basic_template,
@@ -1007,6 +1105,8 @@ classes = (
     BE_OT_animation_transition_remove,
     BE_OT_test_run_scene,
     BE_OT_stop_test_run,
+    BE_OT_pause_test_run,
+    BE_OT_step_test_run,
     BE_OT_editor_input_lock,
     BE_OT_disable_editor_input_lock,
     BE_OT_apply_optimization_preset,

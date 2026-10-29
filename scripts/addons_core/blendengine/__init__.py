@@ -20,6 +20,7 @@ if "bpy" in locals():
 
     for module_name in (
         "properties",
+        "editor",
         "utils",
         "components",
         "input_system",
@@ -29,6 +30,7 @@ if "bpy" in locals():
         "optimization",
         "performance",
         "export_system",
+        "demo_game",
         "runtime",
         "templates",
         "operators",
@@ -41,6 +43,7 @@ if "bpy" in locals():
 else:
     from . import (
         properties,
+        editor,
         utils,
         components,
         input_system,
@@ -50,6 +53,7 @@ else:
         optimization,
         performance,
         export_system,
+        demo_game,
         runtime,
         templates,
         operators,

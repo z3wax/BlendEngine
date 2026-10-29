@@ -171,6 +171,10 @@ class GameSession:
         self.frame = 0
         self.fps = 0.0
         self.frame_ms = 0.0
+        self.logic_ms = 0.0
+        self.viewport_fps = 0.0
+        self._last_viewport_draw = None
+        self._viewport_region = None
         self.logs = []
         self.stop_requested = False
         self._last_wall_time = time.perf_counter()
@@ -186,11 +190,24 @@ class GameSession:
         self._timer_state = {}
         self._trigger_overlaps = set()
         self._collision_overlaps = set()
+        self._objects = ()
+        self._index_dirty = True
+        self._player = None
+        self._spatial_revision = 0
+        self._geometry_metrics = None
+        self._geometry_metrics_elapsed = -math.inf
+        self._metrics_dirty = True
+        self._runtime_stats = {"collision_candidates": 0, "collision_exhaustive_pairs": 0}
+        self._gameplay = None
+        self._refresh_scene_index()
+        if self.scene.get("blendengine_demo") == "NEON_RELAY":
+            from . import demo_game
+            self._gameplay = demo_game.DemoGame(self)
 
-        for obj in self.scene.objects:
+        for obj in self._objects:
             self._ground_z[obj.name] = obj.location.z
             if obj.type == "CAMERA":
-                player = utils.find_player_object(self.scene)
+                player = self.player
                 if player is not None:
                     self._camera_offsets[obj.name] = obj.location - player.location
 
@@ -202,18 +219,86 @@ class GameSession:
         self._set_first_person_player_visibility(False)
         _add_hud_handler()
         self.log("Test Run started for %s." % project.game_title)
+        if self._gameplay is not None:
+            self._gameplay.start()
         self.execute_behaviors("ON_START", 0.0)
         self._update_runtime_metrics(force=True)
         self.flush_log()
+        self._last_wall_time = time.perf_counter()
 
     def stop(self, status="Stopped"):
         project = self.scene.blendengine_project
         project.test_running = False
         project.test_status = status
         self._set_first_person_player_visibility(True)
+        if self._gameplay is not None:
+            self._gameplay.stop()
         _remove_hud_handler()
         self.log("Test Run %s." % status.lower())
         self.flush_log()
+
+    def invalidate_scene_cache(self):
+        """Invalidate role/asset indices after scripted scene structure changes."""
+        self._index_dirty = True
+        self._metrics_dirty = True
+
+    def _refresh_scene_index(self):
+        """Read changing component roles once per tick, keeping RNA edits live.
+
+        We deliberately refresh each tick: custom PropertyGroup edits do not
+        reliably produce dependency-graph geometry updates. Methods within the
+        tick share the resulting lists instead of rescanning the whole scene.
+        """
+        objects = tuple(self.scene.objects)
+        if objects != self._objects:
+            self._metrics_dirty = True
+        self._objects = objects
+        self._player = None
+        fallback_player = None
+        self._npcs = []
+        self._behavior_objects = []
+        self._colliders = []
+        self._triggers = []
+        self._trigger_objects = []
+        self._weapons = []
+        self._player_bodies = []
+        for obj in objects:
+            settings = obj.blendengine_object
+            # Match find_component's first-match behavior even in manually
+            # edited files that contain duplicate component entries.
+            components = {}
+            for component in settings.components:
+                components.setdefault(component.component_type, component.enabled)
+            if self._player is None and settings.player_controller.enabled:
+                self._player = obj
+            if fallback_player is None and "PLAYER_CONTROLLER" in components:
+                fallback_player = obj
+            if settings.npc_behavior.enabled:
+                self._npcs.append(obj)
+            if settings.behaviors:
+                self._behavior_objects.append(obj)
+            if components.get("COLLIDER", False):
+                self._colliders.append(obj)
+            if components.get("TRIGGER_ZONE", False):
+                self._triggers.append(obj)
+            elif settings.is_game_object:
+                self._trigger_objects.append(obj)
+            if settings.object_tag == "Weapon":
+                self._weapons.append(obj)
+            elif settings.object_tag == "PlayerBody":
+                self._player_bodies.append(obj)
+        if self._player is None:
+            self._player = fallback_player
+        self._index_dirty = False
+
+    def _ensure_scene_index(self):
+        if self._index_dirty or len(self.scene.objects) != len(self._objects):
+            self._refresh_scene_index()
+
+    @property
+    def player(self):
+        self._ensure_scene_index()
+        return self._player
 
     def _prepare_play_view(self):
         def _apply():
@@ -234,7 +319,7 @@ class GameSession:
             pass
 
     def _set_first_person_player_visibility(self, visible):
-        player = utils.find_player_object(self.scene)
+        player = self.player
         if player is None:
             return
         controller = player.blendengine_object.player_controller
@@ -267,6 +352,7 @@ class GameSession:
     def handle_event(self, event):
         if event.type not in GAME_INPUT_EVENTS:
             return False
+        self._refresh_scene_index()
         if event.value == "PRESS":
             self.input_state.add(event.type)
             if event.type in {"F", "LEFTMOUSE"}:
@@ -280,19 +366,22 @@ class GameSession:
 
     def step(self, dt):
         now = time.perf_counter()
-        real_dt = max(now - self._last_wall_time, 1.0 / 240.0)
+        real_dt = max(now - self._last_wall_time, 1.0e-9)
         self._last_wall_time = now
         self.fps = 1.0 / real_dt
         self.frame_ms = real_dt * 1000.0
         self._attack_cooldown = max(0.0, self._attack_cooldown - dt)
         self.elapsed += dt
         self.frame += 1
+        self._refresh_scene_index()
         self._update_player(dt)
         self._update_npcs(dt)
         self.execute_behaviors("ON_UPDATE", dt)
         self.execute_behaviors("ON_TIMER", dt)
         self._update_collisions(dt)
         self._update_triggers(dt)
+        if self._gameplay is not None:
+            self._gameplay.update(dt)
         self._update_camera()
         if self.frame % 5 == 0:
             self._update_visibility_culling()
@@ -300,10 +389,20 @@ class GameSession:
             self._update_runtime_metrics()
         if self.frame % 15 == 0:
             self.flush_log()
+        self.logic_ms = (time.perf_counter() - now) * 1000.0
+        self.scene.blendengine_project.runtime_frame_ms = self.logic_ms
 
     def _update_runtime_metrics(self, force=False):
         project = self.scene.blendengine_project
-        metrics = performance.estimate_scene(self.scene)
+        # Asset budgets are estimates, not per-frame render measurements. A
+        # full mesh/material/image scan is only needed periodically or after
+        # structural edits. Visibility below still updates on every HUD sample.
+        if (force or self._metrics_dirty or self._geometry_metrics is None or
+                self.elapsed - self._geometry_metrics_elapsed >= 1.0):
+            self._geometry_metrics = performance.estimate_scene(self.scene)
+            self._geometry_metrics_elapsed = self.elapsed
+            self._metrics_dirty = False
+        metrics = self._geometry_metrics
         visible_objects = 0
         visible_triangles = 0
         for obj in self.scene.objects:
@@ -316,11 +415,13 @@ class GameSession:
                 continue
             visible_objects += 1
             if obj.type == "MESH" and obj.data is not None:
-                visible_triangles += sum(max(1, len(poly.vertices) - 2) for poly in obj.data.polygons)
+                # A polygon with n corners triangulates into n-2 triangles.
+                # Loop/polygon counts give the same sum without Python visits
+                # to every polygon of every instance.
+                visible_triangles += max(0, len(obj.data.loops) - 2 * len(obj.data.polygons))
 
-        target_fps = getattr(self.scene.blendengine_performance_budget, "target_fps", 60)
-        project.runtime_fps = self.fps if not force else max(self.fps, float(target_fps))
-        project.runtime_frame_ms = self.frame_ms
+        project.runtime_fps = self.fps
+        project.runtime_frame_ms = self.logic_ms
         project.runtime_memory_mb = _memory_usage_mb()
         project.runtime_visible_objects = visible_objects
         project.runtime_draw_calls_estimated = metrics["draw_calls_estimated"]
@@ -333,6 +434,15 @@ class GameSession:
             "texture_memory_mb": metrics["texture_memory_mb"],
             "memory_mb": project.runtime_memory_mb,
         }
+        # The HUD redraws with the viewport; headers cache their layout until
+        # tagged separately. Keep the toolbar's measured rate current too.
+        screen = getattr(self.context, "screen", None)
+        if screen is not None:
+            for area in screen.areas:
+                if area.type == "VIEW_3D":
+                    for region in area.regions:
+                        if region.type == "HEADER":
+                            region.tag_redraw()
 
     def _bindings_for_action(self):
         actions = {}
@@ -345,7 +455,7 @@ class GameSession:
         return bool(actions.get(action, set()) & self.input_state)
 
     def _update_player(self, dt):
-        player = utils.find_player_object(self.scene)
+        player = self.player
         if player is None:
             return
 
@@ -398,7 +508,7 @@ class GameSession:
         self._vertical_velocity[player.name] = velocity
 
     def _update_camera(self):
-        player = utils.find_player_object(self.scene)
+        player = self.player
         if player is None:
             return
         controller = player.blendengine_object.player_controller
@@ -408,9 +518,10 @@ class GameSession:
         if controller.controller_type == "FIRST_PERSON":
             camera.location = player.location + Vector((0.0, 0.0, 0.72))
             camera.rotation_euler = (math.radians(90.0), 0.0, player.rotation_euler.z)
-            for obj in self.scene.objects:
-                if obj.blendengine_object.object_tag == "Weapon":
+            for obj in self._weapons:
+                if obj.hide_viewport:
                     obj.hide_viewport = False
+                if obj.hide_render:
                     obj.hide_render = False
             return
         offset = self._camera_offsets.get(camera.name)
@@ -426,13 +537,13 @@ class GameSession:
         if not optimization.camera_frustum_generation and not optimization.hide_behind_camera:
             return
         camera = self.scene.camera
-        player = utils.find_player_object(self.scene)
+        player = self.player
         if camera is None:
             return
         camera_forward = camera.matrix_world.to_quaternion() @ Vector((0.0, 0.0, -1.0))
         max_distance = max(optimization.world_cell_size * (optimization.visible_cell_radius + 1), 24.0)
         visible_count = 0
-        for obj in self.scene.objects:
+        for obj in self._objects:
             if obj == camera or obj == player or obj.type in {"CAMERA", "EMPTY"}:
                 continue
             if obj.blendengine_object.object_tag in {"Weapon", "FirstPersonArms"}:
@@ -452,15 +563,16 @@ class GameSession:
             if not hidden:
                 visible_count += 1
             try:
-                obj.hide_set(hidden)
+                if obj.hide_get() != hidden:
+                    obj.hide_set(hidden)
             except Exception:
                 obj.hide_viewport = hidden
 
     def _update_npcs(self, dt):
-        player = utils.find_player_object(self.scene)
+        player = self.player
         if player is None:
             return
-        for obj in self.scene.objects:
+        for obj in self._npcs:
             npc = obj.blendengine_object.npc_behavior
             if not npc.enabled:
                 continue
@@ -496,7 +608,7 @@ class GameSession:
     def _shoot_weapon(self):
         if self._attack_cooldown > 0.0:
             return
-        player = utils.find_player_object(self.scene)
+        player = self.player
         camera = self.scene.camera
         if player is None or camera is None:
             return
@@ -605,7 +717,8 @@ class GameSession:
         obj.rotation_euler.z = math.atan2(delta.x, delta.y)
 
     def execute_behaviors(self, event_type, dt, key=None):
-        for obj in self.scene.objects:
+        self._ensure_scene_index()
+        for obj in self._behavior_objects:
             settings = obj.blendengine_object
             for behavior in settings.behaviors:
                 if not behavior.enabled:
@@ -651,12 +764,10 @@ class GameSession:
                 self._execute_action(obj, action, dt)
 
     def _update_triggers(self, dt):
+        self._ensure_scene_index()
         active_pairs = set()
-        triggers = [obj for obj in self.scene.objects if _component_enabled(obj, "TRIGGER_ZONE")]
-        game_objects = [
-            obj for obj in self.scene.objects
-            if obj.blendengine_object.is_game_object and not _component_enabled(obj, "TRIGGER_ZONE")
-        ]
+        triggers = self._triggers
+        game_objects = self._trigger_objects
         for trigger in triggers:
             for other in game_objects:
                 if trigger == other:
@@ -671,19 +782,74 @@ class GameSession:
                         self._execute_behaviors_on_object(other, "ON_ENTER_TRIGGER", dt, tag=trigger_tag)
         self._trigger_overlaps = active_pairs
 
+    def _collision_candidates(self, colliders):
+        """Sweep sphere bounds, returning pairs in original scene/event order."""
+        bounds = []
+        for index, obj in enumerate(colliders):
+            radius = max(*obj.dimensions, 0.1) * 0.5
+            center = obj.location.copy()
+            # Vector subtraction/norms use Blender's float precision. A tiny
+            # conservative margin prevents broad-phase rounding from rejecting
+            # a tangent pair accepted by the unchanged narrow-phase test.
+            padding = 1.0e-6 * max(1.0, radius, *(abs(value) for value in center))
+            bounds.append((index, center, radius + padding))
+        if not bounds:
+            return []
+        # Pick the longest center extent so narrow corridors and square arenas
+        # do not depend on a hardcoded sweep direction.
+        axis = max(range(3), key=lambda a: max(b[1][a] for b in bounds) - min(b[1][a] for b in bounds))
+        bounds.sort(key=lambda b: (b[1][axis] - b[2], b[0]))
+        active = []
+        pairs = []
+        for index, center, radius in bounds:
+            left = center[axis] - radius
+            active = [item for item in active if item[1][axis] + item[2] >= left]
+            for other_index, other_center, other_radius in active:
+                total = radius + other_radius
+                if all(abs(center[a] - other_center[a]) <= total for a in range(3)):
+                    pairs.append((min(index, other_index), max(index, other_index)))
+            active.append((index, center, radius))
+        pairs.sort()
+        return pairs
+
     def _update_collisions(self, dt):
-        colliders = [obj for obj in self.scene.objects if _component_enabled(obj, "COLLIDER")]
+        self._ensure_scene_index()
+        colliders = self._colliders
         active_pairs = set()
-        for index, first in enumerate(colliders):
-            for second in colliders[index + 1:]:
-                pair = tuple(sorted((first.name, second.name)))
-                if self._objects_overlap(first, second):
-                    active_pairs.add(pair)
-                    if pair not in self._collision_overlaps:
-                        first_tag = first.blendengine_object.object_tag
-                        second_tag = second.blendengine_object.object_tag
-                        self._execute_behaviors_on_object(first, "ON_COLLISION", dt, tag=second_tag)
-                        self._execute_behaviors_on_object(second, "ON_COLLISION", dt, tag=first_tag)
+        candidates = self._collision_candidates(colliders)
+        self._runtime_stats["collision_candidates"] = len(candidates)
+        self._runtime_stats["collision_exhaustive_pairs"] = len(colliders) * (len(colliders) - 1) // 2
+        revision = self._spatial_revision
+        fallback = False
+        pending = iter(candidates)
+        checks = 0
+        while True:
+            try:
+                first_index, second_index = next(pending)
+            except StopIteration:
+                break
+            checks += 1
+            first, second = colliders[first_index], colliders[second_index]
+            pair = tuple(sorted((first.name, second.name)))
+            if self._objects_overlap(first, second):
+                active_pairs.add(pair)
+                if pair not in self._collision_overlaps:
+                    first_tag = first.blendengine_object.object_tag
+                    second_tag = second.blendengine_object.object_tag
+                    self._execute_behaviors_on_object(first, "ON_COLLISION", dt, tag=second_tag)
+                    self._execute_behaviors_on_object(second, "ON_COLLISION", dt, tag=first_tag)
+            # A collision behavior may teleport/rotate/spawn objects. Preserve
+            # the old exhaustive pass's same-tick action semantics by checking
+            # all later original pairs when that invalidates the sweep bounds.
+            if not fallback and revision != self._spatial_revision:
+                last_pair = (first_index, second_index)
+                pending = (
+                    (i, j) for i in range(first_index, len(colliders))
+                    for j in range(i + 1, len(colliders))
+                    if (i, j) > last_pair
+                )
+                fallback = True
+        self._runtime_stats["collision_checks"] = checks
         self._collision_overlaps = active_pairs
 
     def _objects_overlap(self, first, second):
@@ -724,6 +890,8 @@ class GameSession:
         return True
 
     def _execute_action(self, owner, action, dt):
+        if action.action_type in {"MOVE_FORWARD", "MOVE_OBJECT", "ROTATE_OBJECT", "OPEN_DOOR", "SPAWN_OBJECT"}:
+            self._spatial_revision += 1
         target = action.target_object or owner
         if action.action_type == "SHOW_LOG":
             self.log(action.text_value or ("%s ran %s" % (owner.name, action.name)))
@@ -756,6 +924,7 @@ class GameSession:
                 duplicate.data = target.data.copy()
             duplicate.location += Vector(action.vector_value)
             self.scene.collection.objects.link(duplicate)
+            self.invalidate_scene_cache()
         elif action.action_type == "GAME_OVER":
             self.log(action.text_value or "Game Over")
             self.stop_requested = True
@@ -803,8 +972,27 @@ def _memory_usage_mb():
 def _draw_runtime_hud():
     if ACTIVE_SESSION is None:
         return
-    scene = ACTIVE_SESSION.scene
+    session = ACTIVE_SESSION
+    # Measure actual viewport redraw cadence, independently of logic timer
+    # callbacks. This is not a GPU benchmark or a promised display frame rate.
+    import bpy
+    region = bpy.context.region
+    region_key = region.as_pointer() if region is not None else None
+    if session._viewport_region is None:
+        session._viewport_region = region_key
+    if region_key == session._viewport_region:
+        now = time.perf_counter()
+        previous = session._last_viewport_draw
+        if previous is not None and now > previous:
+            measured = 1.0 / (now - previous)
+            session.viewport_fps = measured if session.viewport_fps == 0.0 else session.viewport_fps * 0.85 + measured * 0.15
+        session._last_viewport_draw = now
+    scene = session.scene
     project = scene.blendengine_project
+    if hasattr(project, "runtime_viewport_fps"):
+        project.runtime_viewport_fps = session.viewport_fps
+    if session._gameplay is not None and getattr(session._gameplay, "custom_hud", False):
+        return
     if not (project.show_fps or project.debug_mode or project.show_game_variables):
         return
     try:
@@ -814,7 +1002,7 @@ def _draw_runtime_hud():
 
     lines = [
         "BlendEngine Play Mode",
-        "FPS %.0f  %.1f ms" % (project.runtime_fps, project.runtime_frame_ms),
+        "Update %.0f Hz  Logic %.1f ms" % (project.runtime_fps, project.runtime_frame_ms),
         "RAM %.0f MB  Visible %d" % (project.runtime_memory_mb, project.runtime_visible_objects),
         "Tris %d  Draw %d  Tex %.1f MB" % (
             project.runtime_triangles_visible,
@@ -823,7 +1011,9 @@ def _draw_runtime_hud():
         ),
         "WASD move  Space jump  Shift sprint  F attack  R aim  Esc stop",
     ]
-    player = utils.find_player_object(scene)
+    if session.viewport_fps > 0.0:
+        lines.insert(2, "Viewport redraw %.0f Hz" % session.viewport_fps)
+    player = session.player
     if player is not None and project.show_game_variables:
         score = _variable_lookup(player, "Score")
         ammo = _variable_lookup(player, "Ammo")
@@ -844,13 +1034,35 @@ def _draw_runtime_hud():
     x = 18
     y = 92 + len(lines) * 18
     try:
+        import gpu
+        from gpu_extras.batch import batch_for_shader
+        try:
+            shader = gpu.shader.from_builtin("UNIFORM_COLOR")
+        except ValueError:
+            shader = gpu.shader.from_builtin("2D_UNIFORM_COLOR")
+        gpu.state.blend_set("ALPHA")
+        for left, right, color in (
+            (8, 608, (0.012, 0.020, 0.030, 0.91)),
+            (8, 11, (0.0, 0.78, 0.65, 1.0)),
+        ):
+            batch = batch_for_shader(shader, "TRI_FAN", {"pos": (
+                (left, 88), (right, 88), (right, y + 25), (left, y + 25),
+            )})
+            shader.bind()
+            shader.uniform_float("color", color)
+            batch.draw(shader)
+        gpu.state.blend_set("NONE")
+    except Exception:
+        # Text remains usable on backends without the optional panel shader.
+        pass
+    try:
         blf.size(font_id, 14)
     except TypeError:
         blf.size(font_id, 14, 72)
     for index, line in enumerate(lines):
         if index == 0:
             color = (0.0, 0.92, 0.76, 1.0)
-        elif "FPS" in line and project.runtime_fps < max(30.0, scene.blendengine_performance_budget.target_fps * 0.75):
+        elif "Update" in line and project.runtime_fps < max(30.0, scene.blendengine_performance_budget.target_fps * 0.75):
             color = (1.0, 0.45, 0.18, 1.0)
         else:
             color = (0.88, 0.94, 0.96, 1.0)
