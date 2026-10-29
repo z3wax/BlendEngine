@@ -878,7 +878,8 @@ def _draw_plugins_marketplace_vcs(layout):
 def _draw_optimization_profile(layout, scene):
     profile = scene.blendengine_quality_profile
     optimization = scene.blendengine_optimization
-    layout.label(text="Editor estimates feed the runtime and build package.", icon="INFO")
+    layout.label(text="Graphics & Performance", icon="SHADING_RENDERED")
+    layout.label(text="Apply a profile to update EEVEE rendering.")
 
     row = layout.row(align=True)
     for preset in ("ULTRA_LOW", "LOW", "BALANCED"):
@@ -889,9 +890,18 @@ def _draw_optimization_profile(layout, scene):
         op = row.operator("blendengine.apply_optimization_preset", text=preset.replace("_", " ").title())
         op.preset = preset
 
+    if scene.render.engine not in {"BLENDER_EEVEE", "BLENDER_EEVEE_NEXT"}:
+        layout.label(text="Select EEVEE to apply real-time graphics.", icon="INFO")
+    elif hasattr(scene.eevee, "use_raytracing"):
+        layout.label(text="Bloom uses your compositor in this EEVEE version.", icon="INFO")
+
+    layout.label(text="Custom applies the values below; FPS is a budget.")
+
     layout.use_property_split = True
     layout.use_property_decorate = False
     layout.prop(profile, "preset")
+    op = layout.operator("blendengine.apply_optimization_preset", text="Apply Selected Profile", icon="CHECKMARK")
+    op.preset = profile.preset
     layout.prop(profile, "target_fps")
     layout.prop(profile, "resolution_scale")
     layout.prop(profile, "texture_quality")
