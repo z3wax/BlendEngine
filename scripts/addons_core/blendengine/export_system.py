@@ -2,14 +2,16 @@
 #
 # Export/build package helpers.
 
+import importlib.util
 import json
 import os
 import re
 import stat
+import tempfile
 
 import bpy
 
-from . import performance, utils
+from . import android_export, performance, utils
 
 
 def _safe_name(value, fallback="BlendEngineBuild"):
@@ -204,6 +206,7 @@ def serialize_game_data(scene):
     return {
         "format": "BlendEngineGameData",
         "version": 1,
+        "native_adapter": scene.get("blendengine_story", ""),
         "project": {
             "title": project.game_title,
             "default_scene": project.default_scene.name if project.default_scene else scene.name,
@@ -301,6 +304,12 @@ def build_profile_summary(scene):
         "Resolution: %dx%d" % (project.resolution_x, project.resolution_y),
         "Folder: %s" % project.build_folder,
     ]
+    if project.target_platform == "ANDROID":
+        parts.extend([
+            "Backend: " + android_export.NATIVE_RUNTIME,
+            "Gameplay adapter: %s" % (scene.get("blendengine_story", "") or "unsupported scene"),
+            "APK package: %s" % getattr(export, "android_package_id", android_export.DEFAULT_PACKAGE_ID),
+        ])
     enabled = []
     if export.export_playable_project:
         enabled.append("playable project")
@@ -435,34 +444,40 @@ def _write_desktop_launchers(package_dir, package_name):
     return ["run_game.bat", "run_game.command"]
 
 
-def _write_android_project(package_dir, game_data, platform_config):
-    android_dir = os.path.join(package_dir, "android_project")
-    app_assets = os.path.join(android_dir, "app", "src", "main", "assets")
-    web_files = _web_runtime_files(android_dir, game_data)
-    _write_json(os.path.join(app_assets, "game_data.json"), game_data)
-    _write_json(os.path.join(app_assets, "platform_config.json"), platform_config)
-    _write_text(os.path.join(android_dir, "settings.gradle"), "pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }\ndependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS); repositories { google(); mavenCentral() } }\nrootProject.name='BlendEngineAndroidExport'\ninclude ':app'\n")
-    _write_text(os.path.join(android_dir, "build.gradle"), "plugins {\n    id 'com.android.application' version '8.5.2' apply false\n}\n")
-    _write_text(os.path.join(android_dir, "app", "build.gradle"), "plugins { id 'com.android.application' }\n\nandroid { namespace 'com.blendengine.export'; compileSdk 35\n    defaultConfig { applicationId 'com.blendengine.export'; minSdk 26; targetSdk 35; versionCode 1; versionName '1.0' }\n}\n")
-    _write_text(os.path.join(android_dir, "app", "src", "main", "AndroidManifest.xml"), "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"><uses-permission android:name=\"android.permission.INTERNET\"/><application android:theme=\"@style/AppTheme\" android:label=\"BlendEngine Game\" android:usesCleartextTraffic=\"true\"><activity android:name=\".MainActivity\" android:screenOrientation=\"landscape\" android:exported=\"true\"><intent-filter><action android:name=\"android.intent.action.MAIN\"/><category android:name=\"android.intent.category.LAUNCHER\"/></intent-filter></activity></application></manifest>\n")
-    _write_text(os.path.join(android_dir, "app", "src", "main", "res", "values", "styles.xml"), "<resources><style name=\"AppTheme\" parent=\"android:style/Theme.Material.NoActionBar\"><item name=\"android:windowFullscreen\">true</item><item name=\"android:windowNoTitle\">true</item><item name=\"android:colorAccent\">#00e6c3</item></style></resources>\n")
-    _write_text(os.path.join(android_dir, "app", "src", "main", "java", "com", "blendengine", "export", "MainActivity.java"), "package com.blendengine.export;\nimport android.app.Activity;\nimport android.os.Bundle;\nimport android.webkit.WebSettings;\nimport android.webkit.WebView;\npublic class MainActivity extends Activity {\n  public void onCreate(Bundle b){ super.onCreate(b); WebView v=new WebView(this); WebSettings s=v.getSettings(); s.setJavaScriptEnabled(true); s.setAllowFileAccess(true); setContentView(v); v.loadUrl(\"file:///android_asset/web_player/index.html\"); }\n}\n")
-    _write_text(os.path.join(app_assets, "web_player", "index.html"), open(os.path.join(android_dir, "web_player", "index.html"), encoding="utf-8").read())
-    _write_text(os.path.join(app_assets, "web_player", "player.js"), open(os.path.join(android_dir, "web_player", "player.js"), encoding="utf-8").read())
-    _write_text(os.path.join(app_assets, "web_player", "game_data.json"), open(os.path.join(android_dir, "web_player", "game_data.json"), encoding="utf-8").read())
-    _write_text(os.path.join(android_dir, "build_android_apk.sh"),
-                "#!/usr/bin/env sh\nset -eu\ncd \"$(dirname \"$0\")\"\nif ! command -v gradle >/dev/null 2>&1; then echo 'Install Android Studio or Gradle + Android SDK to build APK.'; exit 2; fi\ngradle :app:assembleDebug\nprintf '\\nAPK: %s\\n' \"$(pwd)/app/build/outputs/apk/debug/app-debug.apk\"\n",
-                executable=True)
-    _write_text(os.path.join(android_dir, "README.md"), "# Android APK Export\n\nRun `./build_android_apk.sh` after installing Android Studio/SDK and Gradle. The project wraps the BlendEngine web runtime and exported `game_data.json` in an Android WebView player.\n")
-    return ["android_project/" + item for item in web_files] + [
-        "android_project/settings.gradle",
-        "android_project/build.gradle",
-        "android_project/app/build.gradle",
-        "android_project/app/src/main/AndroidManifest.xml",
-        "android_project/app/src/main/java/com/blendengine/export/MainActivity.java",
-        "android_project/build_android_apk.sh",
-        "android_project/README.md",
-    ]
+def _write_android_project(package_dir, game_data, platform_config, context):
+    """Export the current scene into a real native Godot game and build its APK."""
+    android_export.require_supported_adapter(game_data)
+    settings = context.scene.blendengine_export
+    sdk_root = getattr(settings, "android_template_path", "")
+    source_root = android_export.find_source_root(bpy.path.abspath(sdk_root) if sdk_root else None)
+    exporter_path = source_root / "tools/blendengine/export_native_assets.py"
+    if not exporter_path.is_file():
+        raise android_export.NativeAndroidExportError("Current-scene native asset exporter is missing: " + str(exporter_path))
+    spec = importlib.util.spec_from_file_location("blendengine_native_asset_export", exporter_path)
+    exporter = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(exporter)
+    with tempfile.TemporaryDirectory(prefix="blendengine-native-assets-") as assets_dir:
+        exporter.export_scene_assets(context.scene, assets_dir)
+        project_dir = android_export.prepare_native_project(
+            package_dir, game_data, assets_dir,
+            package_id=getattr(settings, "android_package_id", android_export.DEFAULT_PACKAGE_ID),
+            version_name=getattr(settings, "android_version_name", "1.0"),
+            version_code=getattr(settings, "android_version_code", 1),
+        )
+    result = android_export.build_native_apk(
+        project_dir,
+        godot=bpy.path.abspath(settings.godot_executable) if getattr(settings, "godot_executable", "") else None,
+        sdk=bpy.path.abspath(settings.android_sdk_path) if getattr(settings, "android_sdk_path", "") else None,
+        java=bpy.path.abspath(settings.java_sdk_path) if getattr(settings, "java_sdk_path", "") else None,
+    )
+    platform_config["apk"] = os.path.relpath(result["artifact"], package_dir)
+    platform_config["apk_validation"] = result
+    _write_json(os.path.join(package_dir, "platform_config.json"), platform_config)
+    return [os.path.relpath(os.path.join(directory, name), package_dir)
+            for directory, subdirs, names in os.walk(project_dir)
+            for name in names
+            if ".godot" not in os.path.relpath(directory, project_dir).split(os.sep)
+            and ".blendengine-tools" not in os.path.relpath(directory, project_dir).split(os.sep)]
 
 
 def _write_ios_project(package_dir, game_data, platform_config):
@@ -501,6 +516,8 @@ def prepare_build_package(context):
     writes_blend = is_desktop_target and (export.export_playable_project or export.export_scene_package)
 
     game_data = serialize_game_data(scene)
+    if project.target_platform == "ANDROID":
+        android_export.require_supported_adapter(game_data)
     manifest = {
         "name": package_name,
         "title": project.game_title,
@@ -525,14 +542,18 @@ def prepare_build_package(context):
         "web": project.target_platform == "WEB",
         "touch_controls": project.target_platform in {"IOS", "ANDROID"},
         "memory_budget_mb": scene.blendengine_optimization.max_runtime_ram_mb,
-        "runtime": "BlendEngine Python runtime for desktop plus exported WebView player scaffolds for mobile/web",
+        "runtime": (android_export.NATIVE_RUNTIME if project.target_platform == "ANDROID" else
+                    "BlendEngine Python runtime for desktop; browser player for iOS/Web"),
         "native_toolchain_required": project.target_platform in {"IOS", "ANDROID", "WEB"},
         "desktop_launcher": project.target_platform in {"WINDOWS", "LINUX", "MACOS"},
-        "android_apk_script": project.target_platform == "ANDROID",
+        "android_native_apk": project.target_platform == "ANDROID",
+        "native_gameplay_adapter": game_data["native_adapter"] if project.target_platform == "ANDROID" else "",
         "ios_xcode_required": project.target_platform == "IOS",
         "notes": (
-            "Desktop packages run through BlendEngine/Blender. "
-            "Android/iOS/Web packages include runtime data and player scaffolds; APK/IPA creation requires the platform SDK and signing."
+            "Android builds use the Godot native C++ OpenGL ES runtime and the LAST_SIGNAL gameplay adapter; "
+            "a matching Godot/Android SDK/JDK toolchain is required. APK structure and signing checks do not "
+            "replace device testing. Desktop packages run through BlendEngine/Blender; "
+            "iOS/Web retain their existing browser player projects."
         ),
     }
     platform_path = os.path.join(package_dir, "platform_config.json")
@@ -607,7 +628,10 @@ def prepare_build_package(context):
     if project.target_platform == "WEB":
         manifest["files"].extend(_web_runtime_files(package_dir, game_data))
     elif project.target_platform == "ANDROID":
-        manifest["files"].extend(_write_android_project(package_dir, game_data, platform_config))
+        manifest["files"].extend(_write_android_project(package_dir, game_data, platform_config, context))
+        manifest["native_runtime"] = android_export.NATIVE_RUNTIME
+        manifest["apk"] = platform_config["apk"]
+        manifest["device_runtime_tested"] = False
     elif project.target_platform == "IOS":
         manifest["files"].extend(_write_ios_project(package_dir, game_data, platform_config))
 
@@ -619,12 +643,14 @@ def prepare_build_package(context):
             "  Linux:   ./run_game.sh\n"
             "  Windows: run_game.bat\n"
             "  macOS:   ./run_game.command\n\n"
-            "Mobile/Web exports open through the generated player project, not the editor UI.\n\n"
+            "Android exports run a native Godot game. iOS/Web use their generated player projects.\n\n"
             "Controls:\n"
             "  W/A/S/D move, Space jump, Shift sprint, F or Left Mouse attack, R or Right Mouse aim, E interact, Esc stop.\n\n"
             "Platform export:\n"
             "  Web target writes web_player/index.html.\n"
-            "  Android target writes android_project/build_android_apk.sh for Android Studio/SDK.\n"
+            "  Android target builds android_project/build/LastSignal-debug.apk with native Godot C++/OpenGL ES.\n"
+            "  Android supports the LAST_SIGNAL story adapter; other Blender Python behaviors are not converted.\n"
+            "  APK build checks verify structure and signature; device gameplay testing is a separate step.\n"
             "  iOS target writes ios_project files for Xcode signing/archive.\n\n"
             "Optimization:\n"
             "  This package includes editor_tools, multiplayer, runtime_optimization, and performance_budget data.\n"

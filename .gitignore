@@ -85,3 +85,25 @@ node_modules/
 .DS_Store
 .idea/
 .vscode/
+
+# Native Android generated resources and build/signing artifacts.
+/native/android_game/.godot/
+/native/android_game/build/
+/native/android_game/**/*.import
+/native/android_game/assets/native_color_*.png
+/native/android_game/assets/native_normal_*.png
+/native/android_game/assets/last_signal_native_*.png
+*.apk
+*.aab
+*.keystore
+*.jks
+
+# Generated legacy exports; keep source scenes and graphics assets in builds/.
+/builds/**/android_project/
+/builds/**/ios_project/
+/builds/**/web_player/
+/builds/**/game_data.json
+/builds/**/manifest.json
+/builds/**/platform_config.json
+/builds/**/run_game.*
+/builds/**/README.txt

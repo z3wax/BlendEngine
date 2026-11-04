@@ -1,0 +1,93 @@
+name: Publish tested native Android APK
+
+on:
+  push:
+    branches: [android/last-signal-native]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: last-signal-native-048fbac2
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.repository == 'z3wax/BlendEngine'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_TAG: last-signal-native-048fbac2
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify QA and restore the exact tested APK
+        run: python3 tools/android/publish_tested_apk.py
+      - name: Verify Android signature
+        shell: bash
+        run: |
+          set -euo pipefail
+          signer=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -n 1)
+          test -n "$signer"
+          "$signer" verify --verbose dist/android/LastSignal-debug.apk
+      - name: Publish verified prerelease artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          required=(dist/android/LastSignal-debug.apk dist/android/LastSignal-debug.apk.sha256
+                    dist/BlendEngine-lean-addon.zip dist/BlendEngine-lean-sdk.zip
+                    docs/android/qa_report.json docs/android/apk_validation.json)
+          for asset in "${required[@]}"; do test -s "$asset"; done
+          shopt -s nullglob
+          optional=(dist/*.mp4 dist/android/*.mp4 dist/SHA256SUMS
+                    dist/*.manifest.json dist/*.zip.sha256
+                    docs/android/video_validation.json docs/android/native_asset_review.json
+                    docs/android/legacy_output_prune.json)
+          assets=("${required[@]}")
+          for asset in "${optional[@]}"; do
+            if test -s "$asset"; then assets+=("$asset"); fi
+          done
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            directory=$(mktemp -d)
+            gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
+              --pattern LastSignal-debug.apk --dir "$directory"
+            cmp dist/android/LastSignal-debug.apk "$directory/LastSignal-debug.apk"
+            gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
+              --json assets --jq '.assets[].name' > "$directory/asset-names.txt"
+            for asset in "${assets[@]}"; do
+              name=${asset##*/}
+              if grep -Fxq -- "$name" "$directory/asset-names.txt"; then
+                if ! test -f "$directory/$name"; then
+                  gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
+                    --pattern "$name" --dir "$directory"
+                fi
+                cmp "$asset" "$directory/$name"
+              else
+                gh release upload "$RELEASE_TAG" "$asset" --repo "$GITHUB_REPOSITORY"
+              fi
+            done
+            echo "Existing release files verified; only missing assets were uploaded."
+            exit 0
+          fi
+          cat > "$RUNNER_TEMP/release-notes.md" <<'NOTES'
+          Last Signal runs as a native Godot C++ / OpenGL ES Android game.
+
+          This APK is the exact installed build that passed Android API 24 x86_64
+          emulator testing: normal launcher, touch movement, quick jump, Inspect,
+          pause/resume, Android Back, restart, checkpoint, five clues and grounded
+          mission victory. The release job reconstructs its bytes and checks the
+          installed APK SHA-256, ZIP/native payload and Android signature.
+
+          SHA-256: `048fbac2b1a68fefbb5f83be651b6b5b47d0351d96f1ef534296f0414ea09308`
+
+          Development signed, Android 7/API 24+, ARM64 + x86_64. Physical ARM64
+          hardware has not been tested. This chapter is silent; its unused audio
+          output is disabled. The lean addon requires Blender; the SDK includes
+          game source and export tools rather than a compiled desktop editor.
+          NOTES
+          gh release create "$RELEASE_TAG" "${assets[@]}" --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" --prerelease --title "Last Signal — tested native Android" \
+            --notes-file "$RUNNER_TEMP/release-notes.md"

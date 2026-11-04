@@ -1,0 +1,72 @@
+{
+  "videos": [
+    {
+      "name": "android-touch.mp4",
+      "sha256": "6b5551d71011304e0fb0e82e2383316fa40aef434fa65947fbc99276a0bb2999",
+      "decode_passed": true,
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "h264",
+            "width": 1280,
+            "height": 720,
+            "nb_frames": "18"
+          }
+        ],
+        "format": {
+          "duration": "23.645744",
+          "size": "274930"
+        }
+      }
+    },
+    {
+      "name": "android-route.mp4",
+      "sha256": "8e2b5dc610d15d2c3888466d63f5698364d19c8ea00f499bd31a32d48c0b89cc",
+      "decode_passed": true,
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "h264",
+            "width": 1280,
+            "height": 720,
+            "nb_frames": "81"
+          }
+        ],
+        "format": {
+          "duration": "102.049811",
+          "size": "644634"
+        }
+      }
+    },
+    {
+      "name": "android-gameplay.mp4",
+      "sha256": "d96cb8c55fb28f8f578eb7062da624e2fe6fa25eb361b201a1ae4a53092f5b57",
+      "decode_passed": true,
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "h264",
+            "width": 1280,
+            "height": 720,
+            "nb_frames": "69"
+          }
+        ],
+        "format": {
+          "duration": "75.692044",
+          "size": "597999"
+        }
+      }
+    }
+  ],
+  "hardware_fps_benchmark": false,
+  "capture_notes": "Android screenrecord, variable frame rate, TCG CPU emulation and software GLES. Capture is 1280x720; emulator logical display was 960x540. No speed-up or frame interpolation.",
+  "trim_notes": "android-gameplay.mp4 copies the original H264 packets for the first 69 frames of android-route.mp4. It removes the test process exit/Android home; the last frame is displayed for 0.25 seconds. The original raw recording is retained.",
+  "packet_copy_decoded_frames_identical": true,
+  "retained_native_frames": 69
+}

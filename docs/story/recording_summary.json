@@ -1,0 +1,512 @@
+{
+  "success": true,
+  "error": null,
+  "run_id": "016464e316c44948af1953f30e7c195a",
+  "game_won": true,
+  "victory_gameplay": {
+    "state": "WON",
+    "score": 5,
+    "collected": [
+      "Signal clue 02",
+      "Signal clue 03",
+      "Signal clue 05",
+      "Signal clue 04",
+      "Signal clue 01"
+    ],
+    "elapsed": 9.806775137997448,
+    "health": 100.0
+  },
+  "video_metadata": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "width": 1280,
+        "height": 800,
+        "r_frame_rate": "20/1",
+        "avg_frame_rate": "57580/2887",
+        "nb_frames": "2879"
+      }
+    ],
+    "format": {
+      "duration": "144.350000",
+      "size": "3557427"
+    }
+  },
+  "capture_fps": 20,
+  "retimed": false,
+  "input_method": "X11 OS keyboard events using xdotool; actual runtime movement",
+  "recording": "/workspace/artifacts/last-signal/final/NeonRelay-gameplay.mp4",
+  "wall_seconds": 153.9490522820015,
+  "metrics": {
+    "fps": {
+      "median": 1.1398454024383318,
+      "minimum": 0.4211207995999264,
+      "maximum": 1.3285205038768242,
+      "samples": 96
+    },
+    "viewport_fps": {
+      "median": 1.1049542463174284,
+      "minimum": 0.8768648495353165,
+      "maximum": 1.2069105368327457,
+      "samples": 96
+    },
+    "logic_ms": {
+      "median": 7.317096498809406,
+      "minimum": 0.3020979966095183,
+      "maximum": 40.45278900230187,
+      "samples": 96
+    }
+  },
+  "metrics_by_preview_mode": {
+    "LIT": {
+      "fps": {
+        "median": 1.1398454024383318,
+        "minimum": 0.4211207995999264,
+        "maximum": 1.3285205038768242,
+        "samples": 96
+      },
+      "viewport_fps": {
+        "median": 1.1049542463174284,
+        "minimum": 0.8768648495353165,
+        "maximum": 1.2069105368327457,
+        "samples": 96
+      },
+      "logic_ms": {
+        "median": 7.317096498809406,
+        "minimum": 0.3020979966095183,
+        "maximum": 40.45278900230187,
+        "samples": 96
+      }
+    }
+  },
+  "fast_preview_requested": false,
+  "metrics_notes": {
+    "fps": "Measured simulation update cadence, not rendered frames",
+    "viewport_fps": "Measured viewport redraw cadence",
+    "logic_ms": "Measured CPU logic time per simulation update"
+  },
+  "events": [
+    {
+      "event": "editor_ready",
+      "wall_seconds": 1.4676204880015575,
+      "pid": 7353,
+      "window": "2097154"
+    },
+    {
+      "event": "capture_started",
+      "wall_seconds": 8.245645687002252,
+      "path": "/workspace/artifacts/last-signal/final/NeonRelay-gameplay.mp4",
+      "capture_fps": 20,
+      "note": "Raw real-time X11 screen capture; no retiming"
+    },
+    {
+      "event": "editor_command",
+      "wall_seconds": 12.01246016100049,
+      "action": "play",
+      "result": [
+        "RUNNING_MODAL"
+      ]
+    },
+    {
+      "event": "waypoint_started",
+      "wall_seconds": 19.44127370299975,
+      "index": 0,
+      "target": [
+        0.0,
+        -6.0
+      ]
+    },
+    {
+      "event": "os_keys",
+      "wall_seconds": 19.504202149000776,
+      "keys": [
+        "w"
+      ]
+    },
+    {
+      "event": "os_keys",
+      "wall_seconds": 29.09577897300187,
+      "keys": []
+    },
+    {
+      "event": "waypoint_reached",
+      "wall_seconds": 29.095825403001072,
+      "index": 0,
+      "position": [
+        0.0,
+        -6.30000114440918,
+        0.9200000166893005
+      ],
+      "gameplay": {
+        "state": "RUNNING",
+        "score": 1,
+        "collected": [
+          "Signal clue 01"
+        ],
+        "elapsed": 1.7067751379974658,
+        "health": 100.0
+      }
+    },
+    {
+      "event": "waypoint_started",
+      "wall_seconds": 29.545979245001945,
+      "index": 1,
+      "target": [
+        -3.0,
+        -2.0
+      ]
+    },
+    {
+      "event": "os_keys",
+      "wall_seconds": 29.628099585999735,
+      "keys": [
+        "a",
+        "w"
+      ]
+    },
+    {
+      "event": "os_keys",
+      "wall_seconds": 38.40566581200255,
+      "keys": [
+        "w"
+      ]
+    },
+    {
+      "event": "os_keys",
+      "wall_seconds": 42.2890871990021,
+      "keys": []
+    },
+    {
+      "event": "waypoint_reached",
+      "wall_seconds": 42.2891304520017,
+      "index": 1,
+      "position": [
+        -2.877925157546997,
+        -2.3120760917663574,
+        0.9200000166893005
+      ],
+      "gameplay": {
+        "state": "RUNNING",
+        "score": 2,
+        "collected": [
+          "Signal clue 02",
+          "Signal clue 01"
+        ],
+        "elapsed": 3.106775137997467,
+        "health": 100.0
+      }
+    },
+    {
+      "event": "waypoint_started",
+      "wall_seconds": 42.739467501000036,
+      "index": 2,
+      "target": [
+        -3.0,
+        2.0
+      ]
+    },
+    {
+      "event": "os_keys",
+      "wall_seconds": 42.79190766100146,
+      "keys": [
+        "w"
+      ]
+    },
+    {
+      "event": "os_keys",
+      "wall_seconds": 51.70793756000057,
+      "keys": []
+    },
+    {
+      "event": "waypoint_reached",
+      "wall_seconds": 51.70800093300204,
+      "index": 2,
+      "position": [
+        -2.877925157546997,
+        1.75792396068573,
+        0.9200000166893005
+      ],
+      "gameplay": {
+        "state": "RUNNING",
+        "score": 2,
+        "collected": [
+          "Signal clue 02",
+          "Signal clue 01"
+        ],
+        "elapsed": 4.206775137997467,
+        "health": 100.0
+      }
+    },
+    {
+      "event": "waypoint_started",
+      "wall_seconds": 52.18770015900009,
+      "index": 3,
+      "target": [
+        3.0,
+        2.0
+      ]
+    },
+    {
+      "event": "os_keys",
+      "wall_seconds": 52.235731782002404,
+      "keys": [
+        "d",
+        "w"
+      ]
+    },
+    {
+      "event": "os_keys",
+      "wall_seconds": 52.62670422800147,
+      "keys": [
+        "d"
+      ]
+    },
+    {
+      "event": "os_keys",
+      "wall_seconds": 70.88934878299915,
+      "keys": []
+    },
+    {
+      "event": "waypoint_reached",
+      "wall_seconds": 70.88939581500017,
+      "index": 3,
+      "position": [
+        2.933704376220703,
+        2.0195534229278564,
+        0.9200000166893005
+      ],
+      "gameplay": {
+        "state": "RUNNING",
+        "score": 3,
+        "collected": [
+          "Signal clue 02",
+          "Signal clue 03",
+          "Signal clue 01"
+        ],
+        "elapsed": 5.8067751379974615,
+        "health": 100.0
+      }
+    },
+    {
+      "event": "waypoint_started",
+      "wall_seconds": 71.33955446700202,
+      "index": 4,
+      "target": [
+        -2.5,
+        6.0
+      ]
+    },
+    {
+      "event": "os_keys",
+      "wall_seconds": 71.41972178200012,
+      "keys": [
+        "a",
+        "w"
+      ]
+    },
+    {
+      "event": "os_keys",
+      "wall_seconds": 84.51625808600147,
+      "keys": [
+        "a"
+      ]
+    },
+    {
+      "event": "os_keys",
+      "wall_seconds": 89.49579246900248,
+      "keys": []
+    },
+    {
+      "event": "waypoint_reached",
+      "wall_seconds": 89.4958389530002,
+      "index": 4,
+      "position": [
+        -2.4707388877868652,
+        5.943996906280518,
+        0.9200000166893005
+      ],
+      "gameplay": {
+        "state": "RUNNING",
+        "score": 4,
+        "collected": [
+          "Signal clue 02",
+          "Signal clue 04",
+          "Signal clue 03",
+          "Signal clue 01"
+        ],
+        "elapsed": 7.706775137997455,
+        "health": 100.0
+      }
+    },
+    {
+      "event": "waypoint_started",
+      "wall_seconds": 89.94596756800092,
+      "index": 5,
+      "target": [
+        0.0,
+        10.0
+      ]
+    },
+    {
+      "event": "os_keys",
+      "wall_seconds": 90.02760424900043,
+      "keys": [
+        "d",
+        "w"
+      ]
+    },
+    {
+      "event": "os_keys",
+      "wall_seconds": 97.32571015199937,
+      "keys": [
+        "w"
+      ]
+    },
+    {
+      "event": "os_keys",
+      "wall_seconds": 102.00464203400043,
+      "keys": []
+    },
+    {
+      "event": "waypoint_reached",
+      "wall_seconds": 102.00468311900113,
+      "index": 5,
+      "position": [
+        -0.1160728931427002,
+        9.778661727905273,
+        0.9200000166893005
+      ],
+      "gameplay": {
+        "state": "RUNNING",
+        "score": 5,
+        "collected": [
+          "Signal clue 02",
+          "Signal clue 03",
+          "Signal clue 05",
+          "Signal clue 04",
+          "Signal clue 01"
+        ],
+        "elapsed": 9.006775137997451,
+        "health": 100.0
+      }
+    },
+    {
+      "event": "waypoint_started",
+      "wall_seconds": 102.48771678499907,
+      "index": 6,
+      "target": [
+        0.0,
+        14.0
+      ]
+    },
+    {
+      "event": "os_keys",
+      "wall_seconds": 102.51118500200027,
+      "keys": [
+        "w"
+      ]
+    },
+    {
+      "event": "os_keys",
+      "wall_seconds": 108.55626412300262,
+      "keys": []
+    },
+    {
+      "event": "game_won",
+      "wall_seconds": 108.55684285399911,
+      "gameplay": {
+        "state": "WON",
+        "score": 5,
+        "collected": [
+          "Signal clue 02",
+          "Signal clue 03",
+          "Signal clue 05",
+          "Signal clue 04",
+          "Signal clue 01"
+        ],
+        "elapsed": 9.806775137997448,
+        "health": 100.0
+      },
+      "session": {
+        "elapsed": 9.806775137997448,
+        "frame": 99,
+        "fps": 1.285953370712852,
+        "frame_ms": 777.6331730019592,
+        "logic_ms": 6.3806299986026715,
+        "viewport_fps": 1.2015810649588836,
+        "stop_requested": false,
+        "input_state": [
+          "W"
+        ],
+        "_runtime_stats": {
+          "collision_candidates": 1,
+          "collision_exhaustive_pairs": 1,
+          "collision_checks": 1
+        },
+        "logs": [
+          "[000.00] Test Run started for LAST SIGNAL / Chapter One.",
+          "[000.00] LAST SIGNAL: Maya arrives at the abandoned mountain relay.",
+          "[001.51] Field log: the last transmission was from your missing brother, Eli.",
+          "[002.91] Maya: A battery. Find the regulator and patch the broken antenna.",
+          "[005.61] Eli, recorded: If you hear this, follow the orange service lights.",
+          "[007.51] Maya: The transmitter is alive. Reach the terminal before the storm returns.",
+          "[008.81] Eli: Maya? I knew you would come. Rescue is on its way.",
+          "[009.81] LAST SIGNAL: transmitter restored. Chapter one complete."
+        ]
+      }
+    },
+    {
+      "event": "editor_command",
+      "wall_seconds": 112.95047625699954,
+      "action": "pause",
+      "result": "Paused"
+    },
+    {
+      "event": "editor_command",
+      "wall_seconds": 115.2293285980013,
+      "action": "step",
+      "result": [
+        "FINISHED"
+      ]
+    },
+    {
+      "event": "editor_command",
+      "wall_seconds": 116.65065432200208,
+      "action": "resume",
+      "result": "Running"
+    },
+    {
+      "event": "editor_command",
+      "wall_seconds": 118.91008371399948,
+      "action": "stop",
+      "result": [
+        "FINISHED"
+      ]
+    },
+    {
+      "event": "editor_command",
+      "wall_seconds": 121.95556887400016,
+      "action": "layout",
+      "result": [
+        "FINISHED"
+      ]
+    },
+    {
+      "event": "editor_command",
+      "wall_seconds": 151.81249884000135,
+      "action": "save",
+      "result": [
+        "FINISHED"
+      ]
+    },
+    {
+      "event": "raw_video_stills_extracted",
+      "wall_seconds": 153.70460047500092,
+      "files": [
+        "NeonRelay-editor.png",
+        "NeonRelay-win.png"
+      ]
+    }
+  ]
+}

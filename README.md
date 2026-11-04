@@ -16,6 +16,12 @@ Blender manba kodiga tayangan, o'yin ishlab chiqish va interaktiv 3D ish jarayon
 
 **Grafika:** [High/Cinematic rejimlari, namuna sahna va ishga tushirish](docs/GRAPHICS.md).
 
+**Editor va o'yin:** [Native editor, Neon Relay va runtime optimizatsiyasi](docs/PERFORMANCE_EDITOR.md).
+
+**Yangi bob:** [Sifatni saqlovchi render optimizatsiyasi va Last Signal](docs/LAST_SIGNAL.md).
+
+**Android va yengil paket:** [Native APK](docs/ANDROID.md) · [Yengil editor/SDK](docs/LEAN_ENGINE.md).
+
 **Repozitoriy egasi:** [z3wax](https://github.com/z3wax)  
 **Asos:** Blender va uning uchinchi tomon komponentlari.
 

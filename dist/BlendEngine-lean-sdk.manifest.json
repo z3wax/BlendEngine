@@ -1,0 +1,629 @@
+{
+  "archive": {
+    "bytes": 10797460,
+    "filename": "BlendEngine-lean-sdk.zip",
+    "sha256": "543308399a3be2254c6db490a291f39b368aaade2619cce582a48b786e44ccac"
+  },
+  "manifest": {
+    "artifact_type": "Native game SDK source",
+    "files": [
+      {
+        "bytes": 302,
+        "path": "COPYING",
+        "sha256": "19e6f4b541772f9d7b98a52bdbca3ebd5ef9e404956a9a6de68bfc3c1a178387",
+        "source": "COPYING"
+      },
+      {
+        "bytes": 1124,
+        "path": "README.txt",
+        "sha256": "6fcb2feae25ffd4d722ad74034a5716d7d578fec2cc86b8f0119e6cd442a113d",
+        "source": "generated install instructions"
+      },
+      {
+        "bytes": 2969,
+        "path": "build_files/cmake/config/blendengine_game.cmake",
+        "sha256": "c5afcc60a1cd53024a45866a408a05dbf903acac037c7ea647a1821b6c2278e3",
+        "source": "build_files/cmake/config/blendengine_game.cmake"
+      },
+      {
+        "bytes": 11358,
+        "path": "doc/license/Apache2-license.txt",
+        "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+        "source": "doc/license/Apache2-license.txt"
+      },
+      {
+        "bytes": 1406,
+        "path": "doc/license/BL-license.txt",
+        "sha256": "c1a2262f9f025ff19036b95f5e731747134ef50aeddb4923b96ac59691b32ac4",
+        "source": "doc/license/BL-license.txt"
+      },
+      {
+        "bytes": 1267,
+        "path": "doc/license/BSD-2-Clause-license.txt",
+        "sha256": "04709a4d8b21dd338ba09f1a7ccbd81237d275b2c084f54491b2562cfc7bca9e",
+        "source": "doc/license/BSD-2-Clause-license.txt"
+      },
+      {
+        "bytes": 1465,
+        "path": "doc/license/BSD-3-Clause-license.txt",
+        "sha256": "78176499683c1e601241d901486dfdebcd0d511826e67905dd54881f5dc1d7e3",
+        "source": "doc/license/BSD-3-Clause-license.txt"
+      },
+      {
+        "bytes": 17992,
+        "path": "doc/license/GPL-license.txt",
+        "sha256": "f2703dec1b0118070caabd3302e21738c00211b0cc3260dbeb1168d6eda726b7",
+        "source": "doc/license/GPL-license.txt"
+      },
+      {
+        "bytes": 35147,
+        "path": "doc/license/GPL3-license.txt",
+        "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+        "source": "doc/license/GPL3-license.txt"
+      },
+      {
+        "bytes": 26521,
+        "path": "doc/license/LGPL2.1-license.txt",
+        "sha256": "592987e8510228d546540b84a22444bde98e48d03078d3b2eefcd889bec5ce8c",
+        "source": "doc/license/LGPL2.1-license.txt"
+      },
+      {
+        "bytes": 1067,
+        "path": "doc/license/MIT-license.txt",
+        "sha256": "26bfd50e59ea3993621f2be8b4956ac190a099859e154615af55e2a498d06cb9",
+        "source": "doc/license/MIT-license.txt"
+      },
+      {
+        "bytes": 822,
+        "path": "doc/license/SPDX-license-identifiers.txt",
+        "sha256": "20582a39834e85e0b92e5aa0c7d3e94c4c733d1d9ea914a30ac86022a3f6c3bc",
+        "source": "doc/license/SPDX-license-identifiers.txt"
+      },
+      {
+        "bytes": 833,
+        "path": "doc/license/Zlib-license.txt",
+        "sha256": "52a1da7db7828498bb11719974c41f875e310ea241c97c8e27af7cda21887c19",
+        "source": "doc/license/Zlib-license.txt"
+      },
+      {
+        "bytes": 21818,
+        "path": "doc/license/bf-members.txt",
+        "sha256": "251f51c9004d76a8eb25b93fac6ae33b202dfe679c3892a34952a6917e67ad9f",
+        "source": "doc/license/bf-members.txt"
+      },
+      {
+        "bytes": 5184,
+        "path": "docs/ANDROID.md",
+        "sha256": "031aedc1edf6837bb7ada5383fc3aee2a053722fdd9fd9bd646a69494638ffd9",
+        "source": "docs/ANDROID.md"
+      },
+      {
+        "bytes": 5175,
+        "path": "docs/LAST_SIGNAL.md",
+        "sha256": "92512fb6aa7b6de22d84bb648099fb86fa25f164510d259bf652653b51cdacc4",
+        "source": "docs/LAST_SIGNAL.md"
+      },
+      {
+        "bytes": 6209,
+        "path": "docs/LEAN_ENGINE.md",
+        "sha256": "1aa75a887946bbba46dec31e748f40997a2ceb511d119d060b82748c63d666c7",
+        "source": "docs/LEAN_ENGINE.md"
+      },
+      {
+        "bytes": 384482,
+        "path": "docs/android/Android-final-approach.png",
+        "sha256": "172a97776877c16a34053fc5009de737d9df799ff83c4ee0c2ba4fa6997b8d6f",
+        "source": "docs/android/Android-final-approach.png"
+      },
+      {
+        "bytes": 482038,
+        "path": "docs/android/Android-paused.png",
+        "sha256": "5753306e3821f3e7ffa283477a25f30bede910771464931bdadb89759a05a342",
+        "source": "docs/android/Android-paused.png"
+      },
+      {
+        "bytes": 590163,
+        "path": "docs/android/Android-start.png",
+        "sha256": "9a871ab3db4e5844cca0526a47e9b8af14d91fa766b515b5c9222ecb71961472",
+        "source": "docs/android/Android-start.png"
+      },
+      {
+        "bytes": 495,
+        "path": "docs/android/apk_validation.json",
+        "sha256": "09e6c7b40b63b96235514f9349a1aeaef0d8812fe85b25aba2ad85f3f73faaea",
+        "source": "docs/android/apk_validation.json"
+      },
+      {
+        "bytes": 20916,
+        "path": "docs/android/legacy_output_prune.json",
+        "sha256": "51dd0f7030d1d9d64a79b32f566fb1815444c1886acbdc348e88a9a57a60490a",
+        "source": "docs/android/legacy_output_prune.json"
+      },
+      {
+        "bytes": 1162,
+        "path": "docs/android/native_asset_review.json",
+        "sha256": "4814f3eec93307fa91ee261b8e028712375e0a7962b38bf6abaa9dac7b57feb6",
+        "source": "docs/android/native_asset_review.json"
+      },
+      {
+        "bytes": 4219,
+        "path": "docs/android/qa_report.json",
+        "sha256": "632d80382fe6314d136133e76ed38fbc462644ad6673abc16a87009332e36b3e",
+        "source": "docs/android/qa_report.json"
+      },
+      {
+        "bytes": 829,
+        "path": "docs/android/regressions.json",
+        "sha256": "dd0b2952fabdc4ced2ae87cce4d5c003e7d2cba3d928db057f1b055293d2d86b",
+        "source": "docs/android/regressions.json"
+      },
+      {
+        "bytes": 2104,
+        "path": "docs/android/video_validation.json",
+        "sha256": "fb82e89306cd48f0489aa70032e45bee648bdba360401e6c56c65cd097421dfd",
+        "source": "docs/android/video_validation.json"
+      },
+      {
+        "bytes": 1591,
+        "path": "docs/brand/banner.svg",
+        "sha256": "82be57a183ee3e99a3947e62aac04eacc1f58605ee5c00c7f9854f381f480ac9",
+        "source": "docs/brand/banner.svg"
+      },
+      {
+        "bytes": 424,
+        "path": "docs/brand/icon.svg",
+        "sha256": "104a0e245fd62d4a5c903b2f0c5af0d15c2197451abc563f530a2710ebe7c680",
+        "source": "docs/brand/icon.svg"
+      },
+      {
+        "bytes": 621062,
+        "path": "docs/render/preserved-quality.png",
+        "sha256": "7f1bfe138940b32fd7296431c59ca54921d965e20ad64409c1af3ffc48ed2841",
+        "source": "docs/render/preserved-quality.png"
+      },
+      {
+        "bytes": 2317,
+        "path": "docs/render/quality_report.json",
+        "sha256": "b58830ae1230cfae9cb352a29b9ebac2015d151be016abf50a031ac63817f4a0",
+        "source": "docs/render/quality_report.json"
+      },
+      {
+        "bytes": 518527,
+        "path": "docs/story/LastSignal-editor.png",
+        "sha256": "1eded0e5cd87d48ee785351822bdd7869fd656a58a468518cee3a52e908984a9",
+        "source": "docs/story/LastSignal-editor.png"
+      },
+      {
+        "bytes": 424460,
+        "path": "docs/story/LastSignal-win.png",
+        "sha256": "6643e04ee917b2e4f9819f191fe2afe81db55865a5a89c9a3bcc2f01730e6018",
+        "source": "docs/story/LastSignal-win.png"
+      },
+      {
+        "bytes": 11384,
+        "path": "docs/story/recording_summary.json",
+        "sha256": "8c0f1a08897a3dd6d8d50cbc0b5c2c0a5c67e89fceadc35dcc9fc453d718c8d3",
+        "source": "docs/story/recording_summary.json"
+      },
+      {
+        "bytes": 29,
+        "path": "native/android_game/.gitignore",
+        "sha256": "febf4016319cc9f01bcefe913e2fbf659aa5dd9bdb8cd68bed0880fb554e1abe",
+        "source": "native/android_game/.gitignore"
+      },
+      {
+        "bytes": 4305,
+        "path": "native/android_game/README.md",
+        "sha256": "5946693972af57f641525b067f57994af2b6063bd45e4adafd0cc51d1a0d5eaa",
+        "source": "native/android_game/README.md"
+      },
+      {
+        "bytes": 179226,
+        "path": "native/android_game/assets/brand/logo.jpg",
+        "sha256": "3a0518cb38ef5231da3d413f2b9769af3cd5dbc1e95fd08b8f552108b0bf3f4f",
+        "source": "native/android_game/assets/brand/logo.jpg"
+      },
+      {
+        "bytes": 63877,
+        "path": "native/android_game/assets/brand/logo.png",
+        "sha256": "1eda069052b0d5522cb9b10fac16f20c830b0f415dc76b299951d80a9bd3ec33",
+        "source": "native/android_game/assets/brand/logo.png"
+      },
+      {
+        "bytes": 7812056,
+        "path": "native/android_game/assets/last_signal.glb",
+        "sha256": "fbab5d329608b05f4cb4affa5f6883a47ed6f6fcdf0fb45cab11d7720d31336f",
+        "source": "native/android_game/assets/last_signal.glb"
+      },
+      {
+        "bytes": 10696,
+        "path": "native/android_game/assets/licenses/GODOT_AUTHORS.txt",
+        "sha256": "2eb271244aea70a5818c6c004892a74eecc129aed84e97656d5563be3769f560",
+        "source": "native/android_game/assets/licenses/GODOT_AUTHORS.txt"
+      },
+      {
+        "bytes": 99790,
+        "path": "native/android_game/assets/licenses/GODOT_COPYRIGHT.txt",
+        "sha256": "b3330849267d56ddd3d62a513817506606c2195034411fe05859f0140bff9d8a",
+        "source": "native/android_game/assets/licenses/GODOT_COPYRIGHT.txt"
+      },
+      {
+        "bytes": 1149,
+        "path": "native/android_game/assets/licenses/GODOT_LICENSE.txt",
+        "sha256": "b0435e3b3e4e55238f05f4b306f30524a1b2e20147810d436eaa554fa6855c80",
+        "source": "native/android_game/assets/licenses/GODOT_LICENSE.txt"
+      },
+      {
+        "bytes": 3524,
+        "path": "native/android_game/assets/story.json",
+        "sha256": "4654bf8ed88abc022257404740e6130d95bcc2aff55a8ae8fc7b15eabde24651",
+        "source": "native/android_game/assets/story.json"
+      },
+      {
+        "bytes": 1626,
+        "path": "native/android_game/export_presets.cfg",
+        "sha256": "1846d15173aad0f3077b34e1e192e070da2055fcf7f02b561eca4c2c1eb4d61d",
+        "source": "native/android_game/export_presets.cfg"
+      },
+      {
+        "bytes": 19992,
+        "path": "native/android_game/main.gd",
+        "sha256": "b784fbd31021463dab1fd5398d786f87b65f430539b7b3c10443f86a1389978a",
+        "source": "native/android_game/main.gd"
+      },
+      {
+        "bytes": 20,
+        "path": "native/android_game/main.gd.uid",
+        "sha256": "af96d3153e73364a1197a35f0d6ae3506044d972f4030b047435d0a133663086",
+        "source": "native/android_game/main.gd.uid"
+      },
+      {
+        "bytes": 157,
+        "path": "native/android_game/main.tscn",
+        "sha256": "cd47ba98762166e7fc8e2eaa396abc3d485a3d2aeefb70ef168a2311ed9fe3ca",
+        "source": "native/android_game/main.tscn"
+      },
+      {
+        "bytes": 1445,
+        "path": "native/android_game/project.godot",
+        "sha256": "fa8aa83c78016f7d686b59ff5a9f9a99ccab7bf2403baabe8e3b498f77eb00c5",
+        "source": "native/android_game/project.godot"
+      },
+      {
+        "bytes": 233,
+        "path": "native/android_game/tests/smoke.sh",
+        "sha256": "174c1a0f48f09fe1a13c249c16a2087927698e8f4d9b331da94c17257a08a068",
+        "source": "native/android_game/tests/smoke.sh"
+      },
+      {
+        "bytes": 5718,
+        "path": "native/android_game/tests/smoke_runner.gd",
+        "sha256": "ede910f26f3c8a71372a90a5d1dafe13dd39b05c59a3a046ed55633103692e3f",
+        "source": "native/android_game/tests/smoke_runner.gd"
+      },
+      {
+        "bytes": 20,
+        "path": "native/android_game/tests/smoke_runner.gd.uid",
+        "sha256": "70caeb6086de980e35240e17c3a1cd1c1993ba2b06aedafec6357925246efe90",
+        "source": "native/android_game/tests/smoke_runner.gd.uid"
+      },
+      {
+        "bytes": 11358,
+        "path": "release/license/Apache-2.0.txt",
+        "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+        "source": "release/license/Apache-2.0.txt"
+      },
+      {
+        "bytes": 1474,
+        "path": "release/license/BSD-3-Clause.txt",
+        "sha256": "56bdf9e20aeb085e73630d0a42b71d26c12ef383bc8d678c90e6c920cbb15531",
+        "source": "release/license/BSD-3-Clause.txt"
+      },
+      {
+        "bytes": 1338,
+        "path": "release/license/BSL-1.0.txt",
+        "sha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+        "source": "release/license/BSL-1.0.txt"
+      },
+      {
+        "bytes": 6690,
+        "path": "release/license/FTL.txt",
+        "sha256": "1dcf28228365ced994b3748e745facfecb9c55d265c6e26a97fd7823e6db0d99",
+        "source": "release/license/FTL.txt"
+      },
+      {
+        "bytes": 35147,
+        "path": "release/license/GPL-3.0.txt",
+        "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+        "source": "release/license/GPL-3.0.txt"
+      },
+      {
+        "bytes": 17997,
+        "path": "release/license/GPL-license.txt",
+        "sha256": "515febef96e8b3c38fddb161afd4803f04a050d463b7f5480b691ed40074025f",
+        "source": "release/license/GPL-license.txt"
+      },
+      {
+        "bytes": 1056,
+        "path": "release/license/MIT.txt",
+        "sha256": "123c983ef5ff60697594e3010cb2022341450f7839d9f77d0a3943a9a5d9992c",
+        "source": "release/license/MIT.txt"
+      },
+      {
+        "bytes": 1520,
+        "path": "release/license/OpenColorIO.txt",
+        "sha256": "e39e97c2149a821e3e3b3c07839f8cadf6a98fb0a816b8ed69f16dd8817066fc",
+        "source": "release/license/OpenColorIO.txt"
+      },
+      {
+        "bytes": 6121,
+        "path": "release/license/OpenSSL.txt",
+        "sha256": "c32913b33252e71190af2066f08115c69bc9fddadf3bf29296e20c835389841c",
+        "source": "release/license/OpenSSL.txt"
+      },
+      {
+        "bytes": 2396,
+        "path": "release/license/Python.txt",
+        "sha256": "f59c9e092485634cac6e1ce41ba8387fb93267e3a601093501a1e684486304e6",
+        "source": "release/license/Python.txt"
+      },
+      {
+        "bytes": 243913,
+        "path": "release/license/THIRD-PARTY-LICENSES.txt",
+        "sha256": "e00d12df01b7570af36075286ba4e51c984b1bbd07e36d4cbb8c446f3e32a5e7",
+        "source": "release/license/THIRD-PARTY-LICENSES.txt"
+      },
+      {
+        "bytes": 4947,
+        "path": "release/license/bfont.ttf.txt",
+        "sha256": "083705688ad986b86332339ef0b4cb6021c5fd8ddea554274d8b2cc73acd090b",
+        "source": "release/license/bfont.ttf.txt"
+      },
+      {
+        "bytes": 3537,
+        "path": "release/license/bmonofont-i18n.ttf.txt",
+        "sha256": "3cd56414b4e06a51ccaa4dcc3388e89b006d5ea4ec5e329e7b61390d706882ac",
+        "source": "release/license/bmonofont-i18n.ttf.txt"
+      },
+      {
+        "bytes": 4547,
+        "path": "release/license/droidsans.ttf.txt",
+        "sha256": "49412cae38e1b479bc8c434fcc436856d2ad433101cb504459b383dd2996931e",
+        "source": "release/license/droidsans.ttf.txt"
+      },
+      {
+        "bytes": 1591,
+        "path": "release/license/jemalloc.txt",
+        "sha256": "999d08a17ee239608785444e73833290f456f118f93ac23c613be43fac9c4c33",
+        "source": "release/license/jemalloc.txt"
+      },
+      {
+        "bytes": 1591,
+        "path": "release/text/copyright.txt",
+        "sha256": "890bbe1c6281ee45405e41d9b7f0ff597543ef2cea126c5043d6881d12d5a9ab",
+        "source": "release/text/copyright.txt"
+      },
+      {
+        "bytes": 1928,
+        "path": "scripts/addons_core/blendengine/__init__.py",
+        "sha256": "655cb25954a7406fc1d30b473ba4fd2a6e6fa4d15b2953c4e34bc386114e402c",
+        "source": "scripts/addons_core/blendengine/__init__.py"
+      },
+      {
+        "bytes": 943,
+        "path": "scripts/addons_core/blendengine/ai_system.py",
+        "sha256": "e18f07f8773a8d1b4dd8f5d93b0f6443a3d00d2a457bf86aaee2ead5b0f5f9d8",
+        "source": "scripts/addons_core/blendengine/ai_system.py"
+      },
+      {
+        "bytes": 19786,
+        "path": "scripts/addons_core/blendengine/android_export.py",
+        "sha256": "42a5b015c88de4c3540050631c29d7e39fdb5854b686cd9696ec69d258f73227",
+        "source": "scripts/addons_core/blendengine/android_export.py"
+      },
+      {
+        "bytes": 1293,
+        "path": "scripts/addons_core/blendengine/animation_system.py",
+        "sha256": "28523fc10933e3fd66d06b95eb139c2993460909acecb08a09b51d0dc79e0daf",
+        "source": "scripts/addons_core/blendengine/animation_system.py"
+      },
+      {
+        "bytes": 179226,
+        "path": "scripts/addons_core/blendengine/assets/brand/logo.jpg",
+        "sha256": "3a0518cb38ef5231da3d413f2b9769af3cd5dbc1e95fd08b8f552108b0bf3f4f",
+        "source": "scripts/addons_core/blendengine/assets/brand/logo.jpg"
+      },
+      {
+        "bytes": 555549,
+        "path": "scripts/addons_core/blendengine/assets/last_signal_character.blend",
+        "sha256": "d73e3cc2d35009e0847a670801936369b208ca5c6379d6a1291b8b9121f18f2e",
+        "source": "scripts/addons_core/blendengine/assets/last_signal_character.blend"
+      },
+      {
+        "bytes": 2653,
+        "path": "scripts/addons_core/blendengine/components.py",
+        "sha256": "515b7570fa43d516de6fda38b278c9fbadfad369e0ad9c54e198c74cca371151",
+        "source": "scripts/addons_core/blendengine/components.py"
+      },
+      {
+        "bytes": 23421,
+        "path": "scripts/addons_core/blendengine/demo_game.py",
+        "sha256": "5ce8a5adf3d9dca4c3dbbc416be18688d86644a4a0c21374602e78f3ac7e11cb",
+        "source": "scripts/addons_core/blendengine/demo_game.py"
+      },
+      {
+        "bytes": 11719,
+        "path": "scripts/addons_core/blendengine/editor.py",
+        "sha256": "875610613c4a8b29cb8927572e0a109b878ec12387de81bde962a03635ab6690",
+        "source": "scripts/addons_core/blendengine/editor.py"
+      },
+      {
+        "bytes": 31612,
+        "path": "scripts/addons_core/blendengine/export_system.py",
+        "sha256": "272a2a11e8070307b07c0652290c990798d71f336c4e70afafb0eaf91b8cf918",
+        "source": "scripts/addons_core/blendengine/export_system.py"
+      },
+      {
+        "bytes": 8223,
+        "path": "scripts/addons_core/blendengine/graphics.py",
+        "sha256": "f7f010dd8290eeb18f1792ee5ac51a0998af2d7be14590e0598d94fd56be4c5e",
+        "source": "scripts/addons_core/blendengine/graphics.py"
+      },
+      {
+        "bytes": 1059,
+        "path": "scripts/addons_core/blendengine/input_system.py",
+        "sha256": "8d7212178e5a0df068a0721ff81c05ee09a64b9cbaf0664b14c26c66349fda55",
+        "source": "scripts/addons_core/blendengine/input_system.py"
+      },
+      {
+        "bytes": 42525,
+        "path": "scripts/addons_core/blendengine/operators.py",
+        "sha256": "7939c66b5accbf7bd1b9075a01564fc605f67808ab12884e2c5831c1ada7e92d",
+        "source": "scripts/addons_core/blendengine/operators.py"
+      },
+      {
+        "bytes": 14546,
+        "path": "scripts/addons_core/blendengine/optimization.py",
+        "sha256": "73cb937793d6311a9c54fc9938f73eaac661be2c6aebeb1728a9c64eb1331869",
+        "source": "scripts/addons_core/blendengine/optimization.py"
+      },
+      {
+        "bytes": 61552,
+        "path": "scripts/addons_core/blendengine/panels.py",
+        "sha256": "f0b6c6b3fc821dd1eb3053b1dc94f8a8345086adca8d0ac9ca5c0529342c4762",
+        "source": "scripts/addons_core/blendengine/panels.py"
+      },
+      {
+        "bytes": 15628,
+        "path": "scripts/addons_core/blendengine/performance.py",
+        "sha256": "0a227c274958626955ce3f26351f71428685d2db618dd5033450a93bcf776ace",
+        "source": "scripts/addons_core/blendengine/performance.py"
+      },
+      {
+        "bytes": 49496,
+        "path": "scripts/addons_core/blendengine/properties.py",
+        "sha256": "79db63bcca2e1d4516744e44b6c1290b8ece4564ca4f2699b9d3ec5f818ed296",
+        "source": "scripts/addons_core/blendengine/properties.py"
+      },
+      {
+        "bytes": 910,
+        "path": "scripts/addons_core/blendengine/render_sync.py",
+        "sha256": "556935d2fa14bfec794f8efe5d38b7a67d6f1b9ce083dbc179422a57e10b70ca",
+        "source": "scripts/addons_core/blendengine/render_sync.py"
+      },
+      {
+        "bytes": 46554,
+        "path": "scripts/addons_core/blendengine/runtime.py",
+        "sha256": "3b30db0f37871babfe9f2717908e7b2e9300f054e7b574b5cd4ca887dd4dfe9f",
+        "source": "scripts/addons_core/blendengine/runtime.py"
+      },
+      {
+        "bytes": 22048,
+        "path": "scripts/addons_core/blendengine/story_game.py",
+        "sha256": "7290cb1ce05552817046546b7a4f549a4b05afea6d691ba9ec2577b59e2e07aa",
+        "source": "scripts/addons_core/blendengine/story_game.py"
+      },
+      {
+        "bytes": 41630,
+        "path": "scripts/addons_core/blendengine/templates.py",
+        "sha256": "11a8eed8a3b1e4937856a3bde990477608ddc621eeea17ab2e0fa78b7bc83693",
+        "source": "scripts/addons_core/blendengine/templates.py"
+      },
+      {
+        "bytes": 10441,
+        "path": "scripts/addons_core/blendengine/utils.py",
+        "sha256": "a0de3e0566e5e6f07fd2bc5c46a80383395713b8f5000f1aed1a07d851c79d8f",
+        "source": "scripts/addons_core/blendengine/utils.py"
+      },
+      {
+        "bytes": 3198,
+        "path": "tools/android/README.md",
+        "sha256": "731f8ac59c0f5ce1418a8921f204177b7c162f171f3aedb2ec79706e4d3fc52d",
+        "source": "tools/android/README.md"
+      },
+      {
+        "bytes": 3410,
+        "path": "tools/android/build_apk.sh",
+        "sha256": "79379605a7ecc7b23df65fa8d4f5df8a3ae17427187e5fc30619c0df22cc58cf",
+        "source": "tools/android/build_apk.sh"
+      },
+      {
+        "bytes": 6981,
+        "path": "tools/android/publish_tested_apk.py",
+        "sha256": "01c1e9583f91ca06a74ecb2f90aed9a60d974a52cdb4ff926df1bd2715720e17",
+        "source": "tools/android/publish_tested_apk.py"
+      },
+      {
+        "bytes": 10698,
+        "path": "tools/android/qa_device.py",
+        "sha256": "0de5591aa21d0fc8154550304241096e06555555e024f63da44a49d296809df8",
+        "source": "tools/android/qa_device.py"
+      },
+      {
+        "bytes": 3003,
+        "path": "tools/android/setup_toolchain.sh",
+        "sha256": "cee604f601ee0ba9ecf4d53c987e42a59c959b12ae2b3a4ec393ff5c9eb3f689",
+        "source": "tools/android/setup_toolchain.sh"
+      },
+      {
+        "bytes": 2582,
+        "path": "tools/blendengine/create_story_game.py",
+        "sha256": "c334ac980398e226e98d2bea2c2f8cf7aa905634dba883cb0f39e77dce3f6e3a",
+        "source": "tools/blendengine/create_story_game.py"
+      },
+      {
+        "bytes": 12578,
+        "path": "tools/blendengine/export_native_assets.py",
+        "sha256": "1faa5fe7d9942d76efe2debfb1f5e78455654edf9edecf8fcb54637f60ad1a94",
+        "source": "tools/blendengine/export_native_assets.py"
+      },
+      {
+        "bytes": 14738,
+        "path": "tools/blendengine/package_lean.py",
+        "sha256": "e79a8d6aced91b78a8aec03c9c8519c8acaa76be43c751912d5925a9d6ca8f28",
+        "source": "tools/blendengine/package_lean.py"
+      }
+    ],
+    "measurement": "Logical file bytes; excludes Git metadata, generated dist/ releases and current output ZIP/sidecar. Addon payload does not represent a compiled editor or APK size.",
+    "omitted": [
+      "Upstream C++ source, libraries and build tools (kept in source checkout)",
+      "Generated platform games and browser/WebView export output",
+      "Downloaded model caches, duplicate scene exports, backups and Python bytecode"
+    ],
+    "payload_bytes_excluding_manifest": 12955848,
+    "payload_files": 96,
+    "payload_reduction_percent": 98.4154,
+    "preserved": [
+      "All BlendEngine Python editor, runtime, graphics, story and export modules",
+      "Portable Last Signal character and addon assets",
+      "User-provided brand logo and upstream license/attribution notices",
+      "Native Godot project, scene export tool, desktop build profile and instructions"
+    ],
+    "profile": "sdk",
+    "schema_version": 1,
+    "source": "https://github.com/z3wax/BlendEngine",
+    "source_inventory": {
+      "by_top_directory": {
+        "(root files)": 130383,
+        ".gitea": 3184,
+        ".github": 8229,
+        "artifacts": 2308,
+        "build_files": 1429266,
+        "builds": 362356072,
+        "doc": 779064,
+        "docs": 4912880,
+        "extern": 33830852,
+        "intern": 11530815,
+        "locale": 42146971,
+        "native": 94350175,
+        "release": 58377967,
+        "scripts": 117649535,
+        "source": 79905292,
+        "tests": 1093913,
+        "tools": 9126755
+      },
+      "bytes": 817633661,
+      "files": 13616
+    }
+  }
+}

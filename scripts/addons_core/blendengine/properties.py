@@ -753,9 +753,11 @@ class BE_ProjectSettings(PropertyGroup):
     show_logs: bpy.props.BoolProperty(name="Show Logs", default=True)
     debug_mode: bpy.props.BoolProperty(name="Debug Mode", default=False)
     test_running: bpy.props.BoolProperty(name="Test Running", default=False)
+    test_paused: bpy.props.BoolProperty(name="Paused", default=False)
     test_status: bpy.props.StringProperty(name="Test Status", default="Not running")
-    runtime_fps: bpy.props.FloatProperty(name="Runtime FPS", default=0.0, min=0.0)
-    runtime_frame_ms: bpy.props.FloatProperty(name="Frame Time MS", default=0.0, min=0.0)
+    runtime_fps: bpy.props.FloatProperty(name="Update Hz", default=0.0, min=0.0)
+    runtime_viewport_fps: bpy.props.FloatProperty(name="Viewport Redraw Hz", default=0.0, min=0.0)
+    runtime_frame_ms: bpy.props.FloatProperty(name="Logic Time MS", default=0.0, min=0.0)
     runtime_memory_mb: bpy.props.FloatProperty(name="Runtime Memory MB", default=0.0, min=0.0)
     runtime_visible_objects: bpy.props.IntProperty(name="Visible Objects", default=0, min=0)
     runtime_draw_calls_estimated: bpy.props.IntProperty(name="Draw Calls", default=0, min=0)
@@ -769,6 +771,12 @@ class BE_ExportSettings(PropertyGroup):
     export_scene_package: bpy.props.BoolProperty(name="Scene Package", default=True)
     include_debug_overlay: bpy.props.BoolProperty(name="Debug Overlay", default=False)
     package_name: bpy.props.StringProperty(name="Package Name", default="BlendEngineBuild")
+    android_package_id: bpy.props.StringProperty(name="Android Package ID", default="org.blendengine.lastsignal")
+    android_version_name: bpy.props.StringProperty(name="Android Version", default="1.0")
+    android_version_code: bpy.props.IntProperty(name="Android Version Code", default=1, min=1)
+    godot_executable: bpy.props.StringProperty(name="Godot Executable", subtype="FILE_PATH")
+    android_sdk_path: bpy.props.StringProperty(name="Android SDK", subtype="DIR_PATH")
+    android_template_path: bpy.props.StringProperty(name="Native SDK Root", subtype="DIR_PATH")
 
 
 class BE_GameQualityProfile(PropertyGroup):
