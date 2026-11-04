@@ -1,0 +1,16 @@
+{
+  "artifact": "/workspace/artifacts/android/LastSignal-debug.apk",
+  "bytes": 63349156,
+  "sha256": "048fbac2b1a68fefbb5f83be651b6b5b47d0351d96f1ef534296f0414ea09308",
+  "runtime": "Godot 4 native C++ / OpenGL ES 3 Compatibility",
+  "architectures": [
+    "arm64-v8a",
+    "x86_64"
+  ],
+  "apk_structure_verified": true,
+  "webview_payload": false,
+  "native_opengl_render_view": true,
+  "android_webview_api_reference": true,
+  "device_runtime_tested": false,
+  "default_dummy_audio": true
+}

@@ -1,0 +1,169 @@
+{
+  "adapter": "LAST_SIGNAL",
+  "title": "Last Signal",
+  "spawn": [
+    0.0,
+    -10.0,
+    0.92
+  ],
+  "items": [
+    [
+      0,
+      -6,
+      0.6
+    ],
+    [
+      -3.0,
+      -2,
+      0.6
+    ],
+    [
+      3,
+      2,
+      0.6
+    ],
+    [
+      -2.5,
+      6,
+      0.6
+    ],
+    [
+      0,
+      10,
+      0.6
+    ]
+  ],
+  "goal": [
+    0,
+    14,
+    0.9
+  ],
+  "waypoints": [
+    [
+      0,
+      -6
+    ],
+    [
+      -3,
+      -2
+    ],
+    [
+      -3,
+      2
+    ],
+    [
+      3,
+      2
+    ],
+    [
+      -2.5,
+      6
+    ],
+    [
+      0,
+      10
+    ],
+    [
+      0,
+      14
+    ]
+  ],
+  "journal": [
+    [
+      "01 / THE SILENCE",
+      "Maya: The storm took the relay. Someone at Station Nine is still calling."
+    ],
+    [
+      "02 / A NAME IN THE STATIC",
+      "Field log: the last transmission was from your missing brother, Eli."
+    ],
+    [
+      "03 / RESTORE THE RELAY",
+      "Maya: A battery. Find the regulator and patch the broken antenna."
+    ],
+    [
+      "03 / RESTORE THE RELAY",
+      "Eli, recorded: If you hear this, follow the orange service lights."
+    ],
+    [
+      "04 / THE LAST SIGNAL",
+      "Maya: The transmitter is alive. Reach the terminal before the storm returns."
+    ],
+    [
+      "05 / DAWN",
+      "Eli: Maya? I knew you would come. Rescue is on its way."
+    ]
+  ],
+  "coordinate_system": "BLENDER_Z_UP",
+  "baked_textures": [
+    {
+      "object": "Outpost | stone ground.001",
+      "atlas_size": 1024,
+      "base_color": "native_color_00.png",
+      "normal": "native_normal_00.png",
+      "embedded_in": "last_signal.glb"
+    },
+    {
+      "object": "Outpost | batched architecture and foliage.001",
+      "atlas_size": 1024,
+      "base_color": "native_color_01.png",
+      "normal": "native_normal_01.png",
+      "embedded_in": "last_signal.glb"
+    },
+    {
+      "object": "Outpost | grass and supply crates.001",
+      "atlas_size": 1024,
+      "base_color": "native_color_03.png",
+      "normal": "native_normal_03.png",
+      "embedded_in": "last_signal.glb"
+    },
+    {
+      "object": "Maya | clothed human character.001",
+      "atlas_size": 1024,
+      "base_color": "native_color_06.png",
+      "normal": "native_normal_06.png",
+      "embedded_in": "last_signal.glb"
+    },
+    {
+      "object": "Signal clue 01.001",
+      "atlas_size": 1024,
+      "base_color": "native_color_07.png",
+      "normal": "native_normal_07.png",
+      "embedded_in": "last_signal.glb"
+    },
+    {
+      "object": "Signal clue 02.001",
+      "atlas_size": 1024,
+      "base_color": "native_color_08.png",
+      "normal": "native_normal_08.png",
+      "embedded_in": "last_signal.glb"
+    },
+    {
+      "object": "Signal clue 03.001",
+      "atlas_size": 1024,
+      "base_color": "native_color_09.png",
+      "normal": "native_normal_09.png",
+      "embedded_in": "last_signal.glb"
+    },
+    {
+      "object": "Signal clue 04.001",
+      "atlas_size": 1024,
+      "base_color": "native_color_10.png",
+      "normal": "native_normal_10.png",
+      "embedded_in": "last_signal.glb"
+    },
+    {
+      "object": "Signal clue 05.001",
+      "atlas_size": 1024,
+      "base_color": "native_color_11.png",
+      "normal": "native_normal_11.png",
+      "embedded_in": "last_signal.glb"
+    }
+  ],
+  "native_backend": "Godot C++ / OpenGL ES; not Blender EEVEE on Android",
+  "source": "BlendEngine Last Signal; existing project human mesh; procedural materials",
+  "lossless_image_sharing": {
+    "duplicate_images": 7,
+    "bytes_saved": 5873692
+  }
+}

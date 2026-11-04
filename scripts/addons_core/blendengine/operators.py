@@ -57,6 +57,20 @@ class BE_OT_create_workspace(Operator):
         return {"FINISHED"}
 
 
+class BE_OT_create_story_game(Operator):
+    bl_idname = "blendengine.create_story_game"
+    bl_label = "New Last Signal Story"
+    bl_description = "Create a separate story chapter with a human character and Lit PBR scene"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        from . import story_game
+        story_game.create_story(context)
+        utils.activate_engine_page(context, "STUDIO")
+        self.report({"INFO"}, "Last Signal ready. Play to follow Maya's story.")
+        return {"FINISHED"}
+
+
 class BE_OT_create_playable_demo(Operator):
     bl_idname = "blendengine.create_playable_demo"
     bl_label = "New Neon Relay Demo"
@@ -1073,6 +1087,7 @@ class BE_OT_prepare_build(Operator):
 
 
 classes = (
+    BE_OT_create_story_game,
     BE_OT_create_workspace,
     BE_OT_create_playable_demo,
     BE_OT_toggle_fast_preview,

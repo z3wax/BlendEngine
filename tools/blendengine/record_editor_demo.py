@@ -297,7 +297,9 @@ class NativeRecording:
                    15.0, "native modal session cleanup and restored scene")
         self.command("layout", page="STUDIO")
         self.wait(2.5)
-        self.command("save", filename="RecordedNeonRelay.blend")
+        # A newly opened Lit workspace can be compiling its first shaders.
+        # Allow its event loop to become available before declaring save lost.
+        self.command("save", filename="RecordedNeonRelay.blend", timeout=90.0)
 
     def finish_capture(self):
         if self.encoder is None:

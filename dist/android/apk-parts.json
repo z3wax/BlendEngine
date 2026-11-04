@@ -1,0 +1,40 @@
+{
+  "repository": "z3wax/BlendEngine",
+  "artifact": "LastSignal-debug.apk",
+  "bytes": 63349156,
+  "sha256": "048fbac2b1a68fefbb5f83be651b6b5b47d0351d96f1ef534296f0414ea09308",
+  "chunks": [
+    {
+      "sha": "a99181870f2dc3612a9e94c74a876d2d369e9849",
+      "bytes": 8388608
+    },
+    {
+      "sha": "a5e47d2557332a070ba1cf654df9cba8a85b2c7d",
+      "bytes": 8388608
+    },
+    {
+      "sha": "d9dd9e2ab1dc22c5a3088aab5dd87a07d727b7e2",
+      "bytes": 8388608
+    },
+    {
+      "sha": "1adac82032e3252014057bafab56338e04936500",
+      "bytes": 8388608
+    },
+    {
+      "sha": "1aac0887e93e63855caad1d88a7bbdc42085f020",
+      "bytes": 8388608
+    },
+    {
+      "sha": "1081e054c7211a69e0d3f75119e08c4d564af841",
+      "bytes": 8388608
+    },
+    {
+      "sha": "0f3fa4f3225df7963131b019913fdc4e75bd4636",
+      "bytes": 8388608
+    },
+    {
+      "sha": "ce37e8c74ab7361844678e9ac7fd47c202512293",
+      "bytes": 4628900
+    }
+  ]
+}

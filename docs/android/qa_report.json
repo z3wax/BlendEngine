@@ -1,0 +1,196 @@
+{
+  "passed": true,
+  "apk": "/workspace/artifacts/android/LastSignal-debug.apk",
+  "sha256": "048fbac2b1a68fefbb5f83be651b6b5b47d0351d96f1ef534296f0414ea09308",
+  "tested_device": "emulator-5554",
+  "physical_arm64_tested": false,
+  "touch": {
+    "direction_pad": {
+      "before": {
+        "animation": "Idle",
+        "clues": 0,
+        "elapsed": 2.02,
+        "event": "playing",
+        "floor": true,
+        "health": 100,
+        "jumps": 0,
+        "native": true,
+        "paused": false,
+        "position": [
+          0.0,
+          0.95,
+          10.0
+        ],
+        "renderer": "gl_compatibility",
+        "score": 0,
+        "skeleton_bones": 11,
+        "source_position": [
+          0.0,
+          -10.0,
+          0.95
+        ],
+        "state": "RUNNING",
+        "story_id": "LAST_SIGNAL",
+        "walked": 0.0
+      },
+      "after": {
+        "animation": "Walk",
+        "clues": 1,
+        "elapsed": 5.52,
+        "event": "clue_1",
+        "floor": true,
+        "health": 100,
+        "jumps": 0,
+        "native": true,
+        "paused": false,
+        "position": [
+          0.0,
+          0.95,
+          7.04
+        ],
+        "renderer": "gl_compatibility",
+        "score": 1,
+        "skeleton_bones": 11,
+        "source_position": [
+          0.0,
+          -7.04,
+          0.95
+        ],
+        "state": "RUNNING",
+        "story_id": "LAST_SIGNAL",
+        "walked": 2.96
+      }
+    },
+    "quick_tap_jump": {
+      "animation": "Idle",
+      "clues": 1,
+      "elapsed": 7.13,
+      "event": "jump",
+      "floor": true,
+      "health": 100,
+      "jumps": 1,
+      "native": true,
+      "paused": false,
+      "position": [
+        0.0,
+        0.95,
+        6.55
+      ],
+      "renderer": "gl_compatibility",
+      "score": 1,
+      "skeleton_bones": 11,
+      "source_position": [
+        0.0,
+        -6.55,
+        0.95
+      ],
+      "state": "RUNNING",
+      "story_id": "LAST_SIGNAL",
+      "walked": 3.45
+    },
+    "inspect": {
+      "animation": "Idle",
+      "clues": 1,
+      "elapsed": 8.72,
+      "event": "inspect",
+      "floor": true,
+      "health": 100,
+      "jumps": 1,
+      "native": true,
+      "paused": false,
+      "position": [
+        0.0,
+        0.95,
+        6.55
+      ],
+      "renderer": "gl_compatibility",
+      "score": 1,
+      "skeleton_bones": 11,
+      "source_position": [
+        0.0,
+        -6.55,
+        0.95
+      ],
+      "state": "RUNNING",
+      "story_id": "LAST_SIGNAL",
+      "walked": 3.45
+    },
+    "pause_freezes_movement": true,
+    "android_back_pauses": true,
+    "restart": {
+      "animation": "Idle",
+      "clues": 0,
+      "elapsed": 0.0,
+      "event": "restarted",
+      "floor": true,
+      "health": 100,
+      "jumps": 1,
+      "native": true,
+      "paused": false,
+      "position": [
+        0.0,
+        0.92,
+        10.0
+      ],
+      "renderer": "gl_compatibility",
+      "score": 0,
+      "skeleton_bones": 11,
+      "source_position": [
+        0.0,
+        -10.0,
+        0.92
+      ],
+      "state": "RUNNING",
+      "story_id": "LAST_SIGNAL",
+      "walked": 3.45
+    }
+  },
+  "android_api": "24",
+  "device_abi": "x86_64",
+  "display_size": [
+    960,
+    540
+  ],
+  "emulator_audio_service": "running",
+  "emulator_audio_override": null,
+  "normal_launcher": true,
+  "native_libraries": [
+    "lib/arm64-v8a/libgodot_android.so",
+    "lib/x86_64/libgodot_android.so"
+  ],
+  "licenses": [
+    "assets/assets/licenses/GODOT_AUTHORS.txt",
+    "assets/assets/licenses/GODOT_LICENSE.txt",
+    "assets/assets/licenses/GODOT_COPYRIGHT.txt"
+  ],
+  "redundant_raw_atlases": [],
+  "signature_verified": true,
+  "installed_sha256": "048fbac2b1a68fefbb5f83be651b6b5b47d0351d96f1ef534296f0414ea09308",
+  "native_smoke": {
+    "animation": "Idle",
+    "clues": 5,
+    "elapsed": 8.99,
+    "event": "won",
+    "floor": true,
+    "health": 100,
+    "jumps": 3,
+    "native": true,
+    "paused": false,
+    "position": [
+      -0.14,
+      1.62,
+      -12.71
+    ],
+    "renderer": "gl_compatibility",
+    "score": 5,
+    "skeleton_bones": 11,
+    "source_position": [
+      -0.14,
+      12.71,
+      1.62
+    ],
+    "state": "WON",
+    "story_id": "LAST_SIGNAL",
+    "walked": 33.2
+  }
+}

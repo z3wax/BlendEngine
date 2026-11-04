@@ -7,7 +7,7 @@ import time
 
 from mathutils import Vector
 
-from . import performance, utils
+from . import performance, render_sync, utils
 
 
 ACTIVE_SESSION = None
@@ -203,6 +203,9 @@ class GameSession:
         if self.scene.get("blendengine_demo") == "NEON_RELAY":
             from . import demo_game
             self._gameplay = demo_game.DemoGame(self)
+        elif self.scene.get("blendengine_story") == "LAST_SIGNAL":
+            from . import story_game
+            self._gameplay = story_game.StoryGame(self)
 
         for obj in self._objects:
             self._ground_z[obj.name] = obj.location.z
@@ -484,27 +487,31 @@ class GameSession:
             yaw = player.rotation_euler.z
             forward = Vector((math.sin(yaw), math.cos(yaw), 0.0))
             right = Vector((math.cos(yaw), -math.sin(yaw), 0.0))
-            player.location += (right * axis_x + forward * axis_y) * speed * dt
+            render_sync.vector(player, "location", player.location + (right * axis_x + forward * axis_y) * speed * dt)
             if movement.length > 0.001:
-                player.rotation_euler.z = math.atan2(movement.x, movement.y)
+                render_sync.scalar(player.rotation_euler, "z", math.atan2(movement.x, movement.y))
         else:
-            player.location += movement * speed * dt
+            render_sync.vector(player, "location", player.location + movement * speed * dt)
             if movement.length > 0.001:
-                player.rotation_euler.z = math.atan2(movement.x, movement.y)
+                render_sync.scalar(player.rotation_euler, "z", math.atan2(movement.x, movement.y))
 
         ground_z = self._ground_height_at(player, default=self._ground_z.get(player.name, player.location.z))
         velocity = self._vertical_velocity.get(player.name, 0.0)
         grounded = player.location.z <= ground_z + 0.001
+        z = player.location.z
         if grounded:
-            player.location.z = ground_z
+            z = ground_z
             velocity = 0.0
             if self._action_down(actions, "JUMP") and controller.jump_force > 0.0:
                 velocity = controller.jump_force
         velocity -= controller.gravity * dt
-        player.location.z += velocity * dt
-        if player.location.z < ground_z:
-            player.location.z = ground_z
+        # RNA coordinates are float32. Preserve the original stored rounding
+        # before the ground test, while submitting only the final coordinate.
+        z = Vector((0.0, 0.0, z + velocity * dt)).z
+        if z < ground_z:
+            z = ground_z
             velocity = 0.0
+        render_sync.scalar(player.location, "z", z)
         self._vertical_velocity[player.name] = velocity
 
     def _update_camera(self):
@@ -516,8 +523,9 @@ class GameSession:
         if camera is None:
             return
         if controller.controller_type == "FIRST_PERSON":
-            camera.location = player.location + Vector((0.0, 0.0, 0.72))
-            camera.rotation_euler = (math.radians(90.0), 0.0, player.rotation_euler.z)
+            render_sync.vector(camera, "location", player.location + Vector((0.0, 0.0, 0.72)))
+            from mathutils import Euler
+            render_sync.vector(camera, "rotation_euler", Euler((math.radians(90.0), 0.0, player.rotation_euler.z)))
             for obj in self._weapons:
                 if obj.hide_viewport:
                     obj.hide_viewport = False
@@ -528,9 +536,9 @@ class GameSession:
         if offset is None:
             offset = Vector((0.0, -6.0, 3.2))
             self._camera_offsets[camera.name] = offset
-        camera.location = player.location + offset
+        render_sync.vector(camera, "location", player.location + offset)
         direction = player.location - camera.location
-        camera.rotation_euler = direction.to_track_quat("-Z", "Y").to_euler()
+        render_sync.vector(camera, "rotation_euler", direction.to_track_quat("-Z", "Y").to_euler())
 
     def _update_visibility_culling(self):
         optimization = self.scene.blendengine_optimization
@@ -563,8 +571,7 @@ class GameSession:
             if not hidden:
                 visible_count += 1
             try:
-                if obj.hide_get() != hidden:
-                    obj.hide_set(hidden)
+                render_sync.hidden(obj, hidden)
             except Exception:
                 obj.hide_viewport = hidden
 

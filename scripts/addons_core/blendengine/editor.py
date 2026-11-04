@@ -2,6 +2,32 @@
 """Native game-editor workspace built from Blender's existing editor areas."""
 
 import bpy
+
+_brand_preview = None
+
+
+def brand_icon():
+    """Load the user's unmodified logo once for the native editor header."""
+    global _brand_preview
+    if bpy.app.background:
+        return 0
+    if _brand_preview is None:
+        from pathlib import Path
+        from bpy.utils import previews
+        path = Path(__file__).parent / 'assets/brand/logo.jpg'
+        if not path.is_file():
+            return 0
+        _brand_preview = previews.new()
+        _brand_preview.load('blendengine', str(path), 'IMAGE')
+    return _brand_preview['blendengine'].icon_id
+
+
+def clear_brand_icon():
+    global _brand_preview
+    if _brand_preview is not None:
+        from bpy.utils import previews
+        previews.remove(_brand_preview)
+        _brand_preview = None
 import json
 
 

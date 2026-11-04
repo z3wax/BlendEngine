@@ -771,6 +771,12 @@ class BE_ExportSettings(PropertyGroup):
     export_scene_package: bpy.props.BoolProperty(name="Scene Package", default=True)
     include_debug_overlay: bpy.props.BoolProperty(name="Debug Overlay", default=False)
     package_name: bpy.props.StringProperty(name="Package Name", default="BlendEngineBuild")
+    android_package_id: bpy.props.StringProperty(name="Android Package ID", default="org.blendengine.lastsignal")
+    android_version_name: bpy.props.StringProperty(name="Android Version", default="1.0")
+    android_version_code: bpy.props.IntProperty(name="Android Version Code", default=1, min=1)
+    godot_executable: bpy.props.StringProperty(name="Godot Executable", subtype="FILE_PATH")
+    android_sdk_path: bpy.props.StringProperty(name="Android SDK", subtype="DIR_PATH")
+    android_template_path: bpy.props.StringProperty(name="Native SDK Root", subtype="DIR_PATH")
 
 
 class BE_GameQualityProfile(PropertyGroup):

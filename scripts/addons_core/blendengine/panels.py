@@ -64,8 +64,13 @@ def _draw_engine_view_header(self, context):
     layout = self.layout
     project = context.scene.blendengine_project
     row = layout.row(align=True)
-    row.label(text="BLENDENGINE", icon="CUBE")
-    row.operator("blendengine.create_playable_demo", text="New Demo", icon="ADD")
+    from . import editor as engine_editor
+    brand_icon = engine_editor.brand_icon()
+    if brand_icon:
+        row.label(text="BLENDENGINE", icon_value=brand_icon)
+    else:
+        row.label(text="BLENDENGINE", icon="CUBE")
+    row.operator("blendengine.create_story_game", text="New Story", icon="ADD")
     layout.separator()
     row = layout.row(align=True)
     for page, label in (("STUDIO", "Scene"), ("PLAY", "Game")):
@@ -739,6 +744,14 @@ def _draw_build(layout, scene):
         op.platform = platform
     layout.prop(project, "build_folder")
     layout.prop(export, "package_name")
+    if scene.blendengine_project.target_platform == "ANDROID":
+        layout.label(text="Backend: Godot native / OpenGL ES", icon="RENDER_STILL")
+        layout.prop(export, "android_package_id")
+        layout.prop(export, "android_version_name")
+        layout.prop(export, "android_version_code")
+        layout.prop(export, "godot_executable")
+        layout.prop(export, "android_sdk_path")
+        layout.prop(export, "android_template_path")
     layout.prop(export, "export_playable_project")
     layout.prop(export, "export_assets")
     layout.prop(export, "export_scene_package")
@@ -1581,6 +1594,8 @@ def register():
 
 
 def unregister():
+    from . import editor as engine_editor
+    engine_editor.clear_brand_icon()
     bpy.types.VIEW3D_HT_header.draw = _ORIGINAL_VIEW_HEADER
     bpy.types.OUTLINER_HT_header.remove(_draw_engine_outliner_header)
     bpy.types.PROPERTIES_HT_header.remove(_draw_engine_properties_header)

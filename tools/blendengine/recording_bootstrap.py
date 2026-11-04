@@ -204,7 +204,8 @@ class RecordingBridge:
                     state["gameplay"]["health"] = getattr(health, "current_health", None)
         try:
             from blendengine import demo_game
-            state["recording_waypoints"] = json_value(getattr(demo_game, "RECORDING_WAYPOINTS", []))
+            raw = context.scene.get("blendengine_demo_waypoints")
+            state["recording_waypoints"] = json.loads(raw) if isinstance(raw, str) else json_value(raw or getattr(demo_game, "RECORDING_WAYPOINTS", []))
         except ImportError:
             state["recording_waypoints"] = []
         return state

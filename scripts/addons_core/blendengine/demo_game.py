@@ -13,7 +13,7 @@ import math
 import bpy
 from mathutils import Vector
 
-from . import components, graphics, input_system, optimization, utils
+from . import components, graphics, input_system, optimization, render_sync, utils
 
 
 CORE_POSITIONS = ((0, -6.5, 0.95), (-3, -2.5, 0.95), (3, 1.5, 0.95),
@@ -363,8 +363,8 @@ class DemoGame:
         self.elapsed += dt
         self._hazard_cooldown = max(0.0, self._hazard_cooldown - dt)
         bounds = self.scene.get("demo_bounds", (-8, 8, -12, 13.8))
-        self.player.location.x = min(bounds[1], max(bounds[0], self.player.location.x))
-        self.player.location.y = min(bounds[3], max(bounds[2], self.player.location.y))
+        render_sync.scalar(self.player.location, "x", min(bounds[1], max(bounds[0], self.player.location.x)))
+        render_sync.scalar(self.player.location, "y", min(bounds[3], max(bounds[2], self.player.location.y)))
         for index, core in enumerate(self.cores):
             if core.name in self.collected:
                 continue

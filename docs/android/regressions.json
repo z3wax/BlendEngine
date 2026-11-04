@@ -1,0 +1,38 @@
+[
+  {
+    "suite": "graphics",
+    "exit_code": 0,
+    "seconds": 1.61,
+    "log": "/workspace/artifacts/final-validation/graphics.log"
+  },
+  {
+    "suite": "runtime",
+    "exit_code": 0,
+    "seconds": 0.51,
+    "log": "/workspace/artifacts/final-validation/runtime.log"
+  },
+  {
+    "suite": "demo",
+    "exit_code": 0,
+    "seconds": 0.72,
+    "log": "/workspace/artifacts/final-validation/demo.log"
+  },
+  {
+    "suite": "render",
+    "exit_code": 0,
+    "seconds": 0.64,
+    "log": "/workspace/artifacts/final-validation/render.log"
+  },
+  {
+    "suite": "story",
+    "exit_code": 0,
+    "seconds": 5.34,
+    "log": "/workspace/artifacts/final-validation/story.log"
+  },
+  {
+    "suite": "android_export",
+    "exit_code": 0,
+    "seconds": 0.21,
+    "log": "/workspace/artifacts/final-validation/android_export.log"
+  }
+]
