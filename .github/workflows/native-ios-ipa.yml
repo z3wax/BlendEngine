@@ -15,7 +15,9 @@ concurrency:
 jobs:
   ios:
     if: github.repository == 'z3wax/BlendEngine'
-    runs-on: macos-15
+    # Godot 4.6.3's official simulator archive contains x86_64 objects.
+    # The device IPA remains ARM64; pin Intel only for Simulator execution.
+    runs-on: macos-15-intel
     timeout-minutes: 60
     env:
       GH_TOKEN: ${{ github.token }}
