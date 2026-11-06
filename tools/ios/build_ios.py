@@ -164,6 +164,10 @@ def main():
                 'CODE_SIGNING_ALLOWED=NO', 'CODE_SIGNING_REQUIRED=NO', 'DEVELOPMENT_TEAM=', 'build'],
                 log=proof/'xcode-simulator.log', timeout=1800)
             app = work/'simulator/Build/Products/Release-iphonesimulator/LastSignal.app'
+            # The software GLES simulator can starve CADisplayLink's run-loop
+            # drain. Godot's supported timer path changes no graphics setting.
+            # Keep this loose override out of the ARM64 device app and IPA.
+            (app/'override.cfg').write_text('[display.AppleEmbedded]\nuse_cadisplaylink=false\n')
             run(['codesign', '--force', '--deep', '--sign', '-', '--timestamp=none', app])
             # Keep the native simulator app available if runtime setup fails.
             run(['/usr/bin/ditto', '-c', '-k', '--keepParent', app,

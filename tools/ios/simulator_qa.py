@@ -104,7 +104,8 @@ def _verify_video(path, returncode):
 def test_game(app, bundle, proof):
     proof = Path(proof)
     report = {'passed': False, 'physical_device_tested': False, 'touch_tested': False,
-              'normal_launcher': False, 'unsigned_device_ipa_install_tested': False}
+              'normal_launcher': False, 'unsigned_device_ipa_install_tested': False,
+              'simulator_timer_override_present': (Path(app)/'override.cfg').is_file()}
     udid, runtime, device = _available_simulator()
     report.update(simulator=udid, runtime=runtime, device=device)
     processes = []
@@ -151,8 +152,9 @@ def test_game(app, bundle, proof):
         prefix = capture['label'] + '-' + reason
         evidence = {'scenario': capture['label'], 'reason': reason, 'pid': capture['pid']}
         tasks = [
-            ('sample', ['/usr/bin/sample', str(capture['pid']), '5', '-file',
-                str(proof/(prefix+'-sample.txt'))], 20, proof/(prefix+'-sample-command.log')),
+            ('stack', ['sudo', '-n', '/usr/sbin/spindump', str(capture['pid']), '5', '10',
+                '-onlyTarget', '-noSymbolicate', '-file', str(proof/(prefix+'-stack.txt'))],
+                45, proof/(prefix+'-stack-command.log')),
             ('lifecycle', ['xcrun', 'simctl', 'spawn', udid, 'log', 'show', '--last', '3m',
                 '--info', '--style', 'ndjson', '--predicate', 'processID == '+str(capture['pid'])],
                 30, proof/(prefix+'-lifecycle.ndjson')),
