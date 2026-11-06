@@ -30,7 +30,11 @@ def _available_simulator():
     runtime = max(candidates, key=lambda r: tuple(int(v) for v in r['version'].split('.')))
     types = json.loads(command('list', 'devicetypes', '-j'))['devicetypes']
     phones = [t for t in types if t.get('productFamily') == 'iPhone']
-    preferred = next((t for t in phones if t['name'] == 'iPhone 16 Pro'), None)
+    # A real smaller device framebuffer makes native software GLES practical
+    # on hosted runners without changing any game/device-export quality knob.
+    preferred = next((t for t in phones if t['name'] == 'iPhone SE (3rd generation)'), None)
+    if preferred is None:
+        preferred = next((t for t in phones if t['name'] == 'iPhone 16 Pro'), None)
     phone = preferred or next((t for t in reversed(phones) if 'Pro' in t['name']), phones[-1])
     udid = command('create', 'BlendEngine native IPA QA', phone['identifier'], runtime['identifier']).strip()
     return udid, runtime['name'], phone['name']
@@ -106,6 +110,7 @@ def test_game(app, bundle, proof):
     processes = []
     recording = None
     handles = []
+    capture = None
 
     def launch(label, args=()):
         # Godot's iOS logger writes os_log info events, not stdout. Start a
@@ -115,7 +120,7 @@ def test_game(app, bundle, proof):
         unified_stream = unified.open('w')
         handles.append(unified_stream)
         logger = subprocess.Popen(['xcrun', 'simctl', 'spawn', udid, 'log', 'stream',
-            '--level', 'info', '--style', 'ndjson', '--timeout', '300',
+            '--level', 'info', '--style', 'ndjson', '--timeout', '900',
             '--predicate', 'subsystem == "' + bundle + '"'],
             stdout=unified_stream, stderr=subprocess.STDOUT)
         processes.append(logger)
@@ -138,7 +143,34 @@ def test_game(app, bundle, proof):
             pid = _launch_pid(receipt, bundle)
         if pid is None:
             raise RuntimeError('Could not identify native simulator launch PID: ' + log.read_text(errors='replace')[-2000:])
-        return proc, {'console': log, 'unified': unified, 'logger': logger, 'pid': pid}
+        subprocess.run(['open', '-a', 'Simulator'], check=True, timeout=30)
+        return proc, {'console': log, 'unified': unified, 'logger': logger, 'pid': pid, 'label': label}
+
+    def diagnose(capture, reason):
+        """Preserve a native stack and lifecycle events before process teardown."""
+        prefix = capture['label'] + '-' + reason
+        evidence = {'scenario': capture['label'], 'reason': reason, 'pid': capture['pid']}
+        tasks = [
+            ('sample', ['/usr/bin/sample', str(capture['pid']), '5', '-file',
+                str(proof/(prefix+'-sample.txt'))], 20, proof/(prefix+'-sample-command.log')),
+            ('lifecycle', ['xcrun', 'simctl', 'spawn', udid, 'log', 'show', '--last', '3m',
+                '--info', '--style', 'ndjson', '--predicate', 'processID == '+str(capture['pid'])],
+                30, proof/(prefix+'-lifecycle.ndjson')),
+            ('screenshot', ['xcrun', 'simctl', 'io', udid, 'screenshot',
+                str(proof/(prefix+'-screen.png'))], 30, proof/(prefix+'-screenshot.log'))]
+        for name, words, timeout, output in tasks:
+            try:
+                result = subprocess.run(words, capture_output=True, text=True, timeout=timeout)
+                output.write_text(result.stdout+result.stderr, encoding='utf-8')
+                evidence[name] = {'returncode': result.returncode, 'log': output.name}
+            except subprocess.TimeoutExpired as error:
+                def decoded(value):
+                    return value.decode(errors='replace') if isinstance(value, bytes) else (value or '')
+                output.write_text(decoded(error.stdout)+decoded(error.stderr), encoding='utf-8')
+                evidence[name] = {'timed_out': True, 'log': output.name}
+            except OSError as error:
+                evidence[name] = {'error': str(error)}
+        report.setdefault('diagnostics', []).append(evidence)
 
     def capture_text(capture):
         return _scenario_text(capture['console'].read_text(errors='replace'),
@@ -169,18 +201,37 @@ def test_game(app, bundle, proof):
         except (OSError, ValueError):
             return None
 
-    def await_state(predicate, timeout=120, capture=None):
-        deadline = time.monotonic() + timeout
+    def await_state(predicate, timeout=600, capture=None):
+        began = time.monotonic()
+        deadline = began + timeout
+        # Give the first real _ready state its own progress window while
+        # retaining an absolute bound below the 900-second log stream limit.
+        absolute_deadline = began + 840
+        previous = None
+        last_progress = began
+        ready_seen = False
+        diagnosed = False
         while time.monotonic() < deadline:
             if capture:
                 check_log(capture)
             value = state()
+            now = time.monotonic()
+            if value is not None and value != previous:
+                previous = value
+                last_progress = now
+                diagnosed = False
+                if not ready_seen:
+                    ready_seen = True
+                    deadline = min(absolute_deadline, now + timeout)
             if value and predicate(value):
                 return value
+            if capture and not diagnosed and now-last_progress >= 90:
+                diagnose(capture, 'ready-stall' if ready_seen else 'startup-stall')
+                diagnosed = True
             time.sleep(1)
         raise RuntimeError('iOS native state timeout: ' + str(state()))
 
-    def await_marker(proc, capture, marker, timeout=240):
+    def await_marker(proc, capture, marker, timeout=600):
         deadline = time.monotonic() + timeout
         while time.monotonic() < deadline:
             content = check_log(capture)
@@ -204,6 +255,7 @@ def test_game(app, bundle, proof):
         command('boot', udid)
         subprocess.run(['open', '-a', 'Simulator', '--args', '-CurrentDeviceUDID', udid], check=True)
         _boot_ready(udid, proof/'simulator-boot.log')
+        subprocess.run(['open', '-a', 'Simulator'], check=True, timeout=30)
         command('install', udid, app, timeout=120)
         data = Path(command('get_app_container', udid, bundle, 'data').strip())
         report['data_container_verified'] = data.is_dir()
@@ -261,6 +313,8 @@ def test_game(app, bundle, proof):
         return report
     except Exception as error:
         report['error'] = str(error)
+        if capture:
+            diagnose(capture, 'failure')
         raise
     finally:
         if recording and recording.poll() is None:
