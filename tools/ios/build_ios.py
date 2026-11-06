@@ -103,6 +103,12 @@ def package_unsigned(app, output):
         run(['/usr/bin/ditto', '-c', '-k', '--keepParent', payload, output])
 
 
+def save_validation(output, result):
+    (output.parent/'ipa_validation.json').write_text(json.dumps(result, indent=2)+'\n')
+    output.with_suffix(output.suffix+'.sha256').write_text(
+        result['sha256']+'  '+output.name+'\n')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--project', type=Path, required=True)
@@ -149,6 +155,8 @@ def main():
         result = validate_ipa(args.output, args.bundle_id)
         result.update({'godot_version': version, 'renderer': 'native OpenGL ES 3 Compatibility',
                        'simulator_tested': False})
+        # Preserve device verification even when simulator setup or testing fails.
+        save_validation(args.output, result)
         if args.qa:
             architecture = platform.machine()
             run(common + ['-sdk', 'iphonesimulator', '-destination', 'generic/platform=iOS Simulator',
@@ -157,14 +165,13 @@ def main():
                 log=proof/'xcode-simulator.log', timeout=1800)
             app = work/'simulator/Build/Products/Release-iphonesimulator/LastSignal.app'
             run(['codesign', '--force', '--deep', '--sign', '-', '--timestamp=none', app])
+            # Keep the native simulator app available if runtime setup fails.
+            run(['/usr/bin/ditto', '-c', '-k', '--keepParent', app,
+                 args.output.parent/'LastSignal-AI-simulator.zip'])
             from simulator_qa import test_game
             qa = test_game(app, args.bundle_id, proof)
             result['simulator_tested'] = qa['passed']
-            run(['/usr/bin/ditto', '-c', '-k', '--keepParent', app,
-                 args.output.parent/'LastSignal-AI-simulator.zip'])
-        (args.output.parent/'ipa_validation.json').write_text(json.dumps(result, indent=2)+'\n')
-        args.output.with_suffix(args.output.suffix+'.sha256').write_text(
-            result['sha256']+'  '+args.output.name+'\n')
+        save_validation(args.output, result)
         print(json.dumps(result, indent=2))
 
 
