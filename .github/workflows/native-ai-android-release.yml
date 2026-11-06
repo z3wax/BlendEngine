@@ -1,0 +1,79 @@
+name: Publish tested AI Android APK
+
+on:
+  push:
+    branches: [release/last-signal-ai-android]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: last-signal-ai-android-68a39afe
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.repository == 'z3wax/BlendEngine'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_TAG: last-signal-ai-android-68a39afe
+      APK_SHA256: 68a39afe4b685a91fca7fc85a3806d94bf6f4cb0fd90a351c84f5ef534d53053
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Restore the exact tested AI APK without rebuilding
+        run: >-
+          python3 tools/android/publish_tested_apk.py
+          --manifest dist/ai-apk-parts.json
+          --qa docs/ai/android-qa.json
+          --output dist/ai-release/LastSignal-AI-debug.apk
+      - name: Verify Android signature and pinned APK SHA-256
+        shell: bash
+        run: |
+          set -euo pipefail
+          sdk_root=${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}
+          test -n "$sdk_root"
+          signer=$(find "$sdk_root/build-tools" -name apksigner -type f | sort -V | tail -n 1)
+          test -n "$signer"
+          "$signer" verify --verbose dist/ai-release/LastSignal-AI-debug.apk
+          printf '%s  %s\n' "$APK_SHA256" dist/ai-release/LastSignal-AI-debug.apk | sha256sum --check
+      - name: Publish the verified Android prerelease
+        shell: bash
+        run: |
+          set -euo pipefail
+          assets=(dist/ai-release/LastSignal-AI-debug.apk
+                  dist/ai-release/LastSignal-AI-debug.apk.sha256
+                  docs/ai/android-qa.json docs/ai/android-validation.json
+                  dist/BlendEngine-AI-addon.zip dist/BlendEngine-AI-sdk.zip
+                  dist/ai/Native-Scout-demo.mp4 dist/ai/package-validation.json
+                  docs/ai/native_summary.json docs/ai/editor_gui.json)
+          for asset in "${assets[@]}"; do test -s "$asset"; done
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo 'Release already exists; refusing to overwrite any existing assets.' >&2
+            exit 1
+          fi
+          cat > "$RUNNER_TEMP/ai-android-release-notes.md" <<'NOTES'
+          Native Godot C++ / OpenGL ES Last Signal with the autonomous Rescue Scout.
+
+          This exact installed APK passed Android API 24 x86_64 emulator testing:
+          normal launcher, touch movement, quick jump, Inspect, pause/resume,
+          Back without quitting, restart, five clues, three jumps and grounded
+          mission victory. The Scout independently walked 24.49 m with 121 pose
+          changes and then became idle. The release reconstructs and verifies the
+          tested APK bytes; it does not rebuild the game.
+
+          SHA-256: `68a39afe4b685a91fca7fc85a3806d94bf6f4cb0fd90a351c84f5ef534d53053`
+
+          Development signed; Android 7/API 24+, ARM64 and x86_64. Physical ARM64
+          Android hardware remains untested. Native-Scout-demo.mp4 is a desktop
+          native game recording, not an Android video or phone FPS benchmark.
+          The addon requires Blender; the SDK includes source/export tools.
+          This Android release makes no iOS build or iOS device-testing claim.
+          NOTES
+          gh release create "$RELEASE_TAG" "${assets[@]}" --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" --prerelease --title 'Last Signal AI — tested native Android' \
+            --notes-file "$RUNNER_TEMP/ai-android-release-notes.md"
