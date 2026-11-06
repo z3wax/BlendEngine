@@ -71,10 +71,36 @@ def _deduplicate_embedded_images(path):
     return {'duplicate_images':duplicate_count,'bytes_saved':len(raw)-len(result)}
 
 
-def _scratch_scene(source):
+def _native_agents(scene):
+    """NPC visuals reuse the player's portable native rig instead of rebaking it."""
+    supported = {'IDLE', 'PATROL', 'FOLLOW_PLAYER', 'GUARD', 'GUIDE'}
+    agents, excluded = [], set()
+    for obj in scene.objects:
+        npc = obj.blendengine_object.npc_behavior
+        if not npc.enabled:
+            continue
+        if npc.behavior_template not in supported:
+            raise ValueError('Native NPC behavior is not supported: ' + npc.behavior_template)
+        if not math.isfinite(npc.move_speed) or not 0 <= npc.move_speed <= 6:
+            raise ValueError('Native NPC speed must be between 0 and 6: ' + obj.name)
+        if len(agents) >= 8:
+            raise ValueError('The native story adapter supports at most 8 NPC agents')
+        agents.append({'name': obj.name, 'behavior': npc.behavior_template,
+            'position': list(obj.matrix_world.translation), 'speed': npc.move_speed,
+            'stop_distance': getattr(npc, 'stop_distance', 1.4),
+            'decision_interval': getattr(npc, 'decision_interval', .15),
+            'detection_range': npc.detection_range, 'patrol_radius': npc.patrol_radius})
+        excluded.add(obj)
+        excluded.update(obj.children_recursive)
+    return agents, excluded
+
+
+def _scratch_scene(source, excluded=()):
     scratch=bpy.data.scenes.new('Native asset export scratch')
     copied={}
     for obj in source.objects:
+        if obj in excluded:
+            continue
         clone=obj.copy()
         if obj.data is not None:
             clone.data=obj.data.copy()
@@ -215,7 +241,8 @@ def export_scene_assets(scene,output_dir):
     original_scene=bpy.context.window.scene
     owned_data={name:set(getattr(bpy.data,name)) for name in
                 ('meshes','armatures','lights','cameras','materials','images','actions')}
-    scratch,copies=_scratch_scene(scene)
+    agents, excluded = _native_agents(scene)
+    scratch,copies=_scratch_scene(scene, excluded)
     try:
         bpy.context.window.scene=scratch
         bpy.context.view_layer.update()
@@ -253,6 +280,7 @@ def export_scene_assets(scene,output_dir):
           'waypoints':[list(p) for p in story_game.WAYPOINTS],
           'journal':[list(p) for p in story_game.JOURNAL],
           'coordinate_system':'BLENDER_Z_UP',
+          'npc_agents': agents,
           'baked_textures':baked,
           'lossless_image_sharing':image_sharing,
           'native_backend':'Godot C++ / OpenGL ES; not Blender EEVEE on Android',

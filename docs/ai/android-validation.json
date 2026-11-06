@@ -1,0 +1,94 @@
+{
+  "passed": true,
+  "artifact": "LastSignal-AI-debug.apk",
+  "bytes": 63369926,
+  "sha256": "68a39afe4b685a91fca7fc85a3806d94bf6f4cb0fd90a351c84f5ef534d53053",
+  "normal_launcher": true,
+  "android_api": "24",
+  "device_abi": "x86_64",
+  "physical_display": [
+    1280,
+    720
+  ],
+  "physical_arm64_tested": false,
+  "native_smoke": {
+    "animation": "Idle",
+    "clues": 5,
+    "elapsed": 8.99,
+    "event": "won",
+    "floor": true,
+    "health": 100,
+    "jumps": 3,
+    "native": true,
+    "npc_agents": [
+      {
+        "animation": "Idle",
+        "behavior": "GUIDE",
+        "cached_cells": 72,
+        "decisions": 66,
+        "leg_l_angle": 2.7273,
+        "max_expansions": 0,
+        "name": "Rescue Scout",
+        "paused": false,
+        "position": [
+          -2.08921647071838,
+          0.950428664684296,
+          -10.7550277709961
+        ],
+        "replans": 11,
+        "skeleton_bones": 11,
+        "state": "IDLE",
+        "walk_pose_changes": 121,
+        "walked": 24.49
+      }
+    ],
+    "paused": false,
+    "position": [
+      -0.14,
+      1.62,
+      -12.71
+    ],
+    "renderer": "gl_compatibility",
+    "score": 5,
+    "skeleton_bones": 11,
+    "source_position": [
+      -0.14,
+      12.71,
+      1.62
+    ],
+    "state": "WON",
+    "story_id": "LAST_SIGNAL",
+    "walked": 33.2
+  },
+  "touch_checks": [
+    "direction_pad",
+    "quick_tap_jump",
+    "inspect",
+    "pause_freezes_movement",
+    "android_back_pauses",
+    "restart"
+  ],
+  "video": {
+    "name": "android-touch.mp4",
+    "sha256": "4f6657cc33409780d8cacfcee2acc6165534df68ba3c1b44bfea3bcc17853aff",
+    "decode_passed": true,
+    "probe": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "width": 1280,
+          "height": 720,
+          "nb_frames": "1"
+        }
+      ],
+      "format": {
+        "size": "80305"
+      }
+    },
+    "usable_motion_proof": false,
+    "note": "Only one frame was encoded by the API24 TCG/swangle screenrecord path. Do not present it as motion evidence. Actual APK motion is verified by native state logs, NPC skeleton counters and multi-position screenshots; the separate native desktop AI video is valid."
+  },
+  "notes": "Actual emulator normal launcher; no injected audio driver or game graphics changes. wm override reset to physical1280x720 to match Godot native surface touch coordinates. Capture is unretimed software-GLES/TCG, not physical phone FPS."
+}

@@ -120,6 +120,10 @@ func step() -> void:
 		bone_min = minf(bone_min,angle)
 		bone_max = maxf(bone_max,angle)
 	if game.state == "WON":
+		for agent in game.npc_agents:
+			if agent.state != "IDLE" or agent.body.velocity.length() > 0.001:
+				fail("the rescue scout must stop at chapter victory",17)
+				return
 		if game.collected.size() != 5 or game.distance_walked < 25 or game.jump_count < 3 or not save_checked or not quick_jump_checked or not back_checked:
 			fail("rescue completion evidence is incomplete",9)
 			return

@@ -1,0 +1,399 @@
+{
+  "passed": true,
+  "apk": "/workspace/artifacts/ai/android/LastSignal-AI-debug.apk",
+  "sha256": "68a39afe4b685a91fca7fc85a3806d94bf6f4cb0fd90a351c84f5ef534d53053",
+  "tested_device": "emulator-5554",
+  "physical_arm64_tested": false,
+  "touch": {
+    "direction_pad": {
+      "before": {
+        "animation": "Idle",
+        "clues": 0,
+        "elapsed": 2.02,
+        "event": "playing",
+        "floor": true,
+        "health": 100,
+        "jumps": 0,
+        "native": true,
+        "npc_agents": [
+          {
+            "animation": "Idle",
+            "behavior": "GUIDE",
+            "cached_cells": 2,
+            "decisions": 13,
+            "leg_l_angle": 3.1416,
+            "max_expansions": 0,
+            "name": "Rescue Scout",
+            "paused": false,
+            "position": [
+              0.302091300487518,
+              0.951014578342438,
+              6.40321063995361
+            ],
+            "replans": 1,
+            "skeleton_bones": 11,
+            "state": "GUIDE",
+            "walk_pose_changes": 4,
+            "walked": 2.0
+          }
+        ],
+        "paused": false,
+        "position": [
+          0.0,
+          0.95,
+          10.0
+        ],
+        "renderer": "gl_compatibility",
+        "score": 0,
+        "skeleton_bones": 11,
+        "source_position": [
+          0.0,
+          -10.0,
+          0.95
+        ],
+        "state": "RUNNING",
+        "story_id": "LAST_SIGNAL",
+        "walked": 0.0
+      },
+      "after": {
+        "animation": "Walk",
+        "clues": 1,
+        "elapsed": 3.87,
+        "event": "clue_1",
+        "floor": true,
+        "health": 100,
+        "jumps": 0,
+        "native": true,
+        "npc_agents": [
+          {
+            "animation": "Idle",
+            "behavior": "GUIDE",
+            "cached_cells": 2,
+            "decisions": 24,
+            "leg_l_angle": 3.1416,
+            "max_expansions": 0,
+            "name": "Rescue Scout",
+            "paused": false,
+            "position": [
+              0.302091300487518,
+              0.951014578342438,
+              6.40321063995361
+            ],
+            "replans": 1,
+            "skeleton_bones": 11,
+            "state": "GUIDE",
+            "walk_pose_changes": 4,
+            "walked": 2.0
+          }
+        ],
+        "paused": false,
+        "position": [
+          0.0,
+          0.95,
+          7.04
+        ],
+        "renderer": "gl_compatibility",
+        "score": 1,
+        "skeleton_bones": 11,
+        "source_position": [
+          0.0,
+          -7.04,
+          0.95
+        ],
+        "state": "RUNNING",
+        "story_id": "LAST_SIGNAL",
+        "walked": 2.96
+      }
+    },
+    "quick_tap_jump": {
+      "animation": "Idle",
+      "clues": 1,
+      "elapsed": 4.82,
+      "event": "jump",
+      "floor": true,
+      "health": 100,
+      "jumps": 1,
+      "native": true,
+      "npc_agents": [
+        {
+          "animation": "Walk",
+          "behavior": "GUIDE",
+          "cached_cells": 4,
+          "decisions": 29,
+          "leg_l_angle": 2.8446,
+          "max_expansions": 0,
+          "name": "Rescue Scout",
+          "paused": false,
+          "position": [
+            -1.16618359088898,
+            0.950177371501923,
+            4.44621610641479
+          ],
+          "replans": 2,
+          "skeleton_bones": 11,
+          "state": "GUIDE",
+          "walk_pose_changes": 10,
+          "walked": 4.44
+        }
+      ],
+      "paused": false,
+      "position": [
+        0.0,
+        0.95,
+        7.04
+      ],
+      "renderer": "gl_compatibility",
+      "score": 1,
+      "skeleton_bones": 11,
+      "source_position": [
+        0.0,
+        -7.04,
+        0.95
+      ],
+      "state": "RUNNING",
+      "story_id": "LAST_SIGNAL",
+      "walked": 2.96
+    },
+    "inspect": {
+      "animation": "Idle",
+      "clues": 1,
+      "elapsed": 5.73,
+      "event": "inspect",
+      "floor": true,
+      "health": 100,
+      "jumps": 1,
+      "native": true,
+      "npc_agents": [
+        {
+          "animation": "Idle",
+          "behavior": "GUIDE",
+          "cached_cells": 5,
+          "decisions": 35,
+          "leg_l_angle": 3.135,
+          "max_expansions": 0,
+          "name": "Rescue Scout",
+          "paused": false,
+          "position": [
+            -2.69436764717102,
+            0.919809997081757,
+            2.40810012817383
+          ],
+          "replans": 3,
+          "skeleton_bones": 11,
+          "state": "GUIDE",
+          "walk_pose_changes": 16,
+          "walked": 6.99
+        }
+      ],
+      "paused": false,
+      "position": [
+        0.0,
+        0.95,
+        7.04
+      ],
+      "renderer": "gl_compatibility",
+      "score": 1,
+      "skeleton_bones": 11,
+      "source_position": [
+        0.0,
+        -7.04,
+        0.95
+      ],
+      "state": "RUNNING",
+      "story_id": "LAST_SIGNAL",
+      "walked": 2.96
+    },
+    "pause_freezes_movement": true,
+    "android_back_pauses": true,
+    "restart": {
+      "animation": "Idle",
+      "clues": 0,
+      "elapsed": 0.0,
+      "event": "restarted",
+      "floor": true,
+      "health": 100,
+      "jumps": 1,
+      "native": true,
+      "npc_agents": [
+        {
+          "animation": "Idle",
+          "behavior": "GUIDE",
+          "cached_cells": 0,
+          "decisions": 45,
+          "leg_l_angle": 3.1416,
+          "max_expansions": 0,
+          "name": "Rescue Scout",
+          "paused": false,
+          "position": [
+            1.5,
+            0.920000016689301,
+            8.0
+          ],
+          "replans": 3,
+          "skeleton_bones": 11,
+          "state": "IDLE",
+          "walk_pose_changes": 0,
+          "walked": 0.0
+        }
+      ],
+      "paused": false,
+      "position": [
+        0.0,
+        0.92,
+        10.0
+      ],
+      "renderer": "gl_compatibility",
+      "score": 0,
+      "skeleton_bones": 11,
+      "source_position": [
+        0.0,
+        -10.0,
+        0.92
+      ],
+      "state": "RUNNING",
+      "story_id": "LAST_SIGNAL",
+      "walked": 2.96
+    }
+  },
+  "android_api": "24",
+  "device_abi": "x86_64",
+  "display_size": [
+    1280,
+    720
+  ],
+  "emulator_audio_service": "running",
+  "emulator_audio_override": null,
+  "normal_launcher": true,
+  "native_libraries": [
+    "lib/arm64-v8a/libgodot_android.so",
+    "lib/x86_64/libgodot_android.so"
+  ],
+  "licenses": [
+    "assets/assets/licenses/GODOT_AUTHORS.txt",
+    "assets/assets/licenses/GODOT_LICENSE.txt",
+    "assets/assets/licenses/GODOT_COPYRIGHT.txt"
+  ],
+  "redundant_raw_atlases": [],
+  "signature_verified": true,
+  "installed_sha256": "68a39afe4b685a91fca7fc85a3806d94bf6f4cb0fd90a351c84f5ef534d53053",
+  "feature": "AGENTS",
+  "expected_npc_count": 1,
+  "autonomous_npc": {
+    "before": [
+      {
+        "animation": "Idle",
+        "behavior": "GUIDE",
+        "cached_cells": 2,
+        "decisions": 13,
+        "leg_l_angle": 3.1416,
+        "max_expansions": 0,
+        "name": "Rescue Scout",
+        "paused": false,
+        "position": [
+          0.302091300487518,
+          0.951014578342438,
+          6.40321063995361
+        ],
+        "replans": 1,
+        "skeleton_bones": 11,
+        "state": "GUIDE",
+        "walk_pose_changes": 4,
+        "walked": 2.0
+      }
+    ],
+    "after": [
+      {
+        "animation": "Idle",
+        "behavior": "GUIDE",
+        "cached_cells": 2,
+        "decisions": 13,
+        "leg_l_angle": 3.1416,
+        "max_expansions": 0,
+        "name": "Rescue Scout",
+        "paused": false,
+        "position": [
+          0.302091300487518,
+          0.951014578342438,
+          6.40321063995361
+        ],
+        "replans": 1,
+        "skeleton_bones": 11,
+        "state": "GUIDE",
+        "walk_pose_changes": 4,
+        "walked": 2.0
+      }
+    ],
+    "player_clues_unchanged": true
+  },
+  "npc_mission": [
+    {
+      "animation": "Idle",
+      "behavior": "GUIDE",
+      "cached_cells": 72,
+      "decisions": 66,
+      "leg_l_angle": 2.7273,
+      "max_expansions": 0,
+      "name": "Rescue Scout",
+      "paused": false,
+      "position": [
+        -2.08921647071838,
+        0.950428664684296,
+        -10.7550277709961
+      ],
+      "replans": 11,
+      "skeleton_bones": 11,
+      "state": "IDLE",
+      "walk_pose_changes": 121,
+      "walked": 24.49
+    }
+  ],
+  "native_smoke": {
+    "animation": "Idle",
+    "clues": 5,
+    "elapsed": 8.99,
+    "event": "won",
+    "floor": true,
+    "health": 100,
+    "jumps": 3,
+    "native": true,
+    "npc_agents": [
+      {
+        "animation": "Idle",
+        "behavior": "GUIDE",
+        "cached_cells": 72,
+        "decisions": 66,
+        "leg_l_angle": 2.7273,
+        "max_expansions": 0,
+        "name": "Rescue Scout",
+        "paused": false,
+        "position": [
+          -2.08921647071838,
+          0.950428664684296,
+          -10.7550277709961
+        ],
+        "replans": 11,
+        "skeleton_bones": 11,
+        "state": "IDLE",
+        "walk_pose_changes": 121,
+        "walked": 24.49
+      }
+    ],
+    "paused": false,
+    "position": [
+      -0.14,
+      1.62,
+      -12.71
+    ],
+    "renderer": "gl_compatibility",
+    "score": 5,
+    "skeleton_bones": 11,
+    "source_position": [
+      -0.14,
+      12.71,
+      1.62
+    ],
+    "state": "WON",
+    "story_id": "LAST_SIGNAL",
+    "walked": 33.2
+  }
+}

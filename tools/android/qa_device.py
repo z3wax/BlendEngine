@@ -28,6 +28,8 @@ def main():
     parser.add_argument("--timeout", type=int, default=900)
     parser.add_argument("--reuse-install", action="store_true", help="Reuse APK only after matching its installed SHA-256; retain shader cache")
     parser.add_argument("--emulator-audio-dummy", action="store_true", help="Work around the API24 emulator's broken goldfish audio HAL, keeping the APK unchanged")
+    parser.add_argument("--expect-agents", type=int, default=0,
+                        help="Require this many independently animated local NPCs in the actual APK")
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     adb = [str(args.sdk / "platform-tools/adb"), "-s", args.serial]
@@ -126,6 +128,19 @@ def main():
         else:
             call("shell", "am", "start", "-n", PACKAGE + "/com.godot.game.GodotAppLauncher")
         start = wait_state(lambda s: s["event"] == "playing" and s["floor"], limit=300)
+        if args.expect_agents:
+            agents = start.get("npc_agents", [])
+            assert len(agents) == args.expect_agents
+            assert all(agent["skeleton_bones"] == 11 for agent in agents)
+            observed = wait_state(lambda s: len(s.get("npc_agents", [])) == args.expect_agents
+                and all(agent["walked"] > .2 and agent.get("walk_pose_changes", 0) > 0
+                        for agent in s["npc_agents"]), limit=180)
+            assert observed["clues"] == 0, "NPCs must not collect story clues for the player"
+            report["feature"] = "AGENTS"
+            report["expected_npc_count"] = args.expect_agents
+            report["autonomous_npc"] = {"before": start["npc_agents"],
+                                        "after": observed["npc_agents"],
+                                        "player_clues_unchanged": True}
         screenshot("android-start.png")
         print("Native GLES scene started; testing real touch controls", flush=True)
         recording = subprocess.Popen(adb + ["shell", "screenrecord", "--time-limit", "30", "/sdcard/lastsignal-qa.mp4"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -176,6 +191,12 @@ def main():
             if "LAST_SIGNAL_SMOKE_PASS" in log:
                 final = state()
                 assert final["state"] == "WON" and final["clues"] == 5 and final["floor"]
+                if args.expect_agents:
+                    agents = final.get("npc_agents", [])
+                    assert len(agents) == args.expect_agents
+                    assert all(agent["walked"] > 1 and agent["state"] == "IDLE"
+                               and agent.get("walk_pose_changes", 0) > 0 for agent in agents)
+                    report["npc_mission"] = agents
                 report["native_smoke"] = final
                 report["passed"] = True
                 print("ANDROID_APK_QA_PASS", flush=True)

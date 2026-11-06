@@ -32,6 +32,8 @@ var moving = false
 var paused_game = false
 var smoke = false
 var smoke_runner: RefCounted
+var npc_agents: Array = []
+var npc_configs: Array = [{"name": "Rescue Scout", "behavior": "GUIDE", "position": Vector3(1.5, 0.92, 8.0), "speed": 3.0}]
 var telemetry_time = 0.0
 var chapter: Label
 var status: Label
@@ -59,6 +61,7 @@ func _ready() -> void:
 		return
 	_setup_lighting()
 	_setup_ui()
+	_setup_npc_agents()
 	if not smoke:
 		_restore_checkpoint()
 	_refresh_ui()
@@ -95,9 +98,37 @@ func _load_story_metadata() -> void:
 		goal = _story_point(data["goal"],godot_axes)
 	if data.get("journal",[]).size() == 6:
 		journal = data["journal"]
+	if data.has("npc_agents") and data["npc_agents"] is Array:
+		npc_configs.clear()
+		for entry in data["npc_agents"].slice(0, 8):
+			if not entry is Dictionary:
+				continue
+			var point = entry.get("position", [])
+			if not point is Array or point.size() != 3:
+				continue
+			var valid = true
+			for value in point:
+				if not (value is int or value is float) or not is_finite(float(value)):
+					valid = false
+			if not valid:
+				continue
+			var config = entry.duplicate(true)
+			config["position"] = _story_point(point, godot_axes)
+			npc_configs.append(config)
 
 func _story_point(value: Array, godot_axes: bool) -> Vector3:
 	return Vector3(value[0],value[1],value[2]) if godot_axes else Vector3(value[0],value[2],-value[1])
+
+func _setup_npc_agents() -> void:
+	var controller = load("res://npc_agent.gd")
+	for config in npc_configs:
+		npc_agents.append(controller.new(self, config))
+
+func agent_telemetry() -> Array:
+	var result: Array = []
+	for agent in npc_agents:
+		result.append(agent.telemetry())
+	return result
 
 func _all_nodes(root: Node) -> Array[Node]:
 	var result: Array[Node] = []
@@ -351,6 +382,8 @@ func _physics_process(dt: float) -> void:
 		_restart()
 	if smoke:
 		smoke_runner.step()
+	for agent in npc_agents:
+		agent.step(dt, paused_game, state == "WON")
 	if paused_game or state == "WON":
 		return
 	elapsed += dt
@@ -397,6 +430,8 @@ func _physics_process(dt: float) -> void:
 	if collected.size() == 5 and _horizontal_distance(body.position,goal) < 1.5 and body.is_on_floor():
 		state = "WON"
 		_animate_human(false)
+		for agent in npc_agents:
+			agent.step(0.0, false, true)
 		_refresh_ui()
 		_save_checkpoint()
 		_show_modal(true)
@@ -438,7 +473,7 @@ func _refresh_ui() -> void:
 	chapter.text = journal[count][0]
 	status.text = "MAYA / FIELD ENGINEER       CLUES  %d / 5" % count
 	dialogue.text = journal[count][1]
-	objective.text = "REACH THE RELAY TERMINAL" if count == 5 else "FOLLOW THE AMBER SERVICE LIGHTS"
+	objective.text = "REACH THE RELAY TERMINAL" if count == 5 else ("FOLLOW THE SCOUT OR AMBER SERVICE LIGHTS" if not npc_agents.is_empty() else "FOLLOW THE AMBER SERVICE LIGHTS")
 	if state == "WON":
 		objective.text = "RESCUE BEACON ONLINE / CHAPTER COMPLETE"
 
@@ -458,6 +493,8 @@ func _toggle_pause() -> void:
 	modal.visible = paused_game
 	if animations != null:
 		animations.speed_scale = 0.0 if paused_game else 1.0
+	for agent in npc_agents:
+		agent.set_paused(paused_game)
 	if paused_game:
 		_release_actions()
 		_save_checkpoint()
@@ -480,6 +517,8 @@ func _restart() -> void:
 	body.position = spawn
 	body.rotation = Vector3.ZERO
 	body.velocity = Vector3.ZERO
+	for agent in npc_agents:
+		agent.reset()
 	collected.clear()
 	elapsed = 0
 	jump_held = false
@@ -497,7 +536,10 @@ func _release_actions() -> void:
 
 func _save_checkpoint() -> void:
 	var file = FileAccess.open(save_path,FileAccess.WRITE)
-	file.store_string(JSON.stringify({"version":1,"collected":collected,"position":[body.position.x,body.position.y,body.position.z],"elapsed":elapsed,"state":state}))
+	var agents: Array = []
+	for agent in npc_agents:
+		agents.append(agent.snapshot())
+	file.store_string(JSON.stringify({"version":1,"collected":collected,"position":[body.position.x,body.position.y,body.position.z],"elapsed":elapsed,"state":state,"npc_agents":agents}))
 
 func _restore_checkpoint() -> void:
 	if not FileAccess.file_exists(save_path):
@@ -516,6 +558,13 @@ func _restore_checkpoint() -> void:
 	state = data.get("state","RUNNING")
 	if state == "WON":
 		_show_modal(true)
+	var saved_agents = data.get("npc_agents", [])
+	if saved_agents is Array:
+		for entry in saved_agents:
+			if entry is Dictionary:
+				for agent in npc_agents:
+					if entry.get("name", "") == str(agent.body.name):
+						agent.restore(entry)
 	_update_camera(1)
 
 func _notification(what: int) -> void:
@@ -527,6 +576,7 @@ func _notification(what: int) -> void:
 
 func _report(event: String) -> void:
 	var data = {"event":event,"story_id":"LAST_SIGNAL","state":state,"score":collected.size(),"health":100,"elapsed":snappedf(elapsed,.01),"source_position":[snappedf(body.position.x,.01),snappedf(-body.position.z,.01),snappedf(body.position.y,.01)],"clues":collected.size(),"position":[snappedf(body.position.x,.01),snappedf(body.position.y,.01),snappedf(body.position.z,.01)],"floor":body.is_on_floor(),"paused":paused_game,"walked":snappedf(distance_walked,.01),"jumps":jump_count,"skeleton_bones":skeleton.get_bone_count() if skeleton else 0,"animation":str(animations.current_animation) if animations else "procedural","renderer":RenderingServer.get_current_rendering_method(),"native":true}
+	data["npc_agents"] = agent_telemetry()
 	print("LAST_SIGNAL_STATE "+JSON.stringify(data))
 	var file = FileAccess.open("user://qa_state.json",FileAccess.WRITE)
 	file.store_string(JSON.stringify(data))

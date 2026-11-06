@@ -1,0 +1,7 @@
+{
+  "name": "Agent Cube",
+  "plan_does_not_mutate": true,
+  "applied": true,
+  "gui_undo_restores": true,
+  "passed": true
+}

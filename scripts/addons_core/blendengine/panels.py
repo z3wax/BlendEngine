@@ -5,7 +5,7 @@
 import bpy
 from bpy.types import Menu, Panel, UIList
 
-from . import input_system, performance, utils
+from . import input_system, performance, runtime, utils
 
 
 class TOPBAR_MT_blendengine(Menu):
@@ -677,9 +677,17 @@ def _draw_npc(layout, obj):
     layout.prop(npc, "move_speed")
     layout.prop(npc, "patrol_radius")
     layout.prop(npc, "detection_range")
+    layout.prop(npc, "stop_distance")
+    layout.prop(npc, "decision_interval")
+    layout.prop(npc, "avoid_obstacles")
     layout.prop(npc, "attack_range")
     layout.prop(npc, "dialogue_text")
     layout.prop(npc, "quest_id")
+    session = runtime.ACTIVE_SESSION
+    if session is not None and session.scene == bpy.context.scene:
+        state = getattr(session, 'agent_states', {}).get(obj.name)
+        if state:
+            layout.label(text="State: " + state['state'])
 
 
 def _draw_health(layout, obj):
@@ -752,6 +760,14 @@ def _draw_build(layout, scene):
         layout.prop(export, "godot_executable")
         layout.prop(export, "android_sdk_path")
         layout.prop(export, "android_template_path")
+    elif project.target_platform == "IOS":
+        layout.label(text="Backend: Godot native / OpenGL ES", icon="RENDER_STILL")
+        layout.prop(export, "ios_bundle_identifier")
+        layout.prop(export, "ios_version_name")
+        layout.prop(export, "ios_version_code")
+        layout.prop(export, "godot_executable")
+        layout.prop(export, "android_template_path")
+        layout.label(text="Unsigned IPA build requires macOS + Xcode.", icon="INFO")
     layout.prop(export, "export_playable_project")
     layout.prop(export, "export_assets")
     layout.prop(export, "export_scene_package")

@@ -97,6 +97,12 @@ node_modules/
 *.aab
 *.keystore
 *.jks
+*.ipa
+*.p12
+*.p8
+*.mobileprovision
+*.xcarchive/
+/dist/ios/
 
 # Generated legacy exports; keep source scenes and graphics assets in builds/.
 /builds/**/android_project/

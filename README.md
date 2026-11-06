@@ -22,6 +22,10 @@ Blender manba kodiga tayangan, o'yin ishlab chiqish va interaktiv 3D ish jarayon
 
 **Android va yengil paket:** [Native APK](docs/ANDROID.md) · [Yengil editor/SDK](docs/LEAN_ENGINE.md).
 
+**AI agentlar:** [Editor yordamchisi va native NPC boshqaruvi](docs/AI_AGENTS.md).
+
+**iOS:** [Imzosiz native IPA va simulator tekshiruvi](docs/IOS.md).
+
 **Repozitoriy egasi:** [z3wax](https://github.com/z3wax)  
 **Asos:** Blender va uning uchinchi tomon komponentlari.
 

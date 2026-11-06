@@ -1,0 +1,127 @@
+name: Build native unsigned iOS IPA
+
+on:
+  push:
+    branches: [native/ai-ios-export]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: native-ai-ios-ipa
+  cancel-in-progress: false
+
+jobs:
+  ios:
+    if: github.repository == 'z3wax/BlendEngine'
+    runs-on: macos-15
+    timeout-minutes: 60
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_TAG: last-signal-ai-ios-v1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Select latest installed stable Xcode
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import pathlib, re, subprocess
+          paths = [p for p in pathlib.Path('/Applications').glob('Xcode*.app') if 'beta' not in p.name.lower()]
+          def version(path):
+              text = subprocess.check_output([str(path/'Contents/Developer/usr/bin/xcodebuild'), '-version'], text=True)
+              return tuple(map(int, re.search(r'Xcode (\d+(?:\.\d+)*)', text).group(1).split('.')))
+          selected = max(paths, key=version)
+          subprocess.run(['sudo', 'xcode-select', '-s', str(selected/'Contents/Developer')], check=True)
+          print('Selected', selected)
+          PY
+          xcodebuild -version
+          xcrun simctl list runtimes
+      - name: Install matching official Godot editor and iOS template
+        run: python3 tools/ios/setup_toolchain.py --github-env "$GITHUB_ENV"
+      - name: Build real unsigned device IPA and test iOS Simulator
+        run: |
+          python3 tools/ios/build_ios.py --project native/android_game \
+            --output dist/ios/LastSignal-AI-unsigned.ipa --qa --proof-dir dist/ios/proof
+      - name: Restore the exact Android AI build that passed device testing
+        run: |
+          python3 tools/android/publish_tested_apk.py --manifest dist/ai-apk-parts.json \
+            --qa docs/ai/android-qa.json --output dist/ios/LastSignal-AI-debug.apk
+      - name: Preserve build and native test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-ios-build-and-qa
+          path: dist/ios/
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Publish verified unsigned IPA and simulator proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, pathlib
+          root = pathlib.Path('dist/ios')
+          validation = json.loads((root/'ipa_validation.json').read_text())
+          qa = json.loads((root/'proof/simulator_qa.json').read_text())
+          assert validation['unsigned'] and validation['native_macho_verified'] and validation['simulator_tested']
+          assert qa['passed'] and qa['normal_launcher'] and qa['native_smoke']['state'] == 'WON'
+          PY
+          ditto -c -k --keepParent dist/ios/proof dist/ios/iOS-build-proof.zip
+          cat > "$RUNNER_TEMP/ios-notes.md" <<'NOTES'
+          Native Last Signal with the Rescue Scout AI, built by Xcode for iOS ARM64.
+
+          This is an **unsigned IPA**. It cannot be installed on a stock iPhone
+          until signed with an Apple identity/provisioning profile. No Apple
+          signing credentials were used. The device binary and resource pack
+          were validated; a separate simulator app passed normal launch,
+          independent Scout animation/navigation, the full five-clue mission
+          and NPC wall-detour/checkpoint scenarios. Physical iPhone installation
+          and UIKit touch automation were not tested.
+
+          Simulator application, screenshot/video, logs and checksums are included.
+          The Android AI APK is also included: it is the exact development-signed
+          build that passed the normal-launcher touch and complete story test on
+          an API 24 x86_64 emulator. Physical ARM64 Android testing is separate.
+          NOTES
+          assets=(dist/ios/LastSignal-AI-unsigned.ipa dist/ios/LastSignal-AI-unsigned.ipa.sha256
+                  dist/ios/LastSignal-AI-simulator.zip dist/ios/ipa_validation.json
+                  dist/ios/iOS-build-proof.zip dist/ios/proof/simulator_qa.json
+                  dist/ios/proof/iOS-native-scene.png dist/ios/proof/iOS-native-gameplay.mp4
+                  dist/ios/LastSignal-AI-debug.apk dist/ios/LastSignal-AI-debug.apk.sha256
+                  docs/ai/android-qa.json)
+          shopt -s nullglob
+          for asset in dist/BlendEngine-AI-*.zip dist/ai/*.mp4 dist/ai/*.json; do
+            if test -s "$asset"; then assets+=("$asset"); fi
+          done
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            existing=$(mktemp -d)
+            gh api "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG" > "$existing/release.json"
+            gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --dir "$existing" \
+              --pattern ipa_validation.json --pattern simulator_qa.json
+            python3 - "$existing" "${assets[@]}" <<'PY'
+          import json, os, pathlib, sys
+          root = pathlib.Path(sys.argv[1])
+          release = json.loads((root/'release.json').read_text())
+          assets = {a['name']: a for a in release['assets']}
+          expected = {pathlib.Path(p).name for p in sys.argv[2:]}
+          assert expected <= set(assets), 'Existing release is incomplete: ' + str(expected-set(assets))
+          assert release['target_commitish'] == os.environ['GITHUB_SHA'], 'Existing release belongs to a different source commit'
+          validation = json.loads((root/'ipa_validation.json').read_text())
+          qa = json.loads((root/'simulator_qa.json').read_text())
+          assert validation['unsigned'] and validation['native_macho_verified'] and validation['simulator_tested']
+          assert qa['passed'] and qa['normal_launcher'] and qa['native_smoke']['state'] == 'WON'
+          ipa = assets['LastSignal-AI-unsigned.ipa']
+          assert ipa['size'] == validation['bytes'] and ipa['digest'] == 'sha256:'+validation['sha256']
+          android = json.loads(pathlib.Path('docs/ai/android-qa.json').read_text())
+          assert assets['LastSignal-AI-debug.apk']['digest'] == 'sha256:'+android['installed_sha256']
+          print('Existing same-source release, required assets and verified binary digests match.')
+          PY
+            exit 0
+          fi
+          gh release create "$RELEASE_TAG" "${assets[@]}" --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" --prerelease --title "Last Signal AI — unsigned native iOS IPA" \
+            --notes-file "$RUNNER_TEMP/ios-notes.md"
