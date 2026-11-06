@@ -85,6 +85,8 @@ AI_TEMPLATE_ITEMS = (
     ("FLEE", "Flee", "Move away from danger"),
     ("ATTACK", "Attack", "Attack a target when close"),
     ("GUARD_AREA", "Guard Area", "Protect a location"),
+    ("GUARD", "Guard Agent", "Watch and return to an assigned location"),
+    ("GUIDE", "Story Guide", "Lead the player to the next story objective"),
     ("TALK", "Talk", "Start a dialogue interaction"),
     ("QUEST_GIVER", "Quest Giver", "Offer and complete quests"),
     ("SHOPKEEPER", "Shopkeeper", "Open a shop interaction"),
@@ -507,6 +509,11 @@ class BE_NPCBehaviorSettings(PropertyGroup):
     attack_range: bpy.props.FloatProperty(name="Attack Range", default=2.0, min=0.0)
     dialogue_text: bpy.props.StringProperty(name="Dialogue", default="Hello!")
     quest_id: bpy.props.StringProperty(name="Quest ID", default="")
+    decision_interval: bpy.props.FloatProperty(name="Decision Interval", default=0.15, min=0.05, max=2.0,
+                                             description="Seconds between bounded planning decisions")
+    stop_distance: bpy.props.FloatProperty(name="Stop Distance", default=1.4, min=0.3, max=10.0)
+    avoid_obstacles: bpy.props.BoolProperty(name="Avoid Obstacles", default=True,
+                                          description="Use cached geometry and bounded local navigation")
 
 
 class BE_HealthSettings(PropertyGroup):
@@ -772,11 +779,14 @@ class BE_ExportSettings(PropertyGroup):
     include_debug_overlay: bpy.props.BoolProperty(name="Debug Overlay", default=False)
     package_name: bpy.props.StringProperty(name="Package Name", default="BlendEngineBuild")
     android_package_id: bpy.props.StringProperty(name="Android Package ID", default="org.blendengine.lastsignal")
-    android_version_name: bpy.props.StringProperty(name="Android Version", default="1.0")
-    android_version_code: bpy.props.IntProperty(name="Android Version Code", default=1, min=1)
+    android_version_name: bpy.props.StringProperty(name="Android Version", default="1.1-agent")
+    android_version_code: bpy.props.IntProperty(name="Android Version Code", default=2, min=1)
     godot_executable: bpy.props.StringProperty(name="Godot Executable", subtype="FILE_PATH")
     android_sdk_path: bpy.props.StringProperty(name="Android SDK", subtype="DIR_PATH")
     android_template_path: bpy.props.StringProperty(name="Native SDK Root", subtype="DIR_PATH")
+    ios_bundle_identifier: bpy.props.StringProperty(name="iOS Bundle ID", default="org.blendengine.lastsignal")
+    ios_version_name: bpy.props.StringProperty(name="iOS Version", default="1.1")
+    ios_version_code: bpy.props.IntProperty(name="iOS Build Number", default=2, min=1)
 
 
 class BE_GameQualityProfile(PropertyGroup):

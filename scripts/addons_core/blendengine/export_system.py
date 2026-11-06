@@ -11,7 +11,7 @@ import tempfile
 
 import bpy
 
-from . import android_export, performance, utils
+from . import android_export, ios_export, performance, utils
 
 
 def _safe_name(value, fallback="BlendEngineBuild"):
@@ -125,6 +125,9 @@ def _npc_settings(obj):
         "attack_range": npc.attack_range,
         "dialogue_text": npc.dialogue_text,
         "quest_id": npc.quest_id,
+        "stop_distance": getattr(npc, "stop_distance", 1.4),
+        "decision_interval": getattr(npc, "decision_interval", .15),
+        "avoid_obstacles": getattr(npc, "avoid_obstacles", True),
     }
 
 
@@ -310,6 +313,12 @@ def build_profile_summary(scene):
             "Gameplay adapter: %s" % (scene.get("blendengine_story", "") or "unsupported scene"),
             "APK package: %s" % getattr(export, "android_package_id", android_export.DEFAULT_PACKAGE_ID),
         ])
+    elif project.target_platform == "IOS":
+        parts.extend([
+            "Backend: " + ios_export.NATIVE_RUNTIME,
+            "Gameplay adapter: %s" % (scene.get("blendengine_story", "") or "unsupported scene"),
+            "IPA: unsigned; macOS/Xcode required; Apple signing required for physical installation",
+        ])
     enabled = []
     if export.export_playable_project:
         enabled.append("playable project")
@@ -480,28 +489,48 @@ def _write_android_project(package_dir, game_data, platform_config, context):
             and ".blendengine-tools" not in os.path.relpath(directory, project_dir).split(os.sep)]
 
 
-def _write_ios_project(package_dir, game_data, platform_config):
-    ios_dir = os.path.join(package_dir, "ios_project")
-    _write_json(os.path.join(ios_dir, "Assets", "game_data.json"), game_data)
-    _write_json(os.path.join(ios_dir, "Assets", "platform_config.json"), platform_config)
-    _web_runtime_files(ios_dir, game_data)
-    _write_text(os.path.join(ios_dir, "BlendEnginePlayer.swift"), "import SwiftUI\nimport WebKit\nstruct BlendEngineView: UIViewRepresentable { func makeUIView(context: Context) -> WKWebView { let v = WKWebView(); if let url = Bundle.main.url(forResource: \"index\", withExtension: \"html\", subdirectory: \"web_player\") { v.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent()) }; return v } func updateUIView(_ uiView: WKWebView, context: Context) {} }\n@main struct BlendEngineApp: App { var body: some Scene { WindowGroup { BlendEngineView().ignoresSafeArea() } } }\n")
-    _write_text(os.path.join(ios_dir, "Info.plist"), "<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\"><plist version=\"1.0\"><dict><key>CFBundleDisplayName</key><string>BlendEngine Game</string><key>UISupportedInterfaceOrientations</key><array><string>UIInterfaceOrientationLandscapeLeft</string><string>UIInterfaceOrientationLandscapeRight</string></array></dict></plist>\n")
-    _write_text(os.path.join(ios_dir, "build_ios_ipa.sh"),
-                "#!/usr/bin/env sh\nset -eu\necho 'Open this folder in Xcode, add BlendEnginePlayer.swift + Assets + web_player to an iOS App target, choose your signing team, then Archive to create an IPA.'\nexit 2\n",
-                executable=True)
-    _write_text(os.path.join(ios_dir, "README.md"), "# iOS Export\n\nApple requires Xcode and a signing team for IPA files. This export includes SwiftUI/WebKit player source, web runtime, and BlendEngine game data. Add these files to an iOS App target and archive/sign in Xcode.\n")
-    return [
-        "ios_project/Assets/game_data.json",
-        "ios_project/Assets/platform_config.json",
-        "ios_project/web_player/index.html",
-        "ios_project/web_player/player.js",
-        "ios_project/web_player/game_data.json",
-        "ios_project/BlendEnginePlayer.swift",
-        "ios_project/Info.plist",
-        "ios_project/build_ios_ipa.sh",
-        "ios_project/README.md",
-    ]
+def _write_ios_project(package_dir, game_data, platform_config, context):
+    """Prepare the current native scene; build a real unsigned IPA only on macOS."""
+    ios_export.require_supported_adapter(game_data)
+    settings = context.scene.blendengine_export
+    sdk_root = getattr(settings, "android_template_path", "")
+    source_root = ios_export.find_source_root(bpy.path.abspath(sdk_root) if sdk_root else None)
+    exporter_path = source_root / "tools/blendengine/export_native_assets.py"
+    if not exporter_path.is_file():
+        raise ios_export.NativeIOSExportError("Current-scene native asset exporter is missing: " + str(exporter_path))
+    spec = importlib.util.spec_from_file_location("blendengine_ios_asset_export", exporter_path)
+    exporter = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(exporter)
+    with tempfile.TemporaryDirectory(prefix="blendengine-ios-assets-") as assets_dir:
+        exporter.export_scene_assets(context.scene, assets_dir)
+        project_dir = ios_export.prepare_native_project(
+            package_dir, game_data, assets_dir, source_root=source_root,
+            bundle_identifier=getattr(settings, "ios_bundle_identifier", ios_export.DEFAULT_BUNDLE_ID),
+            version_name=getattr(settings, "ios_version_name", "1.1"),
+            version_code=getattr(settings, "ios_version_code", 2))
+    platform_config.update({
+        "ios_project": os.path.relpath(project_dir, package_dir),
+        "ios_build_status": "native_project_prepared", "ipa": "",
+        "requires_macos_xcode": True, "signed": False,
+        "physical_device_installable": False, "device_runtime_tested": False,
+    })
+    if ios_export.sys.platform == "darwin":
+        result = ios_export.build_unsigned_ipa(
+            project_dir,
+            godot=bpy.path.abspath(settings.godot_executable) if getattr(settings, "godot_executable", "") else None,
+            bundle_identifier=getattr(settings, "ios_bundle_identifier", ios_export.DEFAULT_BUNDLE_ID),
+            version_name=getattr(settings, "ios_version_name", "1.1"),
+            version_code=getattr(settings, "ios_version_code", 2))
+        platform_config.update({"ipa": os.path.relpath(result["artifact"], package_dir),
+                               "ios_build_status": "unsigned_ipa_built",
+                               "ipa_validation": result})
+    _write_json(os.path.join(package_dir, "platform_config.json"), platform_config)
+    return [os.path.relpath(os.path.join(directory, name), package_dir)
+            for directory, subdirs, names in os.walk(project_dir)
+            for name in names
+            if ".godot" not in os.path.relpath(directory, project_dir).split(os.sep)
+            and ".blendengine-tools" not in os.path.relpath(directory, project_dir).split(os.sep)
+            and "__pycache__" not in os.path.relpath(directory, project_dir).split(os.sep)]
 
 
 def prepare_build_package(context):
@@ -518,6 +547,8 @@ def prepare_build_package(context):
     game_data = serialize_game_data(scene)
     if project.target_platform == "ANDROID":
         android_export.require_supported_adapter(game_data)
+    elif project.target_platform == "IOS":
+        ios_export.require_supported_adapter(game_data)
     manifest = {
         "name": package_name,
         "title": project.game_title,
@@ -543,17 +574,20 @@ def prepare_build_package(context):
         "touch_controls": project.target_platform in {"IOS", "ANDROID"},
         "memory_budget_mb": scene.blendengine_optimization.max_runtime_ram_mb,
         "runtime": (android_export.NATIVE_RUNTIME if project.target_platform == "ANDROID" else
-                    "BlendEngine Python runtime for desktop; browser player for iOS/Web"),
+                    ios_export.NATIVE_RUNTIME if project.target_platform == "IOS" else
+                    "Browser player" if project.target_platform == "WEB" else
+                    "BlendEngine Python runtime for desktop"),
         "native_toolchain_required": project.target_platform in {"IOS", "ANDROID", "WEB"},
         "desktop_launcher": project.target_platform in {"WINDOWS", "LINUX", "MACOS"},
         "android_native_apk": project.target_platform == "ANDROID",
-        "native_gameplay_adapter": game_data["native_adapter"] if project.target_platform == "ANDROID" else "",
+        "native_gameplay_adapter": game_data["native_adapter"] if project.target_platform in {"ANDROID", "IOS"} else "",
         "ios_xcode_required": project.target_platform == "IOS",
         "notes": (
             "Android builds use the Godot native C++ OpenGL ES runtime and the LAST_SIGNAL gameplay adapter; "
             "a matching Godot/Android SDK/JDK toolchain is required. APK structure and signing checks do not "
             "replace device testing. Desktop packages run through BlendEngine/Blender; "
-            "iOS/Web retain their existing browser player projects."
+            "iOS prepares the native Godot project for macOS/Xcode and an unsigned device IPA; "
+            "Apple signing is required for physical iPhone installation. Only the explicit Web target uses a browser player."
         ),
     }
     platform_path = os.path.join(package_dir, "platform_config.json")
@@ -633,7 +667,12 @@ def prepare_build_package(context):
         manifest["apk"] = platform_config["apk"]
         manifest["device_runtime_tested"] = False
     elif project.target_platform == "IOS":
-        manifest["files"].extend(_write_ios_project(package_dir, game_data, platform_config))
+        manifest["files"].extend(_write_ios_project(package_dir, game_data, platform_config, context))
+        manifest["native_runtime"] = ios_export.NATIVE_RUNTIME
+        manifest["ipa"] = platform_config["ipa"]
+        manifest["ios_build_status"] = platform_config["ios_build_status"]
+        manifest["signed"] = False
+        manifest["device_runtime_tested"] = False
 
     readme_path = os.path.join(package_dir, "README.txt")
     with open(readme_path, "w", encoding="utf-8") as handle:
@@ -643,7 +682,7 @@ def prepare_build_package(context):
             "  Linux:   ./run_game.sh\n"
             "  Windows: run_game.bat\n"
             "  macOS:   ./run_game.command\n\n"
-            "Android exports run a native Godot game. iOS/Web use their generated player projects.\n\n"
+            "Android and iOS exports use native Godot games. The explicit Web target uses a browser player.\n\n"
             "Controls:\n"
             "  W/A/S/D move, Space jump, Shift sprint, F or Left Mouse attack, R or Right Mouse aim, E interact, Esc stop.\n\n"
             "Platform export:\n"
@@ -651,7 +690,8 @@ def prepare_build_package(context):
             "  Android target builds android_project/build/LastSignal-debug.apk with native Godot C++/OpenGL ES.\n"
             "  Android supports the LAST_SIGNAL story adapter; other Blender Python behaviors are not converted.\n"
             "  APK build checks verify structure and signature; device gameplay testing is a separate step.\n"
-            "  iOS target writes ios_project files for Xcode signing/archive.\n\n"
+            "  iOS target prepares ios_project; macOS/Xcode builds a real unsigned device IPA.\n"
+            "  An unsigned IPA requires Apple signing before physical iPhone installation.\n\n"
             "Optimization:\n"
             "  This package includes editor_tools, multiplayer, runtime_optimization, and performance_budget data.\n"
             % project.game_title

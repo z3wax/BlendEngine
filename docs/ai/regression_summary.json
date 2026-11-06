@@ -1,0 +1,53 @@
+{
+  "existing_tests": 45,
+  "new_ai_tests": 65,
+  "total_tests": 110,
+  "passed": true,
+  "blender_version": "3.6.23",
+  "editor_tests": {
+    "name": "editor-agent",
+    "tests": 14,
+    "passed": true,
+    "log": "/workspace/artifacts/ai-agents/final/editor-agent.log"
+  },
+  "ai_suites": [
+    {
+      "name": "agent-core",
+      "passed": true,
+      "exit_code": 0,
+      "tests": 22,
+      "log": "/workspace/artifacts/ai-agents/final/agent-core.log"
+    },
+    {
+      "name": "agent-provider",
+      "passed": true,
+      "exit_code": 0,
+      "tests": 12,
+      "log": "/workspace/artifacts/ai-agents/final/agent-provider.log"
+    },
+    {
+      "name": "npc-navigation",
+      "passed": true,
+      "exit_code": 0,
+      "tests": 7,
+      "log": "/workspace/artifacts/ai-agents/final/npc-navigation.log"
+    },
+    {
+      "name": "blender-npc",
+      "passed": true,
+      "exit_code": 0,
+      "tests": 9,
+      "log": "/workspace/artifacts/ai-agents/final/blender-npc.log"
+    },
+    {
+      "name": "agent-export",
+      "passed": true,
+      "exit_code": 0,
+      "tests": 1,
+      "log": "/workspace/artifacts/ai-agents/final/agent-export.log"
+    }
+  ],
+  "existing_report": "/workspace/artifacts/ai-agents/final/existing_regressions.json",
+  "scope": "Python and Blender integration only; native/Android/iOS checks are separate",
+  "external_model_calls_tested": false
+}

@@ -1,0 +1,21 @@
+{
+  "native_ai": "offline goal planning with bounded spherecast/grid navigation",
+  "modes": [
+    "IDLE",
+    "FOLLOW_PLAYER",
+    "GUIDE",
+    "PATROL",
+    "GUARD"
+  ],
+  "max_agents": 8,
+  "decision_interval_default_seconds": 0.15,
+  "path_search_max_expansions": 512,
+  "source_glb_sha256": "fbab5d329608b05f4cb4affa5f6883a47ed6f6fcdf0fb45cab11d7720d31336f",
+  "glb_unchanged": true,
+  "story_smoke_pass": true,
+  "npc_smoke_pass": true,
+  "native_capture": "Native-Scout-demo.mp4",
+  "capture_unretimed": true,
+  "runtime_needs_api_key": false,
+  "physical_android_tested": false
+}

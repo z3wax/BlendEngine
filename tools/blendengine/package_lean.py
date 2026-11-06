@@ -42,8 +42,10 @@ SDK_TOOLS = (
     "docs/LEAN_ENGINE.md",
     "docs/ANDROID.md",
     "docs/LAST_SIGNAL.md",
+    "docs/AI_AGENTS.md",
+    "docs/IOS.md",
 )
-SDK_DIRECTORIES = ("tools/android", "docs/android", "docs/render", "docs/story")
+SDK_DIRECTORIES = ("tools/android", "tools/ios", "docs/android", "docs/render", "docs/story", "docs/ai")
 SKIP_DIRECTORIES = {
     "__pycache__", ".git", ".pytest_cache", ".mypy_cache", ".godot", ".gradle", ".kotlin",
     ".blendengine-tools", "build", "builds",

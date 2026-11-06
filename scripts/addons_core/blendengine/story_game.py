@@ -342,6 +342,9 @@ class StoryGame(demo_game.DemoGame):
         self.player.rotation_euler=(0,0,0)
         self.rig.rotation_euler.z=math.pi
         self.session._vertical_velocity[self.player.name]=0.0
+        reset_agents = getattr(self.session, 'reset_agents', None)
+        if reset_agents is not None:
+            reset_agents()
         for side in ('L','R'):
             self.rig.pose.bones['leg.'+side].rotation_euler.x=0
             self.rig.pose.bones['calf.'+side].rotation_euler.x=0

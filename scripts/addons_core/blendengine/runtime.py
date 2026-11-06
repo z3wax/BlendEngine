@@ -7,7 +7,7 @@ import time
 
 from mathutils import Vector
 
-from . import performance, render_sync, utils
+from . import ai_system, performance, render_sync, utils
 
 
 ACTIVE_SESSION = None
@@ -213,6 +213,15 @@ class GameSession:
                 player = self.player
                 if player is not None:
                     self._camera_offsets[obj.name] = obj.location - player.location
+        self._npc_agent_manager = ai_system.AgentManager(self)
+        self.agent_states = self._npc_agent_manager.statuses
+
+    def reset_agents(self):
+        """Reset runtime-only NPC plans, transforms and poses for replay."""
+        manager = getattr(self, "_npc_agent_manager", None)
+        if manager is not None:
+            manager.reset()
+        self._npc_attack_timers.clear()
 
     def start(self):
         project = self.scene.blendengine_project
@@ -224,6 +233,7 @@ class GameSession:
         self.log("Test Run started for %s." % project.game_title)
         if self._gameplay is not None:
             self._gameplay.start()
+        self.reset_agents()
         self.execute_behaviors("ON_START", 0.0)
         self._update_runtime_metrics(force=True)
         self.flush_log()
@@ -236,6 +246,7 @@ class GameSession:
         self._set_first_person_player_visibility(True)
         if self._gameplay is not None:
             self._gameplay.stop()
+        self.reset_agents()
         _remove_hud_handler()
         self.log("Test Run %s." % status.lower())
         self.flush_log()
@@ -244,6 +255,9 @@ class GameSession:
         """Invalidate role/asset indices after scripted scene structure changes."""
         self._index_dirty = True
         self._metrics_dirty = True
+        manager = getattr(self, "_npc_agent_manager", None)
+        if manager is not None:
+            manager.world.signature = None
 
     def _refresh_scene_index(self):
         """Read changing component roles once per tick, keeping RNA edits live.
@@ -576,26 +590,7 @@ class GameSession:
                 obj.hide_viewport = hidden
 
     def _update_npcs(self, dt):
-        player = self.player
-        if player is None:
-            return
-        for obj in self._npcs:
-            npc = obj.blendengine_object.npc_behavior
-            if not npc.enabled:
-                continue
-            target = npc.target_object or player
-            if npc.behavior_template == "PATROL":
-                origin = self._patrol_origins.setdefault(obj.name, obj.location.copy())
-                angle = self.elapsed * max(0.2, npc.move_speed) / max(1.0, npc.patrol_radius)
-                obj.location.x = origin.x + math.cos(angle) * npc.patrol_radius
-                obj.location.y = origin.y + math.sin(angle) * npc.patrol_radius
-            elif target is not None and npc.behavior_template in {"FOLLOW_PLAYER", "ATTACK", "COMPANION", "ENEMY_BOSS"}:
-                self._move_toward(obj, target.location, npc.move_speed, dt, stop_distance=max(0.5, npc.attack_range))
-                if npc.behavior_template in {"ATTACK", "ENEMY_BOSS"}:
-                    self._try_npc_attack(obj, player, npc)
-            elif target is not None and npc.behavior_template == "FLEE":
-                away = obj.location + (obj.location - target.location)
-                self._move_toward(obj, away, npc.move_speed, dt, stop_distance=0.0)
+        self._npc_agent_manager.update(dt)
 
     def _try_npc_attack(self, npc_obj, player, npc):
         if (npc_obj.location - player.location).length > max(0.8, npc.attack_range):

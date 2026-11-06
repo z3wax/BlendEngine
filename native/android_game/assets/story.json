@@ -165,5 +165,21 @@
   "lossless_image_sharing": {
     "duplicate_images": 7,
     "bytes_saved": 5873692
-  }
+  },
+  "npc_agents": [
+    {
+      "name": "Rescue Scout",
+      "behavior": "GUIDE",
+      "position": [
+        1.5,
+        -8,
+        0.92
+      ],
+      "speed": 3.0,
+      "stop_distance": 1.4,
+      "detection_range": 20.0,
+      "patrol_radius": 5.0,
+      "decision_interval": 0.15
+    }
+  ]
 }
