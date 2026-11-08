@@ -5,7 +5,7 @@
 import bpy
 from bpy.types import Menu, Panel, UIList
 
-from . import input_system, performance, utils
+from . import ai_game_creator, input_system, performance, utils
 
 
 class TOPBAR_MT_blendengine(Menu):
@@ -27,6 +27,7 @@ class TOPBAR_MT_blendengine(Menu):
             op = row.operator("blendengine.open_page", text=label, icon=icon)
             op.page = page
         layout.operator_context = "INVOKE_DEFAULT"
+        layout.operator("blendengine.ai_generate_game", text="AI Create Game", icon="SHADERFX")
         layout.operator("blendengine.easy_create_game", text="New Game", icon="ADD")
         layout.operator_context = "EXEC_REGION_WIN"
         if project.test_running:
@@ -223,6 +224,7 @@ def _draw_engine_dashboard(layout, context):
     row = layout.row(align=True)
     row.scale_y = 1.45
     row.operator_context = "INVOKE_DEFAULT"
+    row.operator("blendengine.ai_generate_game", text="AI Create", icon="SHADERFX")
     row.operator("blendengine.easy_create_game", text="New Game", icon="ADD")
     row.operator_context = "EXEC_DEFAULT"
     if project.test_running:
@@ -651,6 +653,9 @@ def _draw_build(layout, scene):
 
 def _draw_game_creation(layout, scene):
     project = scene.blendengine_project
+    box = layout.box()
+    box.label(text="AI Game Creator", icon="SHADERFX")
+    ai_game_creator.draw_ai_creator(box, bpy.context, compact=True)
     layout.use_property_split = True
     layout.use_property_decorate = False
     layout.prop(project, "game_dimension")

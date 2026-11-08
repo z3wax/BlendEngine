@@ -1,7 +1,7 @@
 <!-- z3wax:presentation:start -->
 ![BlendEngine](docs/brand/banner.svg)
 
-[Loyiha xaritasi va misol](docs/PROJECT_GUIDE.md) · [Roadmap](ROADMAP.md) · [Baholash](docs/EVALUATION.md) · [Changelog](CHANGELOG.md) · [Relizlar](docs/RELEASING.md)
+[AI Game Creator](docs/AI_GAME_CREATOR.md) · [Loyiha xaritasi va misol](docs/PROJECT_GUIDE.md) · [Roadmap](ROADMAP.md) · [Baholash](docs/EVALUATION.md) · [Changelog](CHANGELOG.md) · [Relizlar](docs/RELEASING.md)
 
 [![Documentation](https://github.com/z3wax/BlendEngine/actions/workflows/documentation.yml/badge.svg)](https://github.com/z3wax/BlendEngine/actions/workflows/documentation.yml)
 
@@ -12,7 +12,15 @@ Hujjatlar CI holati dastur yoki model testlari holatidan alohida.
 
 # BlendEngine
 
-Blender manba kodiga tayangan, o'yin ishlab chiqish va interaktiv 3D ish jarayonlarini o'rganishga yo'naltirilgan engine loyihasi.
+Blender manba kodiga tayangan, o'yin ishlab chiqish va interaktiv 3D ish jarayonlarini o'rganishga yo'naltirilgan engine loyihasi. BlendEngine endi AI game creator sifatida ham ishlaydi: g'oyani oddiy so'zlar bilan yozasiz, u o'ynaladigan level quradi.
+
+## AI Game Creator
+
+![AI yaratgan to'rt o'yin](docs/ai/ai_game_creator.jpg)
+
+3D View yon panelidagi **BlendEngine > AI Game Creator** bo'limiga g'oyani istalgan tilda yozing, masalan `O'rmonda 12 ta tanga yig'adigan, bo'rilardan qochadigan 3D o'yin`, va **Create Game with AI** tugmasini bosing. Natija: dunyo, qahramon, dushmanlar, buyumlar, xavfli zonalar, g'alaba sharti va no-code qoidalar bilan tayyor sahna; **Play** bilan o'ynab ko'ring, **Change something** bilan o'zgartiring.
+
+Claude (Anthropic API kaliti bilan) yoki internet talab qilmaydigan offline rejalashtiruvchi (o'zbek, ingliz, rus kalit so'zlari) ishlatiladi. Batafsil: [docs/AI_GAME_CREATOR.md](docs/AI_GAME_CREATOR.md).
 
 **Grafika:** [High/Cinematic rejimlari, namuna sahna va ishga tushirish](docs/GRAPHICS.md).
 

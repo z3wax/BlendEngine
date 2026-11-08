@@ -93,7 +93,8 @@ def validate_scene(scene):
         if settings.is_game_object or settings.components:
             game_objects += 1
             behavior_count += len(settings.behaviors)
-            if _component_enabled(obj, "TRIGGER_ZONE") and obj.type == "MESH" and obj.display_type != "WIRE":
+            if (_component_enabled(obj, "TRIGGER_ZONE") and obj.type == "MESH" and obj.display_type != "WIRE"
+                    and not obj.get("blendengine_visible_trigger")):
                 result.warnings.append("Trigger %s is visible; set Display As Wire if it should be hidden." % obj.name)
     if game_objects == 0:
         result.warnings.append("No BlendEngine game objects were found.")
@@ -115,6 +116,16 @@ def validate_scene(scene):
                 result.warnings.append("Suggested fix: " + item["suggested_fix"])
 
     return result
+
+
+def _world_bounds(scene):
+    """Optional (min_x, min_y, max_x, max_y) play area stored on the scene."""
+    bounds = scene.get("blendengine_world_bounds")
+    try:
+        values = tuple(float(value) for value in bounds)
+    except (TypeError, ValueError):
+        return None
+    return values if len(values) == 4 else None
 
 
 def _compare(left, operator, right):
@@ -186,6 +197,13 @@ class GameSession:
         self._timer_state = {}
         self._trigger_overlaps = set()
         self._collision_overlaps = set()
+        self.end_status = ""
+        self._removed = set()
+        self._spawned = []
+        self._player = utils.find_player_object(self.scene)
+        self._bounds = _world_bounds(self.scene)
+        self._two_d = self.scene.blendengine_project.game_dimension == "TWO_D"
+        self._snapshot = self._capture_state()
 
         for obj in self.scene.objects:
             self._ground_z[obj.name] = obj.location.z
@@ -210,10 +228,85 @@ class GameSession:
         project = self.scene.blendengine_project
         project.test_running = False
         project.test_status = status
+        self._restore_state()
         self._set_first_person_player_visibility(True)
         _remove_hud_handler()
         self.log("Test Run %s." % status.lower())
         self.flush_log()
+
+    def _capture_state(self):
+        """Remember what Play Mode changes so Stop returns the editor scene."""
+        state = {}
+        for obj in self.scene.objects:
+            settings = obj.blendengine_object
+            entry = {
+                "location": obj.location.copy(),
+                "rotation": obj.rotation_euler.copy(),
+                "hide_viewport": obj.hide_viewport,
+                "hide_render": obj.hide_render,
+            }
+            try:
+                entry["hidden"] = obj.hide_get()
+            except Exception:
+                entry["hidden"] = None
+            if settings.health.enabled:
+                entry["health"] = settings.health.current_health
+            if settings.variables:
+                entry["variables"] = [(variable.name, _variable_value(variable)) for variable in settings.variables]
+            state[obj.name] = entry
+        return state
+
+    def _restore_state(self):
+        import bpy
+        for duplicate in self._spawned:
+            try:
+                bpy.data.objects.remove(duplicate, do_unlink=True)
+            except Exception:
+                pass
+        self._spawned = []
+        for name, entry in self._snapshot.items():
+            obj = self.scene.objects.get(name)
+            if obj is None:
+                continue
+            obj.location = entry["location"]
+            obj.rotation_euler = entry["rotation"]
+            obj.hide_viewport = entry["hide_viewport"]
+            obj.hide_render = entry["hide_render"]
+            if entry["hidden"] is not None:
+                try:
+                    obj.hide_set(entry["hidden"])
+                except Exception:
+                    pass
+            if "health" in entry:
+                obj.blendengine_object.health.current_health = entry["health"]
+            for variable_name, value in entry.get("variables", ()):
+                variable = _variable_lookup(obj, variable_name)
+                if variable is not None:
+                    _set_variable_value(variable, value)
+
+    def _remove_from_play(self, obj):
+        """Hide a collected pickup or defeated enemy for the rest of the run."""
+        self._removed.add(obj.name)
+        obj.hide_viewport = True
+        obj.hide_render = True
+        try:
+            obj.hide_set(True)
+        except Exception:
+            pass
+
+    def finish_with(self, status, message=""):
+        if message:
+            self.log(message)
+        if not self.end_status:
+            self.end_status = status
+        self.stop_requested = True
+
+    def lookup_variable(self, owner, variable_name):
+        """Owner's variable, falling back to the player's (score, inventory)."""
+        variable = _variable_lookup(owner, variable_name)
+        if variable is None and self._player is not None and self._player != owner:
+            variable = _variable_lookup(self._player, variable_name)
+        return variable
 
     def _prepare_play_view(self):
         def _apply():
@@ -287,6 +380,7 @@ class GameSession:
         self._attack_cooldown = max(0.0, self._attack_cooldown - dt)
         self.elapsed += dt
         self.frame += 1
+        self._player = utils.find_player_object(self.scene)
         self._update_player(dt)
         self._update_npcs(dt)
         self.execute_behaviors("ON_UPDATE", dt)
@@ -364,6 +458,9 @@ class GameSession:
             axis_y += 1.0
         if self._action_down(actions, "MOVE_BACKWARD"):
             axis_y -= 1.0
+        if controller.controller_type == "SIDE_SCROLLER":
+            # Side view: W/S would walk into or out of the screen.
+            axis_y = 0.0
 
         movement = Vector((axis_x, axis_y, 0.0))
         if movement.length > 1.0:
@@ -381,6 +478,7 @@ class GameSession:
             player.location += movement * speed * dt
             if movement.length > 0.001:
                 player.rotation_euler.z = math.atan2(movement.x, movement.y)
+        self._clamp_to_bounds(player)
 
         ground_z = self._ground_height_at(player, default=self._ground_z.get(player.name, player.location.z))
         velocity = self._vertical_velocity.get(player.name, 0.0)
@@ -435,7 +533,7 @@ class GameSession:
         for obj in self.scene.objects:
             if obj == camera or obj == player or obj.type in {"CAMERA", "EMPTY"}:
                 continue
-            if obj.blendengine_object.object_tag in {"Weapon", "FirstPersonArms"}:
+            if obj.blendengine_object.object_tag in {"Weapon", "FirstPersonArms"} or obj.name in self._removed:
                 continue
             settings = obj.blendengine_object
             if settings.optimization.dynamic_object and settings.player_controller.enabled:
@@ -462,14 +560,18 @@ class GameSession:
             return
         for obj in self.scene.objects:
             npc = obj.blendengine_object.npc_behavior
-            if not npc.enabled:
+            if not npc.enabled or obj.name in self._removed:
                 continue
             target = npc.target_object or player
             if npc.behavior_template == "PATROL":
                 origin = self._patrol_origins.setdefault(obj.name, obj.location.copy())
                 angle = self.elapsed * max(0.2, npc.move_speed) / max(1.0, npc.patrol_radius)
-                obj.location.x = origin.x + math.cos(angle) * npc.patrol_radius
-                obj.location.y = origin.y + math.sin(angle) * npc.patrol_radius
+                if self._two_d:
+                    # Pace back and forth along the side-view lane.
+                    obj.location.x = origin.x + math.sin(angle) * npc.patrol_radius
+                else:
+                    obj.location.x = origin.x + math.cos(angle) * npc.patrol_radius
+                    obj.location.y = origin.y + math.sin(angle) * npc.patrol_radius
             elif target is not None and npc.behavior_template in {"FOLLOW_PLAYER", "ATTACK", "COMPANION", "ENEMY_BOSS"}:
                 self._move_toward(obj, target.location, npc.move_speed, dt, stop_distance=max(0.5, npc.attack_range))
                 if npc.behavior_template in {"ATTACK", "ENEMY_BOSS"}:
@@ -477,6 +579,9 @@ class GameSession:
             elif target is not None and npc.behavior_template == "FLEE":
                 away = obj.location + (obj.location - target.location)
                 self._move_toward(obj, away, npc.move_speed, dt, stop_distance=0.0)
+            if self._two_d:
+                obj.location.y = self._patrol_origins.setdefault(obj.name, obj.location.copy()).y
+            self._clamp_to_bounds(obj)
 
     def _try_npc_attack(self, npc_obj, player, npc):
         if (npc_obj.location - player.location).length > max(0.8, npc.attack_range):
@@ -487,11 +592,11 @@ class GameSession:
         self._npc_attack_timers[npc_obj.name] = self.elapsed + 1.1
         health = player.blendengine_object.health
         if health.enabled:
-            health.current_health = max(0.0, health.current_health - 8.0)
+            damage = getattr(npc, "attack_damage", 8.0)
+            health.current_health = max(0.0, health.current_health - damage)
             self.log("%s hit player. Health %.0f." % (npc_obj.name, health.current_health))
             if health.current_health <= 0.0:
-                self.log("Player eliminated.")
-                self.stop_requested = True
+                self.finish_with("Game Over", "Player eliminated.")
 
     def _shoot_weapon(self):
         if self._attack_cooldown > 0.0:
@@ -499,6 +604,9 @@ class GameSession:
         player = utils.find_player_object(self.scene)
         camera = self.scene.camera
         if player is None or camera is None:
+            return
+        if not player.blendengine_object.player_controller.attack_key:
+            # An empty Attack Key means this game has no attack.
             return
         ammo = _variable_lookup(player, "Ammo")
         if ammo is not None and _variable_value(ammo) <= 0:
@@ -550,6 +658,8 @@ class GameSession:
         current = obj
         fallback = None
         while current is not None:
+            if current.name in self._removed:
+                return None
             if current.blendengine_object.object_tag in {"Zombie", "Enemy"}:
                 fallback = current
                 health = current.blendengine_object.health
@@ -561,17 +671,12 @@ class GameSession:
 
     def _damage_enemy(self, enemy, amount, player):
         health = enemy.blendengine_object.health
-        if not health.enabled:
+        if not health.enabled or enemy.name in self._removed:
             return
         health.current_health = max(0.0, health.current_health - amount)
         self._last_hit_name = enemy.name
         if health.current_health <= 0.0:
-            enemy.hide_viewport = True
-            enemy.hide_render = True
-            try:
-                enemy.hide_set(True)
-            except Exception:
-                pass
+            self._remove_from_play(enemy)
             kills = _variable_lookup(player, "Kills")
             score = _variable_lookup(player, "Score")
             if kills is not None:
@@ -583,17 +688,32 @@ class GameSession:
             self.log("%s hit. Health %.0f." % (enemy.name, health.current_health))
 
     def _ground_height_at(self, obj, default):
+        """Height to stand at: the first Ground-tagged surface below the
+        object's middle. Casting from the middle (not from far above) lets the
+        player walk under platforms and step down off them; hits on the
+        object itself or on non-ground objects are skipped."""
         half_height = max(0.1, obj.dimensions.z * 0.5)
-        origin = Vector((obj.location.x, obj.location.y, obj.location.z + 6.0))
+        origin = Vector((obj.location.x, obj.location.y, obj.location.z + 0.25))
         direction = Vector((0.0, 0.0, -1.0))
         try:
             depsgraph = self.context.evaluated_depsgraph_get()
-            hit, loc, _normal, _index, hit_obj, _matrix = self.scene.ray_cast(depsgraph, origin, direction, distance=14.0)
-            if hit and hit_obj is not None and hit_obj != obj and hit_obj.blendengine_object.object_tag == "Ground":
-                return loc.z + half_height
+            for _attempt in range(8):
+                hit, loc, _normal, _index, hit_obj, _matrix = self.scene.ray_cast(depsgraph, origin, direction, distance=40.0)
+                if not hit:
+                    break
+                if hit_obj is not None and hit_obj.name != obj.name and hit_obj.blendengine_object.object_tag == "Ground":
+                    return loc.z + half_height
+                origin = loc + direction * 0.02
         except Exception:
             pass
         return default
+
+    def _clamp_to_bounds(self, obj):
+        if self._bounds is None:
+            return
+        min_x, min_y, max_x, max_y = self._bounds
+        obj.location.x = min(max(obj.location.x, min_x), max_x)
+        obj.location.y = min(max(obj.location.y, min_y), max_y)
 
     def _move_toward(self, obj, target_location, speed, dt, stop_distance=0.0):
         delta = Vector((target_location.x - obj.location.x, target_location.y - obj.location.y, 0.0))
@@ -652,10 +772,14 @@ class GameSession:
 
     def _update_triggers(self, dt):
         active_pairs = set()
-        triggers = [obj for obj in self.scene.objects if _component_enabled(obj, "TRIGGER_ZONE")]
+        objects = [obj for obj in self.scene.objects if obj.name not in self._removed]
+        triggers = [obj for obj in objects if _component_enabled(obj, "TRIGGER_ZONE")]
+        # Static objects never move into a trigger, so only moving game objects are tested.
         game_objects = [
-            obj for obj in self.scene.objects
-            if obj.blendengine_object.is_game_object and not _component_enabled(obj, "TRIGGER_ZONE")
+            obj for obj in objects
+            if obj.blendengine_object.is_game_object
+            and not obj.blendengine_object.optimization.static_object
+            and not _component_enabled(obj, "TRIGGER_ZONE")
         ]
         for trigger in triggers:
             for other in game_objects:
@@ -672,7 +796,10 @@ class GameSession:
         self._trigger_overlaps = active_pairs
 
     def _update_collisions(self, dt):
-        colliders = [obj for obj in self.scene.objects if _component_enabled(obj, "COLLIDER")]
+        colliders = [
+            obj for obj in self.scene.objects
+            if obj.name not in self._removed and _component_enabled(obj, "COLLIDER")
+        ]
         active_pairs = set()
         for index, first in enumerate(colliders):
             for second in colliders[index + 1:]:
@@ -699,7 +826,7 @@ class GameSession:
                 if condition.text_value.upper() not in self.input_state:
                     return False
             elif condition.condition_type == "VARIABLE_COMPARE":
-                variable = _variable_lookup(obj, condition.variable_name)
+                variable = self.lookup_variable(obj, condition.variable_name)
                 if variable is None:
                     return False
                 right = condition.number_value
@@ -734,15 +861,23 @@ class GameSession:
         elif action.action_type == "ROTATE_OBJECT":
             target.rotation_euler.z += action.number_value * dt
         elif action.action_type == "SET_VARIABLE":
-            variable = _variable_lookup(owner, action.variable_name)
+            variable = self.lookup_variable(owner, action.variable_name)
             if variable is not None:
                 _set_variable_value(variable, action.number_value if variable.variable_type != "STRING" else action.text_value)
+        elif action.action_type == "ADD_VARIABLE":
+            variable = self.lookup_variable(owner, action.variable_name)
+            if variable is not None and variable.variable_type in {"INT", "FLOAT"}:
+                _set_variable_value(variable, _variable_value(variable) + action.number_value)
+        elif action.action_type == "COLLECT_OBJECT":
+            self._remove_from_play(target)
+        elif action.action_type == "WIN_GAME":
+            self.finish_with("Victory", action.text_value or "You win!")
         elif action.action_type == "CHANGE_HEALTH":
             health = target.blendengine_object.health
             if health.enabled:
                 health.current_health = max(0.0, min(health.max_health, health.current_health + action.number_value))
                 if health.current_health <= 0.0 and health.game_over_on_death:
-                    self.stop_requested = True
+                    self.finish_with("Game Over", "%s was defeated." % target.name)
         elif action.action_type == "PLAY_ANIMATION":
             if action.animation is not None:
                 if target.animation_data is None:
@@ -756,9 +891,9 @@ class GameSession:
                 duplicate.data = target.data.copy()
             duplicate.location += Vector(action.vector_value)
             self.scene.collection.objects.link(duplicate)
+            self._spawned.append(duplicate)
         elif action.action_type == "GAME_OVER":
-            self.log(action.text_value or "Game Over")
-            self.stop_requested = True
+            self.finish_with("Game Over", action.text_value or "Game Over")
 
 
 def start_test_run(context):
@@ -814,6 +949,11 @@ def _draw_runtime_hud():
 
     lines = [
         "BlendEngine Play Mode",
+    ]
+    goal_text = scene.get("blendengine_goal_text")
+    if goal_text:
+        lines.append("Goal: %s" % goal_text)
+    lines += [
         "FPS %.0f  %.1f ms" % (project.runtime_fps, project.runtime_frame_ms),
         "RAM %.0f MB  Visible %d" % (project.runtime_memory_mb, project.runtime_visible_objects),
         "Tris %d  Draw %d  Tex %.1f MB" % (
@@ -835,6 +975,12 @@ def _draw_runtime_hud():
             lines.append("Ammo %s" % _variable_value(ammo))
         if kills is not None:
             lines.append("Kills %s" % _variable_value(kills))
+        collected = _variable_lookup(player, "Collected")
+        target = scene.get("blendengine_goal_target", 0)
+        if collected is not None and target:
+            lines.append("Collected %s / %s" % (_variable_value(collected), target))
+        if scene.get("blendengine_ai_generated"):
+            lines.append("Time %.0f s" % ACTIVE_SESSION.elapsed)
         if health.enabled:
             lines.append("Health %.0f / %.0f" % (health.current_health, health.max_health))
     if ACTIVE_SESSION._last_hit_name:

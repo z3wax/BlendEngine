@@ -35,7 +35,7 @@ jobs:
           python3 - <<'PY'
           import pathlib, re, urllib.parse, xml.etree.ElementTree as ET
           root = pathlib.Path.cwd()
-          paths = ['docs/brand/banner.svg', 'docs/brand/icon.svg', 'docs/PROJECT_GUIDE.md', 'ROADMAP.md', 'docs/EVALUATION.md', 'docs/RELEASING.md', 'CHANGELOG.md', 'docs/REPOSITORY_SETTINGS.md']
+          paths = ['docs/brand/banner.svg', 'docs/brand/icon.svg', 'docs/PROJECT_GUIDE.md', 'docs/AI_GAME_CREATOR.md', 'docs/GRAPHICS.md', 'ROADMAP.md', 'docs/EVALUATION.md', 'docs/RELEASING.md', 'CHANGELOG.md', 'docs/REPOSITORY_SETTINGS.md']
           errors = []
           for name in paths:
               p = root / name

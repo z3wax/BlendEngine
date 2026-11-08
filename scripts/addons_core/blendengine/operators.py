@@ -637,7 +637,10 @@ class BE_OT_test_run_scene(Operator):
         if event.type == "TIMER":
             self._session.step(1.0 / 60.0)
             if self._session.stop_requested or not context.scene.blendengine_project.test_running:
-                return self._finish(context, "Stopped")
+                status = self._session.end_status or "Stopped"
+                if status != "Stopped":
+                    self.report({"INFO"}, "Game finished: %s" % status)
+                return self._finish(context, status)
             return {"PASS_THROUGH"}
 
         if event.value in {"PRESS", "RELEASE"}:

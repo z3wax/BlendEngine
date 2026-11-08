@@ -18,6 +18,18 @@ The first screen is a game editor, not a Blender modeling workspace. The top bar
 
 Legacy Blender pages such as Modeling, Sculpting, Shading, UV Editing, and Geometry Nodes are hidden from the main workflow.
 
+## AI Game Creator
+
+Describe a game in plain words and BlendEngine builds a playable level for it.
+
+1. Open the 3D View sidebar, `BlendEngine` tab, `AI Game Creator` (or Top Bar `BlendEngine > AI Create Game`).
+2. Type an idea in any language, for example `2D platformer in a snowy world, collect 15 stars and reach the portal`.
+3. Pick a designer: `Auto` uses Claude when an Anthropic API key is set in the add-on preferences, otherwise the offline keyword planner (Uzbek, English, Russian).
+4. Press `Create Game with AI`, then `Play`.
+5. Use `Change something` for edits such as `more enemies, night time, add a boss`, or `New Layout` to reshuffle the level.
+
+The generated scene is ordinary BlendEngine content: every pickup, hazard, and win condition is a no-code rule you can open in `Logic`. See `docs/AI_GAME_CREATOR.md` in the repository for details.
+
 ## Starter Game
 
 The default 3D template is `Neon Quarantine`, a cyberpunk first-person zombie shooter built from the local models in `/home/abdulhodiy/Desktop/MODELS/`:

@@ -363,7 +363,8 @@ addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
 function color(tag, type){
   if(tag === 'Player' || tag === 'PlayerBody') return '#00d7bd';
   if(tag === 'Enemy' || tag === 'Zombie') return '#c53333';
-  if(tag === 'Coin') return '#f5bf35';
+  if(tag === 'Coin' || tag === 'Pickup') return '#f5bf35';
+  if(tag === 'Goal') return '#5ad8ff';
   if(tag === 'Damage') return '#d82188';
   if(tag === 'Health') return '#39e876';
   if(tag === 'Water') return '#4ab6c7';
@@ -396,7 +397,7 @@ function draw(){
   }
   for(const obj of data.objects){
     const [x,y]=worldToScreen(obj.location[0], obj.location[1]);
-    const r = (obj.tag === 'Player' || obj.tag === 'PlayerBody') ? 14 : (obj.tag === 'Enemy' || obj.tag === 'Zombie') ? 12 : obj.tag === 'Coin' ? 8 : 10;
+    const r = (obj.tag === 'Player' || obj.tag === 'PlayerBody') ? 14 : (obj.tag === 'Enemy' || obj.tag === 'Zombie') ? 12 : (obj.tag === 'Coin' || obj.tag === 'Pickup') ? 8 : 10;
     ctx.fillStyle = color(obj.tag, obj.type);
     ctx.globalAlpha = obj.tag === 'Ground' ? .2 : .95;
     ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();

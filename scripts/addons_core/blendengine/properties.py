@@ -139,6 +139,10 @@ ACTION_TYPE_ITEMS = (
     ("GAME_OVER", "Game Over", "Trigger game over state"),
     ("SHOW_LOG", "Show Log", "Write a readable message to the BlendEngine log"),
     ("CUSTOM_SCRIPT", "Custom Script", "Call an optional Python script later"),
+    # New items are appended so enum values stored in existing .blend files keep their meaning.
+    ("ADD_VARIABLE", "Add To Variable", "Add Value to a game variable; uses the player's variable when the owner has none"),
+    ("COLLECT_OBJECT", "Collect Object", "Hide the target object for the rest of the run so it can only be picked up once"),
+    ("WIN_GAME", "Win Game", "Show a victory message and end the run as won"),
 )
 
 INPUT_ACTION_ITEMS = (
@@ -505,6 +509,12 @@ class BE_NPCBehaviorSettings(PropertyGroup):
     patrol_radius: bpy.props.FloatProperty(name="Patrol Radius", default=5.0, min=0.0)
     detection_range: bpy.props.FloatProperty(name="Detection Range", default=10.0, min=0.0)
     attack_range: bpy.props.FloatProperty(name="Attack Range", default=2.0, min=0.0)
+    attack_damage: bpy.props.FloatProperty(
+        name="Attack Damage",
+        default=8.0,
+        min=0.0,
+        description="Health removed from the player by each attack",
+    )
     dialogue_text: bpy.props.StringProperty(name="Dialogue", default="Hello!")
     quest_id: bpy.props.StringProperty(name="Quest ID", default="")
 
