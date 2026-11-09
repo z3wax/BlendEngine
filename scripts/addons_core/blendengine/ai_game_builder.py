@@ -15,7 +15,7 @@ import bpy
 from mathutils import Matrix, Vector
 
 from . import ai_game_spec as spec_lib
-from . import components, graphics, input_system, optimization, templates, utils
+from . import components, graphics, input_system, optimization, runtime, templates, utils
 
 
 SPEC_TEXT_NAME = "BlendEngine AI Game Spec.json"
@@ -669,6 +669,9 @@ class GameBuilder:
         controller.run_speed = spec["run_speed"]
         controller.jump_force = spec["jump_force"]
         controller.sprint = spec["run_speed"] > spec["walk_speed"]
+        if controller.controller_type == "FIRST_PERSON":
+            controller.mouse_look = True
+            controller.head_bob = 0.035
         components.add_collider(player, tag="Player")
         health = components.add_health(player, max_health=spec["max_health"])
         health.game_over_on_death = True
@@ -765,6 +768,15 @@ class GameBuilder:
                 npc.attack_range = max(1.2, size * 0.9 + 0.5)
                 npc.patrol_radius = 2.0 + self.rng.uniform(0.0, 3.0) * (0.6 if self.is_2d else 1.0)
                 npc.attack_damage = group["damage"]
+                # Procedural body motion so enemies walk instead of gliding.
+                if group["shape"] in {"GHOST", "DRONE"}:
+                    npc.gait = "HOVER"
+                elif "zomb" in group["name"].lower() or "зомби" in group["name"].lower():
+                    npc.gait = "SHAMBLE"
+                else:
+                    npc.gait = "WALK"
+                npc.turn_speed = 2.5 if behavior == "ENEMY_BOSS" else 4.0
+                npc.stride_length = 0.8 * size
                 optimization.mark_dynamic_object(enemy)
                 optimization.mark_instancing_candidate(enemy)
                 utils.ensure_basic_animation_states(enemy)
@@ -1035,7 +1047,9 @@ class GameBuilder:
         data = bpy.data.cameras.new("AI_GameCamera")
         player_location = self.player.location.copy()
         if camera_type == "FIRST_PERSON":
-            location = player_location + Vector((0.0, 0.0, 0.72))
+            # Eyes sit just in front of the body so the camera never looks
+            # out from inside the player mesh (it is visible outside Play).
+            location = player_location + Vector((0.0, runtime.FIRST_PERSON_EYE_FORWARD, 0.72))
             rotation = (math.radians(90.0), 0.0, 0.0)
             data.lens = 26
         elif camera_type == "TOP_DOWN":

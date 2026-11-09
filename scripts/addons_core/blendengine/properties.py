@@ -470,6 +470,18 @@ class BE_PlayerControllerSettings(PropertyGroup):
     jump_force: bpy.props.FloatProperty(name="Jump Force", default=6.0, min=0.0)
     gravity: bpy.props.FloatProperty(name="Gravity", default=9.81, min=0.0)
     mouse_sensitivity: bpy.props.FloatProperty(name="Mouse Sensitivity", default=1.0, min=0.01)
+    mouse_look: bpy.props.BoolProperty(
+        name="Mouse Look",
+        default=False,
+        description="First person: the mouse (or arrow keys) turns the view and WASD moves relative to it",
+    )
+    head_bob: bpy.props.FloatProperty(
+        name="Head Bob",
+        default=0.0,
+        min=0.0,
+        max=0.2,
+        description="First-person camera bob height while walking, in meters (0 disables)",
+    )
     camera_follow: bpy.props.PointerProperty(
         name="Camera Follow",
         type=bpy.types.Object,
@@ -514,6 +526,30 @@ class BE_NPCBehaviorSettings(PropertyGroup):
         default=8.0,
         min=0.0,
         description="Health removed from the player by each attack",
+    )
+    gait: bpy.props.EnumProperty(
+        name="Gait",
+        items=(
+            ("NONE", "None", "Glide without procedural motion (legacy)"),
+            ("WALK", "Walk", "Steady steps with a light bob and sway"),
+            ("SHAMBLE", "Shamble", "Lurching zombie steps: uneven speed, heavy sway, forward lean"),
+            ("HOVER", "Hover", "Float and bob in place, for ghosts and drones"),
+        ),
+        default="NONE",
+        description="Procedural body motion while moving. Meshes with BE_StepL / BE_StepR shape keys also swing their legs",
+    )
+    turn_speed: bpy.props.FloatProperty(
+        name="Turn Speed",
+        default=0.0,
+        min=0.0,
+        subtype="ANGLE",
+        description="How fast the NPC turns, per second. 0 turns instantly (legacy)",
+    )
+    stride_length: bpy.props.FloatProperty(
+        name="Stride",
+        default=0.8,
+        min=0.1,
+        description="Distance covered by one step; sets the step rhythm",
     )
     dialogue_text: bpy.props.StringProperty(name="Dialogue", default="Hello!")
     quest_id: bpy.props.StringProperty(name="Quest ID", default="")

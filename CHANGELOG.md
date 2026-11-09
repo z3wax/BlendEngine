@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### AI Studio va tabiiy harakat
+
+- **AI Studio** ish maydoni (Codex uslubida): chapda AI bilan suhbat va o'yinlar ro'yxati, pastda xabar maydoni, o'ngda — kod o'rnida — jonli 3D o'yin paneli (Play/Stop, New Layout, Spec, Build). Birinchi xabar o'yin yaratadi, keyingilari uni o'zgartiradi; suhbat `.blend` da saqlanadi.
+- Tabiiy harakat: NPC'lar uchun yurish turi (Walk/Shamble/Hover), cheklangan burilish tezligi, bir-biridan uzoqlashish, tana chayqalishi/engashish va `BE_StepL`/`BE_StepR` oyoq shape key'lari; o'yinchi uchun tezlanish, birinchi shaxsda sichqoncha bilan qarash, bosh tebranishi va tepki. HD skript zombi oyoqlarini yasaydi.
+- Birinchi shaxs kamerasi tananing old tomoniga ko'chirildi (o'yin panelida kamera o'yinchi meshi ichidan qaramaydi).
+- Offline rejalashtiruvchi: "Zombilar 12 ta bo'lsin" (son otdan keyin) tushuniladi; o'zgartirishda mavjud dushmanlar nomi va ko'rinishi saqlanadi, "sekinroq" endi sonini kamaytirmaydi.
+- App template mavzusida matn maydonlari qora fondan ajralib turadi.
+
 ### Neon Quarantine HD
 
 - `tools/blendengine/create_realistic_soldier_showcase.py`: askar o'yinining GPU'li kompyuterlar uchun HD versiyasini yaratadi. Unda to'liq teksturali shahar real masshtabda, PBR materiallar, askar pozasi, kadrga chiqarilgan miltiq, HDRI, tuman va bake qilingan yorug'lik bor. Zombilar Play Mode'da o'yinchiga yuzi bilan yuradi.

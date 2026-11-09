@@ -5,7 +5,7 @@
 bl_info = {
     "name": "BlendEngine",
     "author": "BlendEngine Contributors",
-    "version": (0, 2, 0),
+    "version": (0, 3, 0),
     "blender": (3, 6, 0),
     "location": "Top Bar > BlendEngine, 3D View > Sidebar > BlendEngine > AI Game Creator",
     "description": "AI game creator and beginner-friendly no-code game engine built on Blender",
@@ -36,6 +36,7 @@ if "bpy" in locals():
         "ai_game_builder",
         "operators",
         "ai_game_creator",
+        "ai_studio",
         "panels",
     ):
         if module_name in globals():
@@ -61,6 +62,7 @@ else:
         ai_game_builder,
         operators,
         ai_game_creator,
+        ai_studio,
         panels,
     )
 
@@ -80,6 +82,7 @@ _REGISTER_MODULES = (
     templates,
     operators,
     ai_game_creator,
+    ai_studio,
     panels,
 )
 

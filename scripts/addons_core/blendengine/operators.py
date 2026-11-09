@@ -608,7 +608,8 @@ class BE_OT_test_run_scene(Operator):
 
     def execute(self, context):
         previous_workspace = context.window.workspace if context.window else None
-        utils.activate_engine_page(context, "PLAY")
+        if previous_workspace is None or previous_workspace.name != utils.STUDIO_WORKSPACE:
+            utils.activate_engine_page(context, "PLAY")
         self._session, result = runtime.start_test_run(context)
         if not result.ok and context.window and previous_workspace is not None:
             context.window.workspace = previous_workspace
@@ -620,6 +621,12 @@ class BE_OT_test_run_scene(Operator):
 
         self._timer = context.window_manager.event_timer_add(1.0 / 60.0, window=context.window)
         context.window_manager.modal_handler_add(self)
+        self._mouse_look = self._session.wants_mouse_look()
+        if self._mouse_look and context.window is not None:
+            # Capture the mouse for first-person look; Esc releases it.
+            context.window.cursor_modal_set("NONE")
+            self._center = (context.window.width // 2, context.window.height // 2)
+            context.window.cursor_warp(*self._center)
         if result.warnings:
             self.report({"WARNING"}, result.summary())
         else:
@@ -633,6 +640,14 @@ class BE_OT_test_run_scene(Operator):
 
         if self._session is None:
             return self._finish(context, "Stopped")
+
+        if event.type == "MOUSEMOVE" and getattr(self, "_mouse_look", False):
+            dx = event.mouse_x - self._center[0]
+            dy = event.mouse_y - self._center[1]
+            if dx or dy:
+                self._session.look(dx, dy)
+                context.window.cursor_warp(*self._center)
+            return {"RUNNING_MODAL"}
 
         if event.type == "TIMER":
             self._session.step(1.0 / 60.0)
@@ -650,6 +665,9 @@ class BE_OT_test_run_scene(Operator):
         return {"PASS_THROUGH"}
 
     def _finish(self, context, status):
+        if getattr(self, "_mouse_look", False) and context.window is not None:
+            context.window.cursor_modal_restore()
+            self._mouse_look = False
         if self._timer is not None:
             context.window_manager.event_timer_remove(self._timer)
             self._timer = None

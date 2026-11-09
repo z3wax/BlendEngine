@@ -386,6 +386,47 @@ def _replace_zombie_body(zombie_root, sources, model_front_minus_y=True, scale=1
     return holder
 
 
+HIP_Z, KNEE_Z, HIP_X = 0.92, 0.5, 0.1
+
+
+def _leg_pose(point, side_sign, swing, knee_bend):
+    """Rotate a model-space point of one leg about the hip (and knee)."""
+    weight_x = _smoothstep(0.0, 0.07, abs(point.x))
+    weight_z = _smoothstep(HIP_Z, HIP_Z - 0.14, point.z)
+    weight = weight_x * weight_z
+    if weight <= 0.0:
+        return point
+    hip = Vector((side_sign * HIP_X, 0.0, HIP_Z))
+    hip_turn = Matrix.Rotation(swing * weight, 3, "X")
+    moved = hip + hip_turn @ (point - hip)
+    knee_weight = _smoothstep(KNEE_Z + 0.06, KNEE_Z - 0.06, point.z) * weight
+    if knee_bend and knee_weight > 0.0:
+        knee = hip + hip_turn @ (Vector((side_sign * HIP_X, 0.0, KNEE_Z)) - hip)
+        moved = knee + Matrix.Rotation(knee_bend * knee_weight, 3, "X") @ (moved - knee)
+    return moved
+
+
+def add_step_shape_keys(obj, to_model):
+    """BE_StepL / BE_StepR: one leg reaches forward (-Y, the model's front)
+    with a bent knee while the other trails. The runtime blends them with
+    the walk phase. ``to_model`` maps mesh space to the soldier model space."""
+    from_model = to_model.inverted()
+    points = [to_model @ vertex.co for vertex in obj.data.vertices]
+    if not any(point.z < HIP_Z - 0.05 for point in points):
+        return False
+    obj.data = obj.data.copy()  # every zombie steps on its own rhythm
+    obj.shape_key_add(name="Basis", from_mix=False)
+    forward, back, knee = math.radians(-30.0), math.radians(18.0), math.radians(40.0)
+    for name, lead in (("BE_StepL", 1.0), ("BE_StepR", -1.0)):
+        key = obj.shape_key_add(name=name, from_mix=False)
+        for index, point in enumerate(points):
+            side = 1.0 if point.x >= 0.0 else -1.0
+            leading = side == lead
+            moved = _leg_pose(point, side, forward if leading else back, knee if leading else 0.0)
+            key.data[index].co = from_model @ moved
+    return True
+
+
 def build_infected_soldiers(scene, lib, seed=7):
     """Zombies rebuilt from the intact soldier model.
 
@@ -420,8 +461,16 @@ def build_infected_soldiers(scene, lib, seed=7):
             return lib["zombie_gear"]
 
         # The soldier model faces -Y in its own space, like glTF models.
-        _replace_zombie_body(zombie_root, kept, model_front_minus_y=True,
-                             source_space=world_matrix(soldier), material_for=material_for)
+        holder = _replace_zombie_body(zombie_root, kept, model_front_minus_y=True,
+                                      source_space=world_matrix(soldier), material_for=material_for)
+        for part in holder.children:
+            if part.type == "MESH":
+                add_step_shape_keys(part, part.matrix_basis.copy())
+        npc = zombie_root.blendengine_object.npc_behavior
+        npc.gait = "SHAMBLE"
+        npc.turn_speed = rng.uniform(1.8, 2.8)
+        npc.stride_length = 0.7
+        npc.move_speed = rng.uniform(1.2, 2.1)
         count += 1
     return count
 
@@ -446,6 +495,9 @@ def import_zombie_model(scene, path, height=1.75, faces_plus_y=False):
     for zombie_root in _zombie_roots(scene):
         _replace_zombie_body(zombie_root, meshes, model_front_minus_y=not faces_plus_y,
                              scale=height / max(model_height, 1e-3), source_space=space)
+        npc = zombie_root.blendengine_object.npc_behavior
+        npc.gait = "SHAMBLE"
+        npc.turn_speed = 2.2
     for obj in imported:
         bpy.data.objects.remove(obj, do_unlink=True)
     return len(meshes)
@@ -616,6 +668,18 @@ def face_zombies_forward(scene):
             set_world_matrix(child, turn @ world_matrix(child))
         root.rotation_euler.z += math.pi
         root["hd_faced"] = True
+
+
+def natural_player_controls(scene):
+    """Mouse look, eased movement, and head bob for the first-person soldier."""
+    player = bpy.data.objects.get("BE_Player_FirstPersonBody")
+    if player is None:
+        return
+    controller = player.blendengine_object.player_controller
+    controller.mouse_look = True
+    controller.head_bob = 0.04
+    controller.acceleration = 14.0
+    controller.deceleration = 18.0
 
 
 def high_end_budget(scene):
@@ -877,6 +941,7 @@ def main():
     place_view_model()
     pose_soldier(scene)
     face_zombies_forward(scene)
+    natural_player_controls(scene)
     if args.zombie_model:
         print("[showcase] zombies from %s: %d meshes" % (args.zombie_model, import_zombie_model(
             scene, args.zombie_model, faces_plus_y=args.zombie_faces_plus_y)))

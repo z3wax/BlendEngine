@@ -113,6 +113,26 @@ def _count_before(text, keywords):
             value = _to_number(match.group(1))
             if value is not None:
                 return value
+    # "Zombilar 14 ta bo'lsin", "zombies: 14" -- the number after the noun.
+    for keyword in keywords:
+        word = re.escape(keyword.rstrip("$"))
+        pattern = re.compile(r"(?<![\w'])" + word + r"[\w'-]*(?:\s+|\s*[:=]\s*)" + _NUMBER_TOKEN
+                             + r"(?:\s+ta\b|\s*шт|\s*x\b|\s*(?=[,.;!?]|$))")
+        match = pattern.search(text)
+        if match:
+            value = _to_number(match.group(1))
+            if value is not None:
+                return value
+    return None
+
+
+def _matching_group(groups, archetype):
+    """The existing enemy group made from an archetype (names may be localized)."""
+    names = {archetype["name"].casefold()}
+    names.update(table[archetype["name"]].casefold() for table in LOCAL_NAMES.values() if archetype["name"] in table)
+    for group in groups:
+        if group["name"].casefold() in names or (group["shape"], group["color"]) == (archetype["shape"], archetype["color"]):
+            return group
     return None
 
 
@@ -455,6 +475,18 @@ def plan_offline(prompt, base_spec=None, seed=None):
     base_enemy_count = max(1, int(round(4 * scale)))
     if _has_any(text, NO_ENEMY_KEYWORDS):
         spec["enemies"] = []
+    elif mentioned_enemies and refining and not theme_changed and all(
+            _matching_group(spec["enemies"], spec_lib.ENEMY_ARCHETYPES.get(key, {"name": "", "shape": "", "color": ""}))
+            for key in mentioned_enemies):
+        # "Zombies: 14, slower" while changing a game keeps the same zombies
+        # (name, look, behavior) and only adjusts what was asked for.
+        for key in mentioned_enemies:
+            group = _matching_group(spec["enemies"], spec_lib.ENEMY_ARCHETYPES[key])
+            count = _count_before(text, ENEMY_KEYWORDS[key])
+            if count:
+                group["count"] = count
+            elif more or fewer:
+                group["count"] = max(1, int(round(group["count"] * (1.6 if more else 0.6))))
     elif mentioned_enemies:
         groups = []
         for key in mentioned_enemies[:spec_lib.MAX_ENEMY_GROUPS]:

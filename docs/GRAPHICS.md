@@ -133,10 +133,45 @@ Play Mode screenshoti GPU'siz bulut muhitida olingan, shuning uchun HUD'dagi
 o'lchanmagan. Uchburchak va tekstura hajmi zamonaviy diskret GPU uchun
 mo'ljallangan, ammo bu o'lchangan kafolat emas.
 
-Cheklovlar: askarda skelet va animatsiya yo'q. U statik poza bilan
-uchinchi shaxs kadrlarida ko'rinadi, o'yinda esa birinchi shaxs kamerasi
-ishlatiladi. Zombilar animatsiyasiz, "zombi pozasi"da siljiydi. To'qnashuv
-javobi yo'q. Zombi teksturalari protsedural: ular asl rassom teksturasi emas.
+Cheklovlar: askarda skelet yo'q. U statik poza bilan uchinchi shaxs
+kadrlarida ko'rinadi, o'yinda esa birinchi shaxs kamerasi ishlatiladi.
+To'qnashuv javobi yo'q. Zombi teksturalari protsedural: ular asl rassom
+teksturasi emas.
+
+## Tabiiy harakat
+
+![Zombilar Play Mode'da: qadam, chayqalish, oldinga engashish](graphics/zombie_walk.gif)
+
+Animatsiya Play Mode simulyatsiyasidan olingan kadrlar (HD sahna, EEVEE,
+960×540, 8 namuna, 12 kadr/s). Runtime NPC va o'yinchi harakatini
+tabiiyroq qiladi:
+
+- **Yurish turi** (`NPC Behavior > Gait`): `Walk`, `Shamble` (zombi), `Hover`
+  (arvoh, dron). Zombi oqsoqlanib qadam tashlaydi: har ikkinchi qadamda
+  tezlanadi, yon tomonga chayqaladi, oldinga engashadi, o'yinchiga yaqinlashganda
+  tashlanadi. Har bir NPC o'z fazasida yuradi, shuning uchun to'da bir xil
+  qadam tashlamaydi.
+- **Oyoqlar:** `BE_StepL` / `BE_StepR` shape key'lari yurish fazasidan
+  boshqariladi. HD skript ularni askar modelidan yasaydi (son oldinga 30°,
+  tizza 40°, orqaga 18°); offline quruvchi dushmanlarida esa faqat tana
+  chayqaladi.
+- **Burilish tezligi** (`Turn Speed`): NPC nishonga bir zumda emas, aylanib
+  buriladi va burilish paytida sekinlashadi. `0` eski, darhol burilishni
+  saqlaydi.
+- **Bir-biridan uzoqlashish:** yurayotgan NPC'lar bir nuqtaga yig'ilib
+  qolmaydi (0,9 m oraliq).
+- **O'yinchi:** tezlanish/sekinlashish, birinchi shaxsda sichqoncha bilan
+  qarash (kursor yashiriladi), bosh tebranishi va o'q otgandagi tepki.
+  O'qlar bilan ham burilish mumkin.
+
+AI quruvchi bularni avtomatik yoqadi: zombi nomli dushmanlar `Shamble`,
+arvoh va dronlar `Hover`, qolganlari `Walk`; FPS o'yinlarda sichqoncha bilan
+qarash va bosh tebranishi. Eski sahnalar o'zgarishsiz ishlaydi: yangi
+sozlamalar standart holatda o'chiq.
+
+Cheklov: bu skeletli animatsiya emas. Qo'llar harakatlanmaydi, oyoqlar ikki
+shape key orasida aralashadi. Haqiqiy yurish sikli uchun rig va animatsiya
+kerak.
 
 ## Tekshirish
 

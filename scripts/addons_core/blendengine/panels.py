@@ -27,6 +27,7 @@ class TOPBAR_MT_blendengine(Menu):
             op = row.operator("blendengine.open_page", text=label, icon=icon)
             op.page = page
         layout.operator_context = "INVOKE_DEFAULT"
+        layout.operator("blendengine.open_ai_studio", text="AI Studio", icon="OUTLINER_DATA_GP_LAYER")
         layout.operator("blendengine.ai_generate_game", text="AI Create Game", icon="SHADERFX")
         layout.operator("blendengine.easy_create_game", text="New Game", icon="ADD")
         layout.operator_context = "EXEC_REGION_WIN"
@@ -224,6 +225,7 @@ def _draw_engine_dashboard(layout, context):
     row = layout.row(align=True)
     row.scale_y = 1.45
     row.operator_context = "INVOKE_DEFAULT"
+    row.operator("blendengine.open_ai_studio", text="AI Studio", icon="OUTLINER_DATA_GP_LAYER")
     row.operator("blendengine.ai_generate_game", text="AI Create", icon="SHADERFX")
     row.operator("blendengine.easy_create_game", text="New Game", icon="ADD")
     row.operator_context = "EXEC_DEFAULT"

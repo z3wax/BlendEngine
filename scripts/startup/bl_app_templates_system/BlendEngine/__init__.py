@@ -80,6 +80,18 @@ def _apply_black_theme(context):
         widget = getattr(ui, name, None)
         if widget is not None:
             _style_widget(widget, raised if "item" in name or "tool" in name else panel, cyan)
+    # Text fields (the AI Studio message box among them) need to stand out
+    # from the near-black headers and panels they sit on.
+    text_field = getattr(ui, "wcol_text", None)
+    if text_field is not None:
+        _safe_color(text_field, "inner", (0.075, 0.083, 0.095, 1.0))
+        _safe_color(text_field, "inner_sel", (0.1, 0.112, 0.128, 1.0))
+        _safe_color(text_field, "text_sel", (0.9, 0.95, 0.96, 1.0))
+        _safe_color(text_field, "outline", (0.2, 0.22, 0.25, 1.0))
+        try:
+            text_field.roundness = 0.5
+        except Exception:
+            pass
 
     if hasattr(ui, "wcol_menu_back"):
         _style_widget(ui.wcol_menu_back, dark, blue)

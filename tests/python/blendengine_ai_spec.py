@@ -285,6 +285,22 @@ class OfflinePlannerTests(unittest.TestCase):
         # A new idea still reads "lava world" as a volcano.
         self.assertEqual(self.plan("lava world with monsters")["world"]["theme"], "VOLCANO")
 
+    def test_refine_keeps_named_enemies_and_reads_counts_after_the_noun(self):
+        base = self.plan("Shahar xarobalarida zombilardan omon qolish: 3D first-person, 8 ta zombi")
+        zombies = base["enemies"][0]
+        refined = self.plan("Zombilar 6 ta bo'lsin, lekin sekinroq yursin", base_spec=base)
+        self.assertEqual(len(refined["enemies"]), 1)
+        self.assertEqual(refined["enemies"][0]["name"], zombies["name"])
+        self.assertEqual(refined["enemies"][0]["count"], 6)
+        self.assertLess(refined["enemies"][0]["speed"], zombies["speed"])
+        slower = self.plan("zombilar sekinroq", base_spec=base)
+        self.assertEqual(slower["enemies"][0]["count"], zombies["count"])
+        self.assertEqual(self.plan("zombies: 5", base_spec=base)["enemies"][0]["count"], 5)
+        # "3 times faster" is not a count.
+        self.assertEqual(self.plan("zombies 3 times faster", base_spec=base)["enemies"][0]["count"], zombies["count"])
+        both = self.plan("add 3 robots", base_spec=base)
+        self.assertEqual([g["count"] for g in both["enemies"]], [zombies["count"], 3])
+
     def test_every_theme_keyword_builds(self):
         for theme, words in planner.THEME_KEYWORDS.items():
             spec = self.plan("a game in the %s" % words[0])

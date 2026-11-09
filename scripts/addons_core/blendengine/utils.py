@@ -286,10 +286,45 @@ def enter_camera_view(context):
     return changed
 
 
+STUDIO_WORKSPACE = "AI Studio"
+
+
+def studio_view_areas(screen):
+    """3D View areas of the AI Studio screen, left to right (chat, game)."""
+    if screen is None:
+        return []
+    return sorted((area for area in screen.areas if area.type == "VIEW_3D"), key=lambda area: area.x)
+
+
+def _studio_workspace(context):
+    workspace = getattr(context, "workspace", None)
+    if workspace is None and getattr(context, "window", None) is not None:
+        workspace = context.window.workspace
+    return workspace is not None and workspace.name == STUDIO_WORKSPACE
+
+
+def is_studio_chat_area(context, area=None):
+    area = area or getattr(context, "area", None)
+    if area is None or area.type != "VIEW_3D" or not _studio_workspace(context):
+        return False
+    areas = studio_view_areas(getattr(context, "screen", None))
+    return len(areas) >= 2 and areas[0] == area
+
+
+def is_studio_game_area(context, area=None):
+    area = area or getattr(context, "area", None)
+    if area is None or area.type != "VIEW_3D" or not _studio_workspace(context):
+        return False
+    areas = studio_view_areas(getattr(context, "screen", None))
+    return len(areas) >= 2 and area in areas[1:]
+
+
 def configure_current_screen_for_blendengine(context):
     screen = context.screen
     if screen is None:
         return
+    if _workspace_name(context) == STUDIO_WORKSPACE:
+        return  # The AI Studio keeps its own chat + game layout.
 
     scene = context.scene
     editor = getattr(scene, "blendengine_editor", None)

@@ -137,6 +137,36 @@ def world_bounds_sphere(obj):
     return center, max((corner - center).length for corner in corners)
 
 
+def angle_difference(target, current):
+    """Signed shortest rotation from ``current`` to ``target`` (radians)."""
+    return (target - current + math.pi) % (2.0 * math.pi) - math.pi
+
+
+def approach_angle(current, target, max_step):
+    difference = angle_difference(target, current)
+    if abs(difference) <= max_step:
+        return current + difference
+    return current + math.copysign(max_step, difference)
+
+
+def _approach_vector(current, target, max_step):
+    difference = target - current
+    if difference.length <= max_step:
+        return target.copy()
+    return current + difference.normalized() * max_step
+
+
+GAIT_SHAPE = {
+    # bob height, roll (rad), forward lean (rad), speed lurch
+    "WALK": (0.035, 0.035, 0.03, 0.0),
+    "SHAMBLE": (0.06, 0.09, 0.16, 0.45),
+}
+
+
+# How far in front of the player's origin the first-person eye sits.
+FIRST_PERSON_EYE_FORWARD = 0.42
+
+
 def yaw_towards(x, y):
     """Z rotation that turns an object's local +Y toward the direction (x, y).
 
@@ -230,6 +260,12 @@ class GameSession:
         self._player = utils.find_player_object(self.scene)
         self._bounds = _world_bounds(self.scene)
         self._two_d = self.scene.blendengine_project.game_dimension == "TWO_D"
+        self._gait = {}
+        self._player_velocity = Vector((0.0, 0.0, 0.0))
+        self._look_pitch = 0.0
+        self._bob_phase = 0.0
+        self._bob_blend = 0.0
+        self._recoil = 0.0
         self._snapshot = self._capture_state()
 
         for obj in self.scene.objects:
@@ -291,6 +327,7 @@ class GameSession:
             except Exception:
                 pass
         self._spawned = []
+        self._reset_gait()
         for name, entry in self._snapshot.items():
             obj = self.scene.objects.get(name)
             if obj is None:
@@ -310,6 +347,13 @@ class GameSession:
                 variable = _variable_lookup(obj, variable_name)
                 if variable is not None:
                     _set_variable_value(variable, value)
+
+    def _reset_gait(self):
+        for state in self._gait.values():
+            for left, right in state["keys"]:
+                left.value = 0.0
+                right.value = 0.0
+        self._gait = {}
 
     def _remove_from_play(self, obj):
         """Hide a collected pickup or defeated enemy for the rest of the run."""
@@ -340,7 +384,7 @@ class GameSession:
             context = self.context
             if context.window:
                 workspace = getattr(context.window, "workspace", None)
-                if workspace is not None and workspace.name != "Play Mode":
+                if workspace is not None and workspace.name not in {"Play Mode", utils.STUDIO_WORKSPACE}:
                     utils.activate_engine_page(context, "PLAY")
             utils.configure_current_screen_for_blendengine(context)
             utils.enter_camera_view(context)
@@ -405,6 +449,7 @@ class GameSession:
         self.fps = 1.0 / real_dt
         self.frame_ms = real_dt * 1000.0
         self._attack_cooldown = max(0.0, self._attack_cooldown - dt)
+        self._recoil = max(0.0, self._recoil - dt * 0.35)
         self.elapsed += dt
         self.frame += 1
         self._player = utils.find_player_object(self.scene)
@@ -494,18 +539,47 @@ class GameSession:
             movement.normalize()
 
         speed = controller.run_speed if controller.sprint and self._action_down(actions, "SPRINT") else controller.walk_speed
-        if controller.controller_type == "FIRST_PERSON":
+        if controller.controller_type == "FIRST_PERSON" and controller.mouse_look:
+            # Mouse (see look()) or arrow keys turn; WASD moves relative to the view.
+            turn = 0.0
+            if "LEFT_ARROW" in self.input_state:
+                turn += 1.0
+            if "RIGHT_ARROW" in self.input_state:
+                turn -= 1.0
+            player.rotation_euler.z += turn * 2.2 * controller.mouse_sensitivity * dt
+            yaw = player.rotation_euler.z
+            forward = Vector((-math.sin(yaw), math.cos(yaw), 0.0))
+            right = Vector((math.cos(yaw), math.sin(yaw), 0.0))
+            desired = (right * movement.x + forward * movement.y) * speed
+        elif controller.controller_type == "FIRST_PERSON":
             yaw = player.rotation_euler.z
             # Local +Y and +X of the player (and of the camera that copies its yaw).
             forward = Vector((-math.sin(yaw), math.cos(yaw), 0.0))
             right = Vector((math.cos(yaw), math.sin(yaw), 0.0))
-            player.location += (right * axis_x + forward * axis_y) * speed * dt
+            desired = (right * axis_x + forward * axis_y) * speed
             if movement.length > 0.001:
                 player.rotation_euler.z = yaw_towards(movement.x, movement.y)
         else:
-            player.location += movement * speed * dt
+            desired = movement * speed
             if movement.length > 0.001:
-                player.rotation_euler.z = yaw_towards(movement.x, movement.y)
+                target_yaw = yaw_towards(movement.x, movement.y)
+                if controller.rotation_smoothing > 0.0:
+                    player.rotation_euler.z = approach_angle(
+                        player.rotation_euler.z, target_yaw, controller.rotation_smoothing * dt)
+                else:
+                    player.rotation_euler.z = target_yaw
+
+        # Ease into and out of motion instead of starting and stopping dead.
+        rate = controller.acceleration if desired.length >= self._player_velocity.length else controller.deceleration
+        if rate > 0.0:
+            self._player_velocity = _approach_vector(self._player_velocity, desired, rate * dt)
+        else:
+            self._player_velocity = desired
+        player.location += self._player_velocity * dt
+        ground_speed = self._player_velocity.length
+        if ground_speed > 0.2:
+            self._bob_phase += ground_speed * dt / 0.75 * math.pi
+        self._bob_blend += (min(1.0, ground_speed / max(0.1, controller.walk_speed)) - self._bob_blend) * min(1.0, dt * 8.0)
         self._clamp_to_bounds(player)
 
         ground_z = self._ground_height_at(player, default=self._ground_z.get(player.name, player.location.z))
@@ -532,8 +606,15 @@ class GameSession:
         if camera is None:
             return
         if controller.controller_type == "FIRST_PERSON":
-            camera.location = player.location + Vector((0.0, 0.0, 0.72))
-            camera.rotation_euler = (math.radians(90.0), 0.0, player.rotation_euler.z)
+            yaw = player.rotation_euler.z
+            right = Vector((math.cos(yaw), math.sin(yaw), 0.0))
+            forward = Vector((-math.sin(yaw), math.cos(yaw), 0.0))
+            bob = controller.head_bob * self._bob_blend
+            camera.location = (player.location + Vector((0.0, 0.0, 0.72 + math.sin(self._bob_phase * 2.0) * bob))
+                               + forward * FIRST_PERSON_EYE_FORWARD
+                               + right * math.sin(self._bob_phase) * bob * 0.6)
+            pitch = self._look_pitch + self._recoil if controller.mouse_look else 0.0
+            camera.rotation_euler = (math.radians(90.0) + pitch, math.sin(self._bob_phase) * bob * 0.15, yaw)
             for obj in self.scene.objects:
                 if obj.blendengine_object.object_tag == "Weapon":
                     obj.hide_viewport = False
@@ -592,10 +673,11 @@ class GameSession:
         player = utils.find_player_object(self.scene)
         if player is None:
             return
-        for obj in self.scene.objects:
+        npcs = [obj for obj in self.scene.objects
+                if obj.blendengine_object.npc_behavior.enabled and obj.name not in self._removed]
+        starts = {obj.name: obj.location.copy() for obj in npcs}
+        for obj in npcs:
             npc = obj.blendengine_object.npc_behavior
-            if not npc.enabled or obj.name in self._removed:
-                continue
             target = npc.target_object or player
             if npc.behavior_template == "PATROL":
                 origin = self._patrol_origins.setdefault(obj.name, obj.location.copy())
@@ -607,15 +689,83 @@ class GameSession:
                     obj.location.x = origin.x + math.cos(angle) * npc.patrol_radius
                     obj.location.y = origin.y + math.sin(angle) * npc.patrol_radius
             elif target is not None and npc.behavior_template in {"FOLLOW_PLAYER", "ATTACK", "COMPANION", "ENEMY_BOSS"}:
-                self._move_toward(obj, target.location, npc.move_speed, dt, stop_distance=max(0.5, npc.attack_range))
+                self._move_toward(obj, target.location, npc.move_speed, dt,
+                                  stop_distance=max(0.5, npc.attack_range), npc=npc)
                 if npc.behavior_template in {"ATTACK", "ENEMY_BOSS"}:
                     self._try_npc_attack(obj, player, npc)
             elif target is not None and npc.behavior_template == "FLEE":
                 away = obj.location + (obj.location - target.location)
-                self._move_toward(obj, away, npc.move_speed, dt, stop_distance=0.0)
+                self._move_toward(obj, away, npc.move_speed, dt, stop_distance=0.0, npc=npc)
+        self._separate_npcs([obj for obj in npcs if obj.blendengine_object.npc_behavior.gait != "NONE"])
+        for obj in npcs:
             if self._two_d:
-                obj.location.y = self._patrol_origins.setdefault(obj.name, obj.location.copy()).y
+                obj.location.y = self._patrol_origins.setdefault(obj.name, starts[obj.name]).y
             self._clamp_to_bounds(obj)
+            moved = obj.location - starts[obj.name]
+            moved.z = 0.0
+            self._apply_gait(obj, moved, dt)
+
+    def _separate_npcs(self, npcs, spacing=0.9):
+        """Keep walking NPCs from melting into each other."""
+        for index, first in enumerate(npcs):
+            for second in npcs[index + 1:]:
+                offset = Vector((first.location.x - second.location.x, first.location.y - second.location.y, 0.0))
+                distance = offset.length
+                if 1e-4 < distance < spacing:
+                    push = offset.normalized() * (spacing - distance) * 0.5
+                    first.location += push
+                    second.location -= push
+
+    def _gait_state(self, obj):
+        state = self._gait.get(obj.name)
+        if state is None:
+            keys = []
+            for child in [obj] + list(obj.children_recursive):
+                shape_keys = getattr(getattr(child, "data", None), "shape_keys", None)
+                if shape_keys is None:
+                    continue
+                blocks = shape_keys.key_blocks
+                if "BE_StepL" in blocks and "BE_StepR" in blocks:
+                    keys.append((blocks["BE_StepL"], blocks["BE_StepR"]))
+            # Each NPC gets its own rhythm so a crowd does not march in step.
+            seed = sum(ord(ch) for ch in obj.name)
+            state = {"phase": (seed % 97) / 97.0 * math.tau, "base_z": obj.location.z, "keys": keys,
+                     "time": (seed % 13) * 0.37}
+            self._gait[obj.name] = state
+        return state
+
+    def _apply_gait(self, obj, moved, dt):
+        npc = obj.blendengine_object.npc_behavior
+        if npc.gait == "NONE":
+            return
+        state = self._gait_state(obj)
+        state["time"] += dt
+        if npc.gait == "HOVER":
+            obj.location.z = state["base_z"] + math.sin(state["time"] * 2.4) * 0.12
+            obj.rotation_euler.y = math.sin(state["time"] * 1.3) * 0.05
+            return
+        bob, roll, lean, _lurch = GAIT_SHAPE[npc.gait]
+        distance = moved.length
+        if npc.behavior_template == "PATROL" and distance > 1e-5:
+            target_yaw = yaw_towards(moved.x, moved.y)
+            obj.rotation_euler.z = (approach_angle(obj.rotation_euler.z, target_yaw, npc.turn_speed * dt)
+                                    if npc.turn_speed > 0.0 else target_yaw)
+        walking = min(1.0, (distance / max(dt, 1e-6)) / max(0.3, npc.move_speed * 0.5))
+        if distance > 1e-5:
+            state["phase"] += distance / npc.stride_length * math.pi
+        else:
+            state["phase"] += dt * 0.9  # idle: slow breathing sway
+        phase = state["phase"]
+        attack_until = self._npc_attack_timers.get(obj.name, -1.0)
+        lunge = max(0.0, 1.0 - abs(self.elapsed - (attack_until - 1.0)) / 0.25) if attack_until > 0.0 else 0.0
+        obj.location.z = state["base_z"] + abs(math.sin(phase)) * bob * walking
+        obj.rotation_euler.y = math.sin(phase) * roll * max(walking, 0.3)
+        # Tip forward: local +Y is the facing direction, so rotate about -X.
+        obj.rotation_euler.x = -(lean * (0.4 + 0.6 * walking) + 0.3 * lunge)
+        step = math.sin(phase) * walking
+        for left, right in state["keys"]:
+            left.value = max(0.0, step)
+            right.value = max(0.0, -step)
 
     def _try_npc_attack(self, npc_obj, player, npc):
         if (npc_obj.location - player.location).length > max(0.8, npc.attack_range):
@@ -631,6 +781,22 @@ class GameSession:
             self.log("%s hit player. Health %.0f." % (npc_obj.name, health.current_health))
             if health.current_health <= 0.0:
                 self.finish_with("Game Over", "Player eliminated.")
+
+    def wants_mouse_look(self):
+        player = utils.find_player_object(self.scene)
+        if player is None:
+            return False
+        controller = player.blendengine_object.player_controller
+        return controller.controller_type == "FIRST_PERSON" and controller.mouse_look
+
+    def look(self, dx, dy):
+        """Turn the first-person view by a mouse delta in pixels."""
+        if not self.wants_mouse_look():
+            return
+        player = utils.find_player_object(self.scene)
+        scale = 0.0025 * player.blendengine_object.player_controller.mouse_sensitivity
+        player.rotation_euler.z -= dx * scale
+        self._look_pitch = max(-1.25, min(1.25, self._look_pitch + dy * scale))
 
     def _shoot_weapon(self):
         if self._attack_cooldown > 0.0:
@@ -651,6 +817,7 @@ class GameSession:
             _set_variable_value(ammo, max(0, _variable_value(ammo) - 1))
         self._attack_cooldown = 0.18
         self._muzzle_flash_until = self.elapsed + 0.08
+        self._recoil = min(0.08, self._recoil + 0.02)
 
         origin = camera.location.copy()
         direction = camera.matrix_world.to_quaternion() @ Vector((0.0, 0.0, -1.0))
@@ -749,14 +916,34 @@ class GameSession:
         obj.location.x = min(max(obj.location.x, min_x), max_x)
         obj.location.y = min(max(obj.location.y, min_y), max_y)
 
-    def _move_toward(self, obj, target_location, speed, dt, stop_distance=0.0):
+    def _move_toward(self, obj, target_location, speed, dt, stop_distance=0.0, npc=None):
         delta = Vector((target_location.x - obj.location.x, target_location.y - obj.location.y, 0.0))
         distance = delta.length
-        if distance <= stop_distance or distance <= 0.0001:
+        turn_speed = npc.turn_speed if npc is not None else 0.0
+        if distance <= 0.0001:
             return
-        delta.normalize()
-        obj.location += delta * min(speed * dt, max(0.0, distance - stop_distance))
-        obj.rotation_euler.z = yaw_towards(delta.x, delta.y)
+        direction = delta.normalized()
+        target_yaw = yaw_towards(direction.x, direction.y)
+        if turn_speed <= 0.0:
+            if distance <= stop_distance:
+                return
+            obj.location += direction * min(speed * dt, max(0.0, distance - stop_distance))
+            obj.rotation_euler.z = target_yaw
+            return
+        # Natural steering: turn at a limited rate and walk where the body
+        # faces, so NPCs curve toward the target instead of sliding sideways.
+        obj.rotation_euler.z = approach_angle(obj.rotation_euler.z, target_yaw, turn_speed * dt)
+        if distance <= stop_distance:
+            return
+        if npc.gait in GAIT_SHAPE:
+            lurch = GAIT_SHAPE[npc.gait][3]
+            if lurch:
+                phase = self._gait_state(obj)["phase"]
+                speed *= (1.0 - lurch) + lurch * abs(math.sin(phase)) * 2.0
+        yaw = obj.rotation_euler.z
+        facing = Vector((-math.sin(yaw), math.cos(yaw), 0.0))
+        alignment = max(0.0, facing.dot(direction))
+        obj.location += facing * min(speed * dt * alignment, max(0.0, distance - stop_distance))
 
     def execute_behaviors(self, event_type, dt, key=None):
         for obj in self.scene.objects:
@@ -972,6 +1159,12 @@ def _memory_usage_mb():
 def _draw_runtime_hud():
     if ACTIVE_SESSION is None:
         return
+    try:
+        import bpy
+        if utils.is_studio_chat_area(bpy.context):
+            return  # the AI Studio chat column draws its own UI
+    except Exception:
+        pass
     scene = ACTIVE_SESSION.scene
     project = scene.blendengine_project
     if not (project.show_fps or project.debug_mode or project.show_game_variables):
@@ -997,6 +1190,8 @@ def _draw_runtime_hud():
         ),
         "WASD move  Space jump  Shift sprint  F attack  R aim  Esc stop",
     ]
+    if ACTIVE_SESSION.wants_mouse_look():
+        lines[-1] = "WASD move  Mouse look  Space jump  Shift sprint  F / click fire  Esc stop"
     player = utils.find_player_object(scene)
     if player is not None and project.show_game_variables:
         score = _variable_lookup(player, "Score")

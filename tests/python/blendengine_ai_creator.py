@@ -14,6 +14,7 @@ or with the ``bpy`` module from PyPI::
 """
 
 import json
+import math
 import os
 from pathlib import Path
 import sys
@@ -29,7 +30,7 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPOSITORY_ROOT / "scripts" / "addons_core"))
 
 import blendengine
-from blendengine import ai_game_builder, ai_game_creator, ai_game_planner, ai_game_spec, export_system, runtime
+from blendengine import ai_game_builder, ai_game_creator, ai_game_planner, ai_game_spec, ai_studio, export_system, runtime
 
 
 DT = 1.0 / 60.0
@@ -64,6 +65,8 @@ class RecordingLayout:
 
     def separator(self, *args, **kwargs):
         pass
+
+    separator_spacer = separator
 
     def label(self, text="", **kwargs):
         self._icon(kwargs)
@@ -404,8 +407,9 @@ class AIGameCreatorTests(unittest.TestCase):
         enemy = next(obj for obj in self.scene.objects if obj.blendengine_object.npc_behavior.enabled)
         session = self.start()
         enemy.location = player.location + Vector((6.0, 4.0, 0.0))
-        self.step(session, DT)
+        self.step(session, 1.0)  # enemies turn at a limited rate now
         facing = enemy.matrix_basis.to_3x3() @ Vector((0.0, 1.0, 0.0))
+        facing.z = 0.0
         to_player = player.location - enemy.location
         to_player.z = 0.0
         self.assertGreater(facing.normalized().dot(to_player.normalized()), 0.99)
@@ -440,6 +444,86 @@ class AIGameCreatorTests(unittest.TestCase):
         root.location = player.location + Vector((0.0, -500.0, 0.0))  # far behind
         session._update_visibility_culling()
         self.assertTrue(building.hide_get())
+
+    def _zombie_game(self, count=1):
+        self.build_spec(hazards=[], collectibles=[{"count": 1}], goal={"type": "SURVIVE", "time_limit_seconds": 120},
+                        enemies=[{"name": "Zombie", "count": count, "behavior": "ATTACK", "shape": "BRUTE",
+                                  "color": "#557744", "size": 1.0, "speed": 2.0, "health": 50, "damage": 0}])
+        player = runtime.utils.find_player_object(self.scene)
+        zombies = [obj for obj in self.scene.objects if obj.blendengine_object.npc_behavior.enabled]
+        return player, zombies
+
+    def test_shambling_zombie_turns_steps_and_sways(self):
+        player, (zombie,) = self._zombie_game()
+        npc = zombie.blendengine_object.npc_behavior
+        self.assertEqual((npc.gait, npc.turn_speed), ("SHAMBLE", 4.0))
+        # Leg swing comes from shape keys on the zombie's mesh.
+        zombie.shape_key_add(name="Basis")
+        zombie.shape_key_add(name="BE_StepL")
+        zombie.shape_key_add(name="BE_StepR")
+        blocks = zombie.data.shape_keys.key_blocks
+        base_z = zombie.location.z
+        zombie.location = player.location + Vector((0.0, 10.0, base_z - player.location.z))
+        zombie.rotation_euler.z = 0.0  # facing away from the player
+        session = self.start()
+        self.step(session, 0.25)
+        facing = zombie.matrix_basis.to_3x3() @ Vector((0.0, 1.0, 0.0))
+        self.assertGreater(facing.y, -0.95, "turned instantly instead of at turn_speed")
+        heights, lean, left, right = [], [], [], []
+        for _ in range(150):
+            session.step(DT)
+            heights.append(zombie.location.z)
+            lean.append(zombie.rotation_euler.x)
+            left.append(blocks["BE_StepL"].value)
+            right.append(blocks["BE_StepR"].value)
+        facing = zombie.matrix_basis.to_3x3() @ Vector((0.0, 1.0, 0.0))
+        to_player = player.location - zombie.location
+        to_player.z = 0.0
+        facing.z = 0.0
+        self.assertGreater(facing.normalized().dot(to_player.normalized()), 0.95)
+        self.assertGreater(max(heights) - min(heights), 0.02)   # head bob
+        self.assertLess(max(lean), -0.05)                        # leaning forward
+        self.assertGreater(max(left), 0.3)
+        self.assertGreater(max(right), 0.3)                      # legs alternate
+        runtime.finish_active_session("Stopped")
+        self.assertAlmostEqual(zombie.location.z, base_z, places=4)
+        self.assertEqual((blocks["BE_StepL"].value, blocks["BE_StepR"].value), (0.0, 0.0))
+
+    def test_walking_npcs_keep_apart(self):
+        player, zombies = self._zombie_game(count=3)
+        session = self.start()
+        for zombie in zombies:
+            zombie.location.x, zombie.location.y = player.location.x, player.location.y + 6.0
+        self.step(session, 0.5)
+        for index, first in enumerate(zombies):
+            for second in zombies[index + 1:]:
+                gap = Vector((first.location.x - second.location.x, first.location.y - second.location.y))
+                self.assertGreater(gap.length, 0.8)
+
+    def test_first_person_eases_in_looks_and_bobs(self):
+        self.build_spec(camera="FIRST_PERSON", player={"can_shoot": True}, enemies=[], hazards=[],
+                        collectibles=[{"count": 1}], goal={"type": "SURVIVE", "time_limit_seconds": 120})
+        player = runtime.utils.find_player_object(self.scene)
+        controller = player.blendengine_object.player_controller
+        self.assertTrue(controller.mouse_look)
+        camera = self.scene.camera
+        session = self.start()
+        session.look(100.0, 40.0)
+        self.assertAlmostEqual(player.rotation_euler.z, -0.25, places=4)
+        session.input_state.add("W")
+        start = player.location.copy()
+        self.step(session, DT)
+        self.assertLess((player.location - start).length / DT, controller.walk_speed * 0.6)  # eases in
+        heights = []
+        for _ in range(60):
+            session.step(DT)
+            heights.append(camera.location.z - player.location.z)
+        velocity = session._player_velocity
+        self.assertAlmostEqual(velocity.length, controller.walk_speed, places=2)
+        forward = Vector((-math.sin(-0.25), math.cos(-0.25), 0.0))
+        self.assertGreater(velocity.normalized().dot(forward), 0.999)  # moves where it looks
+        self.assertGreater(max(heights) - min(heights), 0.02)           # head bob
+        self.assertGreater(camera.rotation_euler.x, math.radians(90.0))  # looking slightly up
 
     def test_world_bounds_keep_player_inside(self):
         self.build_spec(enemies=[], hazards=[], collectibles=[{"count": 1}])
@@ -481,6 +565,64 @@ class AIGameCreatorTests(unittest.TestCase):
         ai_game_creator.BE_AIGameCreatorPreferences.draw(prefs, bpy.context)
         self.assertIn("blendengine.ai_generate_game", layout.operators)
         self.assertIn("blendengine.ai_refine_game", layout.operators)
+
+    # -- AI Studio (chat-first workspace) ----------------------------------
+
+    def test_studio_chat_records_and_sends(self):
+        settings = self.scene.blendengine_ai
+        bpy.ops.blendengine.ai_chat_new()
+        self.assertEqual(ai_game_creator.chat_messages(self.scene), [])
+        self.assertEqual(bpy.ops.blendengine.ai_chat_send(), {"CANCELLED"})  # empty message
+
+        settings.chat_input = "forest game collect 5 coins"
+        self.assertEqual(bpy.ops.blendengine.ai_chat_send(), {"FINISHED"})
+        self.assertEqual(settings.chat_input, "")
+        self.assertEqual(settings.chat_mode, "CHANGE")
+        messages = ai_game_creator.chat_messages(self.scene)
+        self.assertEqual([m["role"] for m in messages], ["user", "assistant"])
+        self.assertEqual(messages[0]["kind"], "create")
+        title = messages[1]["title"]
+        self.assertTrue(messages[1]["facts"])
+        self.assertEqual(ai_studio._games(messages), [title])
+
+        # A follow-up message changes the same game instead of starting over.
+        settings.chat_input = "add lava and make it harder"
+        self.assertEqual(bpy.ops.blendengine.ai_chat_send(), {"FINISHED"})
+        messages = ai_game_creator.chat_messages(self.scene)
+        self.assertEqual(messages[2]["kind"], "change")
+        self.assertEqual(messages[3]["title"], title)
+        self.assertEqual(ai_studio._games(messages), [title])
+        spec = ai_game_creator._stored_spec(self.scene)
+        self.assertIn("LAVA", [hazard["kind"] for hazard in spec["hazards"]])
+
+        # "New game" starts a fresh conversation; examples fill the composer.
+        bpy.ops.blendengine.ai_chat_example(index=1)
+        self.assertEqual(settings.chat_input, ai_game_creator.EXAMPLE_PROMPTS[1][1])
+        self.assertEqual(settings.chat_mode, "NEW")
+        bpy.ops.blendengine.ai_chat_new()
+        self.assertEqual(ai_game_creator.chat_messages(self.scene), [])
+
+        for _ in range(ai_game_creator.MAX_CHAT_MESSAGES + 5):
+            ai_game_creator.record_chat(self.scene, "user", "hi")
+        self.assertEqual(len(ai_game_creator.chat_messages(self.scene)), ai_game_creator.MAX_CHAT_MESSAGES)
+
+    def test_studio_headers_use_real_properties_and_operators(self):
+        layout = RecordingLayout(self)
+        context = types.SimpleNamespace(scene=self.scene, preferences=bpy.context.preferences, region=None,
+                                        space_data=None)
+        ai_studio.draw_composer(layout, context)  # before any game exists
+        self.create("forest coins")
+        ai_studio.draw_composer(layout, context)
+        self.scene.blendengine_ai.busy = True
+        ai_studio.draw_composer(layout, context)
+        self.scene.blendengine_ai.busy = False
+        ai_studio.draw_game_header(layout, context)
+        for idname in ("blendengine.ai_chat_send", "blendengine.ai_chat_new", "blendengine.ai_cancel",
+                       "blendengine.test_run_scene", "blendengine.ai_variation", "blendengine.prepare_build"):
+            self.assertIn(idname, layout.operators)
+        # Outside the studio the 3D View keeps Blender's own header.
+        self.assertIs(bpy.types.VIEW3D_HT_header.draw, ai_studio._header_draw)
+        self.assertFalse(ai_studio.utils.is_studio_chat_area(bpy.context))
 
     # -- persistence & export ----------------------------------------------
 

@@ -119,6 +119,20 @@ class BE_AIGameCreatorSettings(PropertyGroup):
     last_prompt: StringProperty(name="Last Idea", default="")
     last_spec_json: StringProperty(name="Spec", default="")
     games_created: IntProperty(name="Games Created", default=0, min=0)
+    chat_json: StringProperty(name="Chat", default="[]", description="AI Studio conversation (JSON)")
+    chat_input: StringProperty(
+        name="Message",
+        default="",
+        description="Describe a new game, or what to change in the current one",
+    )
+    chat_mode: EnumProperty(
+        name="Send As",
+        items=(
+            ("CHANGE", "Change current game", "Edit the game on the right"),
+            ("NEW", "New game", "Design a new game from scratch"),
+        ),
+        default="CHANGE",
+    )
 
 
 def addon_preferences(context=None):
@@ -162,6 +176,26 @@ def _stored_spec(scene):
     return ai_game_builder.load_stored_spec()
 
 
+MAX_CHAT_MESSAGES = 80
+
+
+def chat_messages(scene):
+    try:
+        messages = json.loads(scene.blendengine_ai.chat_json or "[]")
+    except ValueError:
+        messages = []
+    return messages if isinstance(messages, list) else []
+
+
+def record_chat(scene, role, text, **data):
+    """Append a message to the AI Studio conversation (user, assistant, error)."""
+    messages = chat_messages(scene)
+    entry = {"role": role, "text": str(text)[:1200]}
+    entry.update(data)
+    messages.append(entry)
+    scene.blendengine_ai.chat_json = json.dumps(messages[-MAX_CHAT_MESSAGES:], ensure_ascii=False)
+
+
 def _set_status(scene, text, icon="INFO"):
     settings = scene.blendengine_ai
     settings.status = text[:500]
@@ -195,6 +229,16 @@ def ensure_can_build(scene):
             raise planner.PlannerError("Switch to Object Mode before building a game.")
 
 
+def _studio_show_new_game(window):
+    """Keep the AI Studio open and point its game panel at the new camera."""
+    from . import ai_studio
+
+    for area in utils.studio_view_areas(window.screen)[1:]:
+        if window.scene.camera is not None:
+            area.spaces.active.region_3d.view_perspective = "CAMERA"
+            ai_studio._fit_camera(window, area)
+
+
 def apply_plan(context, scene, plan, prompt, replace_scene=True):
     """Build ``plan.spec`` into ``scene`` and record it in the AI settings."""
     ensure_can_build(scene)
@@ -213,12 +257,24 @@ def apply_plan(context, scene, plan, prompt, replace_scene=True):
     if warnings:
         message += " Note: " + warnings[0]
     _set_status(scene, message, "ERROR" if warnings and plan.source == "offline" and settings.provider != "OFFLINE" else "CHECKMARK")
+    # The offline planner uses the idea itself as the tagline; don't echo
+    # the user's own words back in the chat.
+    said = {str(m.get("text", "")).strip().casefold() for m in chat_messages(scene) if m.get("role") == "user"}
+    said.add(str(prompt).strip().casefold())
+    tagline = spec["tagline"] if spec["tagline"].strip().casefold() not in said else ""
+    record_chat(scene, "assistant", tagline, title=spec["title"], facts=spec_lib.summarize(spec),
+                notes=spec.get("design_notes", [])[:3], source=plan.source, objects=result["object_count"],
+                warning=warnings[0] if warnings else "")
     for warning in warnings:
         print("[BlendEngine AI] " + warning)
     print("[BlendEngine AI] " + message)
     try:
-        if context is not None and getattr(context, "window", None) is not None:
+        window = getattr(context, "window", None) if context is not None else None
+        if window is not None and getattr(window.workspace, "name", "") != utils.STUDIO_WORKSPACE:
             utils.activate_engine_page(context, "STUDIO")
+        for candidate in getattr(bpy.context.window_manager, "windows", ()):
+            if getattr(candidate.workspace, "name", "") == utils.STUDIO_WORKSPACE:
+                _studio_show_new_game(candidate)
     except Exception:
         pass
     try:
@@ -269,11 +325,13 @@ def _poll_job():
         _set_status(scene, "Cancelled.", "CANCEL")
     elif job.error:
         _set_status(scene, job.error, "ERROR")
+        record_chat(scene, "error", job.error)
     else:
         try:
             apply_plan(bpy.context, scene, job.result, job.prompt, replace_scene=job.replace_scene)
         except planner.PlannerError as ex:
             _set_status(scene, str(ex), "ERROR")
+            record_chat(scene, "error", str(ex))
         except Exception as ex:
             traceback.print_exc()
             _set_status(scene, "Building the game failed: %s" % ex, "ERROR")
@@ -287,6 +345,7 @@ def start_design(context, prompt, base_spec=None, replace_scene=True):
     scene = context.scene
     settings = scene.blendengine_ai
     ensure_can_build(scene)
+    record_chat(scene, "user", prompt, kind="change" if base_spec is not None else "create")
     api_key, model, effort = _claude_settings(context)
     kwargs = {
         "provider": settings.provider,

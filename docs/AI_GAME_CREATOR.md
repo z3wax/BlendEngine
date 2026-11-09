@@ -16,6 +16,39 @@ jangi, 2D qorli platformer va ruscha "вид сверху" vulqon o'yini. Rasm h
 muhitda Blender 4.2 Cycles (CPU, 40 namuna) bilan render qilingan; o'yinning
 o'zi Play Mode'da EEVEE bilan ishlaydi.
 
+## AI Studio (chat + o'yin)
+
+**BlendEngine > AI Studio** (yoki Studio'dagi **AI Studio** tugmasi) Codex
+uslubidagi ish maydonini ochadi: chapda AI bilan suhbat, o'ngda — kod o'rnida —
+jonli 3D o'yin paneli.
+
+![AI Studio: chapda suhbat, o'ngda o'yin](ai/studio_chat.jpg)
+
+- **Chap ustun:** yaratilgan o'yinlar ro'yxati, **New game** va qaysi
+  rejalashtiruvchi ishlayotgani (Claude yoki offline).
+- **Suhbat:** sizning xabarlaringiz o'ngda, AI javoblari chapda: o'yin nomi,
+  janr/kamera/dunyo, maqsad, obyektlar soni va dizayn izohlari. Dizayn
+  ketayotganda "Designing your game..." ko'rinadi.
+- **Pastdagi xabar maydoni:** birinchi xabar yangi o'yin yaratadi, keyingilari
+  shu o'yinni o'zgartiradi (**Change current game** / **New game**).
+  **Examples** tayyor g'oyalarni qo'yadi, oxirgi tanlov — rejalashtiruvchi.
+- **O'yin paneli:** o'yin kamerasidan EEVEE rendered ko'rinish; **Play / Stop**,
+  **New Layout**, **Spec**, **Build** tugmalari. Play shu panelning o'zida
+  ishlaydi, suhbat ochiq qoladi.
+
+| Bo'sh studio | Play studio ichida |
+|---|---|
+| ![Bo'sh AI Studio](ai/studio_empty.jpg) | ![Play AI Studio ichida](ai/studio_play.jpg) |
+
+Rasmdagi suhbat: `Shahar xarobalarida zombilardan omon qolish: 3D
+first-person, 8 ta zombi, 90 soniya yashab qol` → o'yin yaratildi; keyin
+`Zombilar 12 ta bo'lsin, lekin sekinroq yursin va lava qo'sh` → o'sha o'yin
+12 zombi, sekinroq tezlik va lava bilan qayta qurildi. Suhbat `.blend`
+faylida saqlanadi (oxirgi 80 xabar). Blenderda chat vidjeti yo'q, shuning
+uchun suhbat 3D View maydoniga GPU bilan chiziladi, xabar maydoni esa shu
+maydonning pastga o'tkazilgan header'ida turadi; boshqa 3D View'lar o'z
+header'ini saqlaydi.
+
 ## Interfeys
 
 Quyidagi rasmlar haqiqiy Blender oynasidan olingan screenshotlar: Linux,
@@ -231,6 +264,9 @@ bajarilmagan.
   manzaradan o'tib ketadi; dunyo chegarasi faqat arenadan chiqishni to'xtatadi.
 - Dushmanlar XY tekisligida harakatlanadi, shuning uchun arena o'rtasi tekis
   qoldiriladi.
-- Shakllar oddiy protsedural primitivlar; animatsiya, ovoz va import qilingan
-  modellar yaratilmaydi.
+- Shakllar oddiy protsedural primitivlar; skeletli animatsiya, ovoz va import
+  qilingan modellar yaratilmaydi. Dushmanlar protsedural yurish bilan
+  harakatlanadi (qarang: [Grafika](GRAPHICS.md#tabiiy-harakat)).
+- AI Studio suhbatida aylantirish (scroll) yo'q: uzun suhbatda eski xabarlar
+  yuqoridan chiqib ketadi, oxirgilari ko'rinib turadi.
 - Web eksport hali ham soddalashtirilgan 2D ko'rinish (preview).
