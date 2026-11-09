@@ -395,6 +395,52 @@ class AIGameCreatorTests(unittest.TestCase):
         self.assertLess(player.location.z, top)
         self.assertLess(player.location.z, half_height + 0.3)
 
+    def test_npcs_and_player_face_where_they_go(self):
+        """Local +Y must point at the target/heading (atan2(x, y) mirrored it)."""
+        self.build_spec(hazards=[], collectibles=[{"count": 1}],
+                        enemies=[{"name": "Brute", "count": 1, "behavior": "FOLLOW_PLAYER", "shape": "BRUTE",
+                                  "color": "#ff0000", "size": 1.0, "speed": 2.0, "health": 50, "damage": 0}])
+        player = runtime.utils.find_player_object(self.scene)
+        enemy = next(obj for obj in self.scene.objects if obj.blendengine_object.npc_behavior.enabled)
+        session = self.start()
+        enemy.location = player.location + Vector((6.0, 4.0, 0.0))
+        self.step(session, DT)
+        facing = enemy.matrix_basis.to_3x3() @ Vector((0.0, 1.0, 0.0))
+        to_player = player.location - enemy.location
+        to_player.z = 0.0
+        self.assertGreater(facing.normalized().dot(to_player.normalized()), 0.99)
+
+        session.input_state.add("D")
+        self.step(session, 0.2)
+        heading = player.matrix_basis.to_3x3() @ Vector((0.0, 1.0, 0.0))
+        self.assertGreater(heading.x, 0.99)
+
+    def test_culling_uses_world_space_bounds(self):
+        """A large building parented under a scaled root stays visible when its
+        surface is near the camera, even though its own location is far away."""
+        self.build_spec(enemies=[], hazards=[], collectibles=[{"count": 1}])
+        mesh = bpy.data.meshes.new("CullTestMesh")
+        mesh.from_pydata([(x, y, z) for x in (-1, 1) for y in (-1, 1) for z in (0, 1)], [],
+                         [(0, 1, 3, 2), (4, 6, 7, 5), (0, 4, 5, 1), (2, 3, 7, 6), (0, 2, 6, 4), (1, 5, 7, 3)])
+        root = bpy.data.objects.new("CullTestRoot", None)
+        building = bpy.data.objects.new("CullTestBuilding", mesh)
+        for obj in (root, building):
+            self.scene.collection.objects.link(obj)
+        building.parent = root
+        building.location = (0.0, 0.0, 0.0)
+        root.scale = (40.0, 40.0, 40.0)          # 80 m wide, 40 m tall
+        player = runtime.utils.find_player_object(self.scene)
+        root.location = player.location + Vector((0.0, 50.0, -1.0))  # facade 10 m ahead
+        optimization = self.scene.blendengine_optimization
+        optimization.camera_frustum_generation = True
+        optimization.hide_behind_camera = True
+        session = self.start()
+        session._update_visibility_culling()
+        self.assertFalse(building.hide_get())
+        root.location = player.location + Vector((0.0, -500.0, 0.0))  # far behind
+        session._update_visibility_culling()
+        self.assertTrue(building.hide_get())
+
     def test_world_bounds_keep_player_inside(self):
         self.build_spec(enemies=[], hazards=[], collectibles=[{"count": 1}])
         player = runtime.utils.find_player_object(self.scene)

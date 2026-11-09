@@ -257,6 +257,7 @@ DAY_KEYWORDS = ["daytime", "sunny", "morning", "kunduz", "quyoshli", "ertalab", 
 BIG_KEYWORDS = ["huge", "big world", "large", "open world", "katta", "ulkan", "keng", "огромн", "больш", "открытый мир"]
 SMALL_KEYWORDS = ["tiny", "small arena", "compact", "kichik", "ixcham", "маленьк", "небольш"]
 MORE_KEYWORDS = ["more", "extra", "ko'proq", "yana", "больше", "добавь", "add "]
+ADD_KEYWORDS = ["add", "also", "plus", "qo'sh", "qo'shib", "qo'shing", "добавь", "добавить", "ещё", "еще"]
 FEWER_KEYWORDS = ["fewer", "less", "kamroq", "kamaytir", "меньше", "убери"]
 FASTER_KEYWORDS = ["faster", "speed up", "quicker", "tezroq", "tezlashtir", "быстрее"]
 SLOWER_KEYWORDS = ["slower", "sekinroq", "медленнее"]
@@ -371,8 +372,13 @@ def plan_offline(prompt, base_spec=None, seed=None):
         spec = spec_lib.default_spec()
     notes = []
 
-    # Theme.
-    theme_scores = {theme: _score(text, words) for theme, words in THEME_KEYWORDS.items()}
+    # Theme. In a change request, words that also name a hazard ("add lava")
+    # must not move the whole game to another world.
+    hazard_words = {word for words in HAZARD_KEYWORDS.values() for word in words}
+    theme_scores = {
+        theme: _score(text, [w for w in words if not (refining and w in hazard_words)])
+        for theme, words in THEME_KEYWORDS.items()
+    }
     best_theme = max(theme_scores, key=lambda key: theme_scores[key])
     theme_changed = theme_scores[best_theme] > 0
     if theme_changed:
@@ -504,11 +510,16 @@ def plan_offline(prompt, base_spec=None, seed=None):
     hazard_count = max(1, int(round(3 * scale)))
     hazard_damage = round(15 * scale)
     if mentioned_hazards:
-        spec["hazards"] = [
+        groups = [
             {"name": spec_lib.HAZARD_NAMES[kind], "count": _count_before(text, HAZARD_KEYWORDS[kind]) or hazard_count,
              "kind": kind, "damage": hazard_damage}
             for kind in mentioned_hazards[:spec_lib.MAX_HAZARD_GROUPS]
         ]
+        if refining and not theme_changed and _has_any(text, ADD_KEYWORDS + MORE_KEYWORDS):
+            # "add lava" keeps the hazards the game already has.
+            kept = [h for h in spec["hazards"] if h["kind"] not in mentioned_hazards]
+            groups = (kept + groups)[-spec_lib.MAX_HAZARD_GROUPS:]
+        spec["hazards"] = groups
     elif _has_any(text, GENERIC_HAZARD_KEYWORDS) or not refining or theme_changed:
         kind = preset["hazard"]
         spec["hazards"] = [{"name": spec_lib.HAZARD_NAMES[kind], "count": hazard_count, "kind": kind, "damage": hazard_damage}]

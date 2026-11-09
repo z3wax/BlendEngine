@@ -23,7 +23,7 @@ Run from the repository root with Blender 3.6 or newer::
         --output-dir /tmp/neon_quarantine_hd --render
 
 Outputs ``NeonQuarantineHD.blend`` (playable with Play Mode) and, with
-``--render``, ``fps.png``, ``third_person.png``, and ``street.png`` rendered
+``--render``, ``fps.png``, ``third_person.png``, ``street.png``, and ``zombie.png`` rendered
 with EEVEE, the engine's real-time renderer.
 """
 
@@ -61,6 +61,28 @@ def _srgb(hex_color):
     return tuple(c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4 for c in channels) + (1.0,)
 
 
+def world_matrix(obj):
+    """World matrix computed from the parent chain.
+
+    ``Object.matrix_world`` is not refreshed for objects hidden in the
+    viewport (the first-person soldier body is), so it can hold a stale
+    transform even after a view layer update."""
+    matrix = obj.matrix_basis.copy()
+    while obj.parent is not None:
+        matrix = obj.matrix_parent_inverse @ matrix
+        obj = obj.parent
+        matrix = obj.matrix_basis @ matrix
+    return matrix
+
+
+def set_world_matrix(obj, matrix):
+    """Inverse of ``world_matrix`` for an object that already has its parent."""
+    if obj.parent is None:
+        obj.matrix_basis = matrix
+    else:
+        obj.matrix_basis = (world_matrix(obj.parent) @ obj.matrix_parent_inverse).inverted() @ matrix
+
+
 def _input(node, *names):
     for name in names:
         socket = node.inputs.get(name)
@@ -69,70 +91,142 @@ def _input(node, *names):
     return None
 
 
+def _noise(nodes, links, vector, scale, detail=4.0, roughness=0.55, distortion=0.0):
+    node = nodes.new("ShaderNodeTexNoise")
+    node.inputs["Scale"].default_value = scale
+    node.inputs["Detail"].default_value = detail
+    node.inputs["Roughness"].default_value = roughness
+    if "Distortion" in node.inputs:
+        node.inputs["Distortion"].default_value = distortion
+    links.new(vector, node.inputs["Vector"])
+    return node.outputs["Fac"]
+
+
+def _mask(nodes, links, value, low, high):
+    """Soft threshold: 0 below ``low``, 1 above ``high``."""
+    node = nodes.new("ShaderNodeMapRange")
+    node.inputs["From Min"].default_value = low
+    node.inputs["From Max"].default_value = high
+    node.clamp = True
+    links.new(value, node.inputs["Value"])
+    return node.outputs["Result"]
+
+
+def _mix_color(nodes, links, factor, color_a, color_b):
+    node = nodes.new("ShaderNodeMixRGB")
+    if isinstance(factor, float):
+        node.inputs["Fac"].default_value = factor
+    else:
+        links.new(factor, node.inputs["Fac"])
+    for socket, color in ((node.inputs["Color1"], color_a), (node.inputs["Color2"], color_b)):
+        if isinstance(color, tuple):
+            socket.default_value = color
+        else:
+            links.new(color, socket)
+    return node.outputs["Color"]
+
+
+def _mix_value(nodes, links, factor, value_a, value_b):
+    node = nodes.new("ShaderNodeMath")
+    node.operation = "MULTIPLY_ADD"  # factor * (b - a) + a
+    links.new(factor, node.inputs[0])
+    node.inputs[1].default_value = value_b - value_a
+    node.inputs[2].default_value = value_a
+    return node.outputs["Value"]
+
+
 def pbr(name, colors, roughness, metallic=0.0, pattern_scale=5.0, bump=0.2, micro=300.0, subsurface=0.0,
-        emission=None, emission_strength=0.0, alpha=1.0):
-    """Principled material whose color comes from a noise-driven palette
-    (camo, mottled skin, worn polymer) plus macro and micro relief."""
+        emission=None, emission_strength=0.0, alpha=1.0, constant=False, dirt=0.0, blood=0.0, veins=0.0,
+        wrinkles=0.0, blood_cover=0.0):
+    """Layered procedural PBR material.
+
+    Patterns use Generated coordinates (0..1 across each part), so they keep
+    the same size whatever unit scale an imported model uses; the Sketchfab
+    meshes here are stored at 1/40 scale, which made object-space noise
+    collapse into a flat average. Layers: a palette (camo, mottled skin),
+    optional dirt, wet blood, veins, and micro + wrinkle relief."""
     mat = bpy.data.materials.get(name) or bpy.data.materials.new(name)
     mat.use_nodes = True
     nodes, links = mat.node_tree.nodes, mat.node_tree.links
     nodes.clear()
     out = nodes.new("ShaderNodeOutputMaterial")
-    out.location = (500, 0)
     bsdf = nodes.new("ShaderNodeBsdfPrincipled")
-    bsdf.location = (200, 0)
     links.new(bsdf.outputs["BSDF"], out.inputs["Surface"])
-    coords = nodes.new("ShaderNodeTexCoord")
-    coords.location = (-900, 0)
+    vector = nodes.new("ShaderNodeTexCoord").outputs["Generated"]
 
-    noise = nodes.new("ShaderNodeTexNoise")
-    noise.location = (-650, 150)
-    noise.inputs["Scale"].default_value = pattern_scale
-    noise.inputs["Detail"].default_value = 4.0
-    noise.inputs["Roughness"].default_value = 0.6
-    links.new(coords.outputs["Object"], noise.inputs["Vector"])
     ramp = nodes.new("ShaderNodeValToRGB")
-    ramp.location = (-400, 150)
-    elements = ramp.color_ramp.elements
-    if len(colors) > 1 and len(colors) <= 4 and name.endswith("Camo"):
+    if constant:
         ramp.color_ramp.interpolation = "CONSTANT"
+    elements = ramp.color_ramp.elements
     while len(elements) < len(colors):
         elements.new(0.5)
     for index, color in enumerate(colors):
-        elements[index].position = index / max(1, len(colors) - 1) * 0.9 + (0.05 if len(colors) > 1 else 0.0)
+        elements[index].position = (index / max(1, len(colors) - 1)) * 0.8 + (0.1 if len(colors) > 1 else 0.0)
         elements[index].color = _srgb(color)
-    links.new(noise.outputs["Fac"], ramp.inputs["Fac"])
-    links.new(ramp.outputs["Color"], _input(bsdf, "Base Color"))
+    links.new(_noise(nodes, links, vector, pattern_scale, detail=6.0), ramp.inputs["Fac"])
+    color = ramp.outputs["Color"]
+    rough = _mix_value(nodes, links, _noise(nodes, links, vector, pattern_scale * 5.0), roughness - 0.08, roughness + 0.08)
+
+    if dirt > 0.0:
+        grime = _mask(nodes, links, _noise(nodes, links, vector, 3.5, detail=8.0), 0.45, 0.75)
+        amount = nodes.new("ShaderNodeMath")
+        amount.operation = "MULTIPLY"
+        links.new(grime, amount.inputs[0])
+        amount.inputs[1].default_value = dirt
+        color = _mix_color(nodes, links, amount.outputs["Value"], color, _srgb("#2f2a22"))
+    if veins > 0.0:
+        voronoi = nodes.new("ShaderNodeTexVoronoi")
+        voronoi.feature = "DISTANCE_TO_EDGE"
+        voronoi.inputs["Scale"].default_value = 28.0
+        links.new(vector, voronoi.inputs["Vector"])
+        lines = _mask(nodes, links, voronoi.outputs["Distance"], 0.03, 0.0)
+        amount = nodes.new("ShaderNodeMath")
+        amount.operation = "MULTIPLY"
+        links.new(lines, amount.inputs[0])
+        amount.inputs[1].default_value = veins
+        color = _mix_color(nodes, links, amount.outputs["Value"], color, _srgb("#3b4a3e"))
+    if blood > 0.0:
+        low = 0.62 - blood_cover
+        stains = _mask(nodes, links, _noise(nodes, links, vector, 6.0, detail=10.0, distortion=1.5), low, low + 0.06)
+        amount = nodes.new("ShaderNodeMath")
+        amount.operation = "MULTIPLY"
+        links.new(stains, amount.inputs[0])
+        amount.inputs[1].default_value = blood
+        color = _mix_color(nodes, links, amount.outputs["Value"], color, _srgb("#3d0707"))
+        # Fresh blood is glossy.
+        wet = nodes.new("ShaderNodeMath")
+        wet.operation = "MULTIPLY_ADD"
+        links.new(amount.outputs["Value"], wet.inputs[0])
+        wet.inputs[1].default_value = -0.5
+        links.new(rough, wet.inputs[2])
+        rough = wet.outputs["Value"]
+
+    links.new(color, _input(bsdf, "Base Color"))
+    links.new(rough, _input(bsdf, "Roughness"))
+    _input(bsdf, "Metallic").default_value = metallic
     if subsurface > 0.0:
         sss = _input(bsdf, "Subsurface Weight", "Subsurface")
         if sss is not None:
             sss.default_value = subsurface
         radius = _input(bsdf, "Subsurface Radius")
         if radius is not None:
-            radius.default_value = (0.6, 0.25, 0.15)
+            radius.default_value = (0.9, 0.3, 0.2)
+        sss_scale = _input(bsdf, "Subsurface Scale")
+        if sss_scale is not None:
+            sss_scale.default_value = 0.02
 
-    rough_noise = nodes.new("ShaderNodeTexNoise")
-    rough_noise.location = (-650, -150)
-    rough_noise.inputs["Scale"].default_value = pattern_scale * 6.0
-    links.new(coords.outputs["Object"], rough_noise.inputs["Vector"])
-    rough_map = nodes.new("ShaderNodeMapRange")
-    rough_map.location = (-400, -150)
-    rough_map.inputs["To Min"].default_value = max(0.02, roughness - 0.12)
-    rough_map.inputs["To Max"].default_value = min(1.0, roughness + 0.12)
-    links.new(rough_noise.outputs["Fac"], rough_map.inputs["Value"])
-    links.new(rough_map.outputs["Result"], _input(bsdf, "Roughness"))
-    _input(bsdf, "Metallic").default_value = metallic
-
-    micro_noise = nodes.new("ShaderNodeTexNoise")
-    micro_noise.location = (-650, -400)
-    micro_noise.inputs["Scale"].default_value = micro
-    micro_noise.inputs["Detail"].default_value = 2.0
-    links.new(coords.outputs["Object"], micro_noise.inputs["Vector"])
+    height = _noise(nodes, links, vector, micro, detail=2.0)
+    if wrinkles > 0.0:
+        add = nodes.new("ShaderNodeMath")
+        add.operation = "MULTIPLY_ADD"
+        links.new(_noise(nodes, links, vector, 40.0, detail=6.0), add.inputs[0])
+        add.inputs[1].default_value = wrinkles
+        links.new(height, add.inputs[2])
+        height = add.outputs["Value"]
     bump_node = nodes.new("ShaderNodeBump")
-    bump_node.location = (-150, -300)
     bump_node.inputs["Strength"].default_value = bump
     bump_node.inputs["Distance"].default_value = 0.004
-    links.new(micro_noise.outputs["Fac"], bump_node.inputs["Height"])
+    links.new(height, bump_node.inputs["Height"])
     links.new(bump_node.outputs["Normal"], _input(bsdf, "Normal"))
 
     if emission is not None:
@@ -146,17 +240,28 @@ def pbr(name, colors, roughness, metallic=0.0, pattern_scale=5.0, bump=0.2, micr
 
 def material_library():
     return {
-        "camo": pbr("HD_Soldier_Camo", ("#8b7d5a", "#5b5a3a", "#6b4f35", "#3d4630"), 0.86, pattern_scale=7.0, bump=0.25),
-        "armor": pbr("HD_Soldier_Armor", ("#4f543e", "#454a37"), 0.52, pattern_scale=3.0, bump=0.12, micro=120.0),
-        "helmet": pbr("HD_Soldier_Helmet", ("#6e6650", "#5f5845"), 0.48, pattern_scale=3.0, bump=0.1, micro=150.0),
-        "canvas": pbr("HD_Soldier_Canvas", ("#7a6a4f", "#6a5c44"), 0.9, pattern_scale=9.0, bump=0.3, micro=500.0),
+        "camo": pbr("HD_Soldier_Camo", ("#8b7d5a", "#5b5a3a", "#6b4f35", "#3d4630"), 0.86, pattern_scale=6.0,
+                    bump=0.25, micro=260.0, constant=True, dirt=0.25),
+        "armor": pbr("HD_Soldier_Armor", ("#4f543e", "#454a37"), 0.52, pattern_scale=3.0, bump=0.12, micro=120.0,
+                     dirt=0.3),
+        "helmet": pbr("HD_Soldier_Helmet", ("#6e6650", "#5f5845"), 0.48, pattern_scale=3.0, bump=0.1, micro=150.0,
+                      dirt=0.3),
+        "canvas": pbr("HD_Soldier_Canvas", ("#7a6a4f", "#6a5c44"), 0.9, pattern_scale=9.0, bump=0.3, micro=400.0,
+                      dirt=0.3),
         "gloves": pbr("HD_Soldier_Gloves", ("#1c1c1e", "#26262a"), 0.55, pattern_scale=12.0, bump=0.2),
-        "mask": pbr("HD_Soldier_Mask", ("#1a1b1d", "#222327"), 0.85, pattern_scale=12.0, bump=0.3, micro=600.0),
+        "mask": pbr("HD_Soldier_Mask", ("#1a1b1d", "#222327"), 0.85, pattern_scale=12.0, bump=0.3, micro=500.0),
         "skin": pbr("HD_Soldier_Skin", ("#c08a6b", "#a8735a"), 0.5, pattern_scale=20.0, bump=0.05, subsurface=0.15),
         "eyes": pbr("HD_Soldier_Eyes", ("#101012",), 0.05, bump=0.0),
         "plastic": pbr("HD_Black_Plastic", ("#141416", "#1c1c20"), 0.4, pattern_scale=10.0, bump=0.08),
-        "zombie": pbr("HD_Zombie_Skin", ("#6d7a5e", "#4a5240", "#5a2f2a", "#7d8a6a"), 0.55, pattern_scale=4.0,
-                      bump=0.45, micro=80.0, subsurface=0.08),
+        # Infected soldiers: grey-green decaying skin with bruises, veins, and blood.
+        "zombie": pbr("HD_Zombie_Skin", ("#8d9a7c", "#76815f", "#5f5a48", "#4a3a3c"), 0.5, pattern_scale=7.0,
+                      bump=0.45, micro=220.0, subsurface=0.1, veins=0.85, blood=1.0, wrinkles=1.0, dirt=0.45,
+                      blood_cover=0.06),
+        "zombie_cloth": pbr("HD_Zombie_Uniform", ("#5e5a46", "#45463a", "#544233", "#33382e"), 0.9, pattern_scale=6.0,
+                            bump=0.3, micro=260.0, constant=True, dirt=0.7, blood=1.0, blood_cover=0.08),
+        "zombie_gear": pbr("HD_Zombie_Gear", ("#3f4334", "#363a2e"), 0.6, pattern_scale=3.0, bump=0.15, micro=120.0,
+                           dirt=0.8, blood=0.7),
+        "zombie_eyes": pbr("HD_Zombie_Eyes", ("#d9d27a",), 0.1, bump=0.0, emission="#e8d65a", emission_strength=2.5),
         "receiver": pbr("HD_SCAR_Anodized", ("#1a1b1d", "#202226"), 0.36, metallic=0.85, pattern_scale=8.0,
                         bump=0.05, micro=400.0),
         "polymer": pbr("HD_SCAR_FDE_Polymer", ("#8a7556", "#7c6a4e"), 0.6, pattern_scale=6.0, bump=0.15, micro=350.0),
@@ -198,8 +303,6 @@ def upgrade_characters(scene, lib):
                 if any(k in part for k in keys):
                     _assign(obj, lib[key])
                     break
-        elif name.startswith("BE_Zombie"):
-            _assign(obj, lib["zombie"])
         elif name.startswith("BE_SCAR"):
             if "Glass" in name:
                 _assign(obj, lib["lens"])
@@ -216,6 +319,136 @@ def upgrade_characters(scene, lib):
             # Placeholder cylinders; the HD view model shows the rifle only.
             obj.hide_render = True
             obj.hide_viewport = True
+
+
+# Gear an infected soldier keeps; the rest of the kit was lost or torn off.
+INFECTED_DROP = ("Helmet", "Facemask", "Headset", "Radio", "Cable", "Backpack", "Backpad")
+INFECTED_PARTS = (
+    (("Head",), "zombie"),
+    (("Eyes",), "zombie_eyes"),
+    (("Body", "Legs_", "Corset", "Unsershoulder"), "zombie_cloth"),
+    (("Gloves",), "zombie"),
+)
+
+
+def _soldier_parts(root):
+    rifle = bpy.data.objects.get("BE_PlayerSoldierVisual_Rifle")
+    skip = set(rifle.children_recursive) if rifle is not None else set()
+    return [obj for obj in root.children_recursive if obj.type == "MESH" and obj not in skip]
+
+
+def _zombie_roots(scene):
+    return sorted((obj for obj in scene.objects
+                   if obj.name.startswith("BE_Zombie_") and obj.type == "EMPTY" and obj.parent is None),
+                  key=lambda obj: obj.name)
+
+
+def _replace_zombie_body(zombie_root, sources, model_front_minus_y=True, scale=1.0, source_space=None,
+                         material_for=None):
+    """Hide the zombie's old meshes and parent new copies of ``sources``.
+
+    The runtime turns NPC roots so their local +Y faces the target; a model
+    whose front is -Y (the glTF convention) is turned by 180 degrees."""
+    for child in zombie_root.children_recursive:
+        if child.type == "MESH":
+            child.hide_render = True
+            child.hide_viewport = True
+            child.blendengine_object.object_tag = "ZombieLegacyMesh"
+    bpy.context.view_layer.update()
+    holder = bpy.data.objects.new(zombie_root.name + "_Body", None)
+    for collection in zombie_root.users_collection:
+        collection.objects.link(holder)
+    holder.parent = zombie_root
+    root_world = world_matrix(zombie_root)
+    feet = root_world.translation.copy()
+    feet.z = 0.0
+    yaw = root_world.to_euler().z + (math.pi if model_front_minus_y else 0.0)
+    set_world_matrix(holder, Matrix.Translation(feet) @ Matrix.Rotation(yaw, 4, "Z") @ Matrix.Scale(scale, 4))
+    to_source = source_space.inverted() if source_space is not None else Matrix.Identity(4)
+    bpy.context.view_layer.update()
+    for source in sources:
+        copy = source.copy()
+        copy.data = source.data  # shared mesh, per-object materials
+        for collection in zombie_root.users_collection:
+            collection.objects.link(copy)
+        copy.parent = holder
+        copy.matrix_parent_inverse.identity()
+        copy.matrix_basis = to_source @ world_matrix(source)
+        copy.hide_render = False
+        copy.hide_viewport = False
+        copy.blendengine_object.object_tag = "Zombie"
+        if material_for is not None:
+            material = material_for(source)
+            if material is not None:
+                for slot in copy.material_slots:
+                    slot.link = "OBJECT"
+                    slot.material = material
+    return holder
+
+
+def build_infected_soldiers(scene, lib, seed=7):
+    """Zombies rebuilt from the intact soldier model.
+
+    The zombie mesh in startup.blend was decimated so hard for the 1 GB
+    profile that its skin and clothing shells broke into intersecting
+    shards, and its texture was stripped; the original file is not in the
+    repository. Use ``--zombie-model`` to bring back an original model."""
+    import random
+    rng = random.Random(seed)
+    soldier = bpy.data.objects.get("BE_PlayerSoldierVisual_Root")
+    if soldier is None:
+        return 0
+    bpy.context.view_layer.update()
+    parts = _soldier_parts(soldier)
+    count = 0
+    for zombie_root in _zombie_roots(scene):
+        kept = []
+        for part in parts:
+            name = part.parent.name if part.parent else part.name
+            if any(key in name for key in INFECTED_DROP):
+                continue
+            # Some armor pieces were ripped off: every zombie looks different.
+            if any(key in name for key in ("plate", "Plate", "pads", "armor", "Pouches")) and rng.random() < 0.35:
+                continue
+            kept.append(part)
+
+        def material_for(part):
+            name = part.parent.name if part.parent else part.name
+            for keys, key in INFECTED_PARTS:
+                if any(k in name for k in keys):
+                    return lib[key]
+            return lib["zombie_gear"]
+
+        # The soldier model faces -Y in its own space, like glTF models.
+        _replace_zombie_body(zombie_root, kept, model_front_minus_y=True,
+                             source_space=world_matrix(soldier), material_for=material_for)
+        count += 1
+    return count
+
+
+def import_zombie_model(scene, path, height=1.75, faces_plus_y=False):
+    """Use an original zombie .glb (for example sexy_zombie_girl.glb from the
+    starter's MODELS folder) instead of the infected soldiers."""
+    before = set(bpy.data.objects)
+    bpy.ops.import_scene.gltf(filepath=path)
+    imported = [obj for obj in bpy.data.objects if obj not in before]
+    meshes = [obj for obj in imported if obj.type == "MESH"]
+    bpy.context.view_layer.update()
+    points = [world_matrix(obj) @ Vector(corner) for obj in meshes for corner in obj.bound_box]
+    low = min(p.z for p in points)
+    model_height = max(p.z for p in points) - low
+    center = Vector(((min(p.x for p in points) + max(p.x for p in points)) * 0.5,
+                     (min(p.y for p in points) + max(p.y for p in points)) * 0.5, low))
+    space = Matrix.Translation(center)
+    for obj in meshes:
+        for polygon in obj.data.polygons:
+            polygon.use_smooth = True
+    for zombie_root in _zombie_roots(scene):
+        _replace_zombie_body(zombie_root, meshes, model_front_minus_y=not faces_plus_y,
+                             scale=height / max(model_height, 1e-3), source_space=space)
+    for obj in imported:
+        bpy.data.objects.remove(obj, do_unlink=True)
+    return len(meshes)
 
 
 # ---------------------------------------------------------------------------
@@ -293,17 +526,17 @@ def _smoothstep(edge0, edge1, value):
 
 def pose_soldier(scene):
     """Turn the T-posed soldier toward the zombies and swing both arms
-    forward into a rifle-ready stance (the model has no skeleton)."""
+    forward into a rifle-ready stance (the model has no skeleton). Like
+    glTF models, it faces -Y in its own space (facemask and breastplate
+    sit on the -Y side of the head and torso)."""
     root = bpy.data.objects.get("BE_PlayerSoldierVisual_Root")
     if root is None or root.get("hd_posed"):
         return None
-    # Saved files can hold stale child matrices; refresh before measuring.
-    bpy.context.view_layer.update()
     meshes = [obj for obj in root.children_recursive if obj.type == "MESH"]
     shoulder_x, shoulder_z = 0.2, 1.45
-    to_root = root.matrix_world.inverted()
+    to_root = world_matrix(root).inverted()
     for obj in meshes:
-        world = to_root @ obj.matrix_world
+        world = to_root @ world_matrix(obj)
         inverse = world.inverted()
         mesh = obj.data
         if mesh.users > 1:
@@ -334,7 +567,7 @@ def pose_soldier(scene):
     holder.location = (0.06, -0.42, 1.24)
     camera, parts = _view_model_parts()
     if parts:
-        to_camera = camera.matrix_world.inverted()
+        to_camera = world_matrix(camera).inverted()
         center = _parts_center(camera, parts)
         # Camera space (-Z forward, +Y up) -> soldier space (-Y forward, +Z up).
         orient = Matrix.Rotation(math.pi, 4, "Z") @ Matrix.Rotation(math.pi / 2.0, 4, "X")
@@ -344,7 +577,7 @@ def pose_soldier(scene):
                 collection.objects.link(copy)
             copy.parent = holder
             copy.matrix_parent_inverse.identity()
-            copy.matrix_basis = orient @ Matrix.Translation(-center) @ to_camera @ obj.matrix_world
+            copy.matrix_basis = orient @ Matrix.Translation(-center) @ to_camera @ world_matrix(obj)
             copy.blendengine_object.object_tag = "PlayerBody"
     return root
 
@@ -359,8 +592,8 @@ def _view_model_parts():
 
 
 def _parts_center(camera, parts):
-    to_camera = camera.matrix_world.inverted()
-    points = [to_camera @ (obj.matrix_world @ Vector(corner)) for obj in parts for corner in obj.bound_box]
+    to_camera = world_matrix(camera).inverted()
+    points = [to_camera @ (world_matrix(obj) @ Vector(corner)) for obj in parts for corner in obj.bound_box]
     return Vector(tuple((min(p[i] for p in points) + max(p[i] for p in points)) * 0.5 for i in range(3)))
 
 
@@ -377,9 +610,10 @@ def face_zombies_forward(scene):
         # Imported children use quaternion rotation, so turn them by matrix
         # about the root's origin instead of editing rotation_euler.
         bpy.context.view_layer.update()
-        turn = root.matrix_world @ Matrix.Rotation(math.pi, 4, "Z") @ root.matrix_world.inverted()
+        root_world = world_matrix(root)
+        turn = root_world @ Matrix.Rotation(math.pi, 4, "Z") @ root_world.inverted()
         for child in root.children:
-            child.matrix_world = turn @ child.matrix_world
+            set_world_matrix(child, turn @ world_matrix(child))
         root.rotation_euler.z += math.pi
         root["hd_faced"] = True
 
@@ -391,7 +625,12 @@ def high_end_budget(scene):
     budget.max_texture_memory_mb = 1024
     budget.max_dynamic_lights = 8
     budget.max_shadow_casters = 4
-    scene.blendengine_optimization.one_gb_ram_mode = False
+    optimization = scene.blendengine_optimization
+    optimization.one_gb_ram_mode = False
+    # The HD city is ~300 m long: stream far enough that the skyline never pops.
+    optimization.world_cell_size = 60.0
+    optimization.visible_cell_radius = 3
+    optimization.max_visible_objects = 1000
 
 
 def place_view_model():
@@ -411,7 +650,8 @@ def place_view_model():
              @ Matrix.Rotation(math.pi, 4, "Z") @ Matrix.Translation(-center))
     for obj in parts:
         if obj.parent == camera:
-            obj.matrix_world = camera.matrix_world @ shift @ camera.matrix_world.inverted() @ obj.matrix_world
+            camera_world = world_matrix(camera)
+            set_world_matrix(obj, camera_world @ shift @ camera_world.inverted() @ world_matrix(obj))
 
 
 # ---------------------------------------------------------------------------
@@ -591,7 +831,12 @@ def render_shots(scene, output_dir):
             obj.hide_render = True
     third = _camera(scene, "HD_Shot_ThirdPerson", (1.55, -7.9, 1.7), (-0.2, 2.0, 1.25), 35, focus=3.3, fstop=4.0)
     street = _camera(scene, "HD_Shot_Street", (-5.0, -12.5, 1.9), (1.5, 3.0, 3.6), 22)
-    for name, camera in (("third_person", third), ("street", street)):
+    zombie = bpy.data.objects.get("BE_Zombie_01")
+    spot = world_matrix(zombie).translation if zombie else Vector((0.0, 1.8, 0.0))
+    target = (spot.x, spot.y, 1.3)
+    closeup = _camera(scene, "HD_Shot_Zombie", (target[0] + 0.9, target[1] - 2.6, 1.55), target, 50,
+                      focus=2.75, fstop=2.8)
+    for name, camera in (("third_person", third), ("street", street), ("zombie", closeup)):
         started = time.time()
         scene.camera = camera
         scene.render.filepath = os.path.join(output_dir, name + ".png")
@@ -610,6 +855,9 @@ def main():
     parser.add_argument("--city-scale", type=float, default=10.0)
     parser.add_argument("--haze", type=float, default=0.012, help="World volume density; 0 disables it")
     parser.add_argument("--no-bake", action="store_true")
+    parser.add_argument("--zombie-model", help="Original zombie .glb to use instead of infected soldiers")
+    parser.add_argument("--zombie-faces-plus-y", action="store_true",
+                        help="Set if zombies from --zombie-model walk backwards (model not in glTF orientation)")
     args = parser.parse_args(sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else [])
 
     optimization, performance, templates = ensure_engine()
@@ -624,10 +872,16 @@ def main():
     scene.blendengine_export.package_name = "NeonQuarantineHD"
     started = time.time()
     replace_city(scene, templates, args.max_texture, args.city_scale)
-    upgrade_characters(scene, material_library())
+    lib = material_library()
+    upgrade_characters(scene, lib)
     place_view_model()
     pose_soldier(scene)
     face_zombies_forward(scene)
+    if args.zombie_model:
+        print("[showcase] zombies from %s: %d meshes" % (args.zombie_model, import_zombie_model(
+            scene, args.zombie_model, faces_plus_y=args.zombie_faces_plus_y)))
+    else:
+        print("[showcase] infected soldiers: %d" % build_infected_soldiers(scene, lib))
     setup_lighting(scene, args.haze)
     configure_render(scene, optimization, args.samples)
     if not args.no_bake:

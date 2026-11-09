@@ -118,6 +118,33 @@ def validate_scene(scene):
     return result
 
 
+def world_matrix(obj):
+    """World matrix from the parent chain; ``matrix_world`` is not refreshed
+    for objects that are hidden, which culling itself does."""
+    matrix = obj.matrix_basis.copy()
+    while obj.parent is not None:
+        matrix = obj.matrix_parent_inverse @ matrix
+        obj = obj.parent
+        matrix = obj.matrix_basis @ matrix
+    return matrix
+
+
+def world_bounds_sphere(obj):
+    """(center, radius) of the object's bounding box in world space."""
+    world = world_matrix(obj)
+    corners = [world @ Vector(corner) for corner in obj.bound_box]
+    center = sum(corners, Vector()) / len(corners)
+    return center, max((corner - center).length for corner in corners)
+
+
+def yaw_towards(x, y):
+    """Z rotation that turns an object's local +Y toward the direction (x, y).
+
+    Blender rotates +Y to (-sin(yaw), cos(yaw)), so the angle is
+    atan2(-x, y); atan2(x, y) mirrors the facing whenever x is not zero."""
+    return math.atan2(-x, y)
+
+
 def _world_bounds(scene):
     """Optional (min_x, min_y, max_x, max_y) play area stored on the scene."""
     bounds = scene.get("blendengine_world_bounds")
@@ -469,15 +496,16 @@ class GameSession:
         speed = controller.run_speed if controller.sprint and self._action_down(actions, "SPRINT") else controller.walk_speed
         if controller.controller_type == "FIRST_PERSON":
             yaw = player.rotation_euler.z
-            forward = Vector((math.sin(yaw), math.cos(yaw), 0.0))
-            right = Vector((math.cos(yaw), -math.sin(yaw), 0.0))
+            # Local +Y and +X of the player (and of the camera that copies its yaw).
+            forward = Vector((-math.sin(yaw), math.cos(yaw), 0.0))
+            right = Vector((math.cos(yaw), math.sin(yaw), 0.0))
             player.location += (right * axis_x + forward * axis_y) * speed * dt
             if movement.length > 0.001:
-                player.rotation_euler.z = math.atan2(movement.x, movement.y)
+                player.rotation_euler.z = yaw_towards(movement.x, movement.y)
         else:
             player.location += movement * speed * dt
             if movement.length > 0.001:
-                player.rotation_euler.z = math.atan2(movement.x, movement.y)
+                player.rotation_euler.z = yaw_towards(movement.x, movement.y)
         self._clamp_to_bounds(player)
 
         ground_z = self._ground_height_at(player, default=self._ground_z.get(player.name, player.location.z))
@@ -527,7 +555,9 @@ class GameSession:
         player = utils.find_player_object(self.scene)
         if camera is None:
             return
-        camera_forward = camera.matrix_world.to_quaternion() @ Vector((0.0, 0.0, -1.0))
+        camera_world = world_matrix(camera)
+        camera_forward = camera_world.to_quaternion() @ Vector((0.0, 0.0, -1.0))
+        camera_location = camera_world.translation
         max_distance = max(optimization.world_cell_size * (optimization.visible_cell_radius + 1), 24.0)
         visible_count = 0
         for obj in self.scene.objects:
@@ -539,10 +569,14 @@ class GameSession:
             if settings.optimization.dynamic_object and settings.player_controller.enabled:
                 continue
             hidden = False
-            to_obj = obj.location - camera.location
-            distance = to_obj.length
-            if optimization.hide_behind_camera and distance > 0.001:
-                hidden = camera_forward.dot(to_obj.normalized()) < -0.08
+            # Test the world-space bounding sphere: a big building whose
+            # origin is far away (or a child of a moved/scaled parent) can
+            # still fill the view.
+            center, radius = world_bounds_sphere(obj)
+            to_obj = center - camera_location
+            distance = max(0.0, to_obj.length - radius)
+            if optimization.hide_behind_camera and to_obj.length > radius:
+                hidden = camera_forward.dot(to_obj) < -radius - 0.08 * to_obj.length
             if not hidden and optimization.camera_frustum_generation:
                 hidden = distance > max_distance
             if visible_count >= optimization.max_visible_objects and settings.optimization.disable_when_far:
@@ -722,7 +756,7 @@ class GameSession:
             return
         delta.normalize()
         obj.location += delta * min(speed * dt, max(0.0, distance - stop_distance))
-        obj.rotation_euler.z = math.atan2(delta.x, delta.y)
+        obj.rotation_euler.z = yaw_towards(delta.x, delta.y)
 
     def execute_behaviors(self, event_type, dt, key=None):
         for obj in self.scene.objects:

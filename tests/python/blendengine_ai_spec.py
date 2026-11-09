@@ -275,6 +275,16 @@ class OfflinePlannerTests(unittest.TestCase):
         self.assertEqual(refined["goal"]["target_count"], 12)
         self.assertEqual(refined["seed"], base["seed"])
 
+    def test_refine_adding_lava_keeps_the_world(self):
+        base = self.plan("Kosmosda 90 soniya omon qolish, o'zga sayyoraliklar va lazer to'siqlari")
+        refined = self.plan("ko'proq dushman, tunda bo'lsin va lava qo'sh", base_spec=base)
+        self.assertEqual(refined["world"]["theme"], "SPACE")
+        self.assertEqual(refined["title"], base["title"])
+        self.assertEqual(sorted(h["kind"] for h in refined["hazards"]), ["LASER", "LAVA"])
+        self.assertGreater(spec_lib.total_count(refined["enemies"]), spec_lib.total_count(base["enemies"]))
+        # A new idea still reads "lava world" as a volcano.
+        self.assertEqual(self.plan("lava world with monsters")["world"]["theme"], "VOLCANO")
+
     def test_every_theme_keyword_builds(self):
         for theme, words in planner.THEME_KEYWORDS.items():
             spec = self.plan("a game in the %s" % words[0])

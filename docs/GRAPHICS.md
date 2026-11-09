@@ -69,6 +69,8 @@ ko'rsating. Rasm renderi uchun xotira va vaqt talab qilinadi; `--width 640
 |---|---|
 | ![Askar zombilarga qarshi](graphics/neon_quarantine_hd_third_person.jpg) | ![Kechki Times Square](graphics/neon_quarantine_hd_street.jpg) |
 
+![Zombi: yuqtirilgan askar](graphics/neon_quarantine_hd_zombie.jpg)
+
 Starter o'yin (`startup.blend`, Neon Quarantine) 1 GB qurilmalar uchun
 soddalashtirilgan shahar bilan keladi. [create_realistic_soldier_showcase.py](../tools/blendengine/create_realistic_soldier_showcase.py)
 uning o'yin mantiqini saqlab qolgan holda GPU'li kompyuterlar uchun HD versiyasini quradi:
@@ -77,19 +79,35 @@ uning o'yin mantiqini saqlab qolgan holda GPU'li kompyuterlar uchun HD versiyasi
   Model Times Square'ning taxminan 1:10 maketi, shuning uchun u odam o'lchamiga
   kattalashtiriladi va chorraha jang maydoniga joylashtiriladi. Starter
   o'yinda u 1:1 qoldirilgan edi, shuning uchun askar binolar tomida turardi.
-- Askar, zombilar, SCAR va pickuplar uchun protsedural PBR materiallar
-  yaratiladi.
+- Askar, SCAR va pickuplar uchun qatlamli protsedural PBR materiallar
+  yaratiladi: kamuflyaj, kir, qon, tomirlar va mikro relyef. Naqshlar
+  Generated koordinatalarda chiziladi, chunki Sketchfab meshlari 1/40
+  masshtabda saqlangan va obyekt koordinatalaridagi naqsh bir xil rangga
+  aylanib qolardi.
+- Zombilar "yuqtirilgan askarlar"ga aylantiriladi. Starter'dagi zombi modeli
+  1 GB profil uchun shunchalik soddalashtirilganki, uning teri va kiyim
+  qatlamlari bir-birini kesib, bo'laklarga bo'lingan, teksturasi esa olib
+  tashlangan; asl fayl repoda yo'q. Shuning uchun zombilar butun askar
+  modelidan yasaladi: chirigan teri, qon, kir bosgan uniforma, yonib turgan
+  ko'zlar va har birida turlicha yo'qolgan zirh. Asl modelingiz bo'lsa,
+  `--zombie-model sexy_zombie_girl.glb` bilan o'shani ishlatish mumkin
+  (orqasi bilan yursa, `--zombie-faces-plus-y` qo'shing).
 - Askar zombilarga qaratiladi va miltiqni ushlab turgan pozaga keltiriladi.
   Modelda skelet yo'q, shuning uchun qo'llar vertekslar bilan egiladi.
 - Birinchi shaxs miltig'i kadrga ko'tariladi va to'g'ri holatga aylantiriladi.
   Starter rig'da u kadr ostida, teskari turgan edi. Placeholder qo'l
   silindrlari yashiriladi.
-- Zombilar Play Mode'da o'yinchiga yuzi bilan yuradi. Starter o'yinda ular
-  orqasi bilan yurardi: modelning old tomoni runtime kutganining teskarisi.
+- Zombilar Play Mode'da o'yinchiga yuzi bilan yuradi. Buning uchun runtime'da
+  ikki xato tuzatildi: NPC yo'nalishi `atan2(x, y)` bilan hisoblanib, nishon
+  yonda bo'lganda ko'zgudagi aksiga qarardi; culling esa obyektning lokal
+  joylashuviga qarab, katta va parent ostidagi binolarni noto'g'ri yashirardi
+  (Play Mode boshlanganda HD shahar yo'qolardi). Endi dunyo koordinatalaridagi
+  chegaralovchi sfera ishlatiladi.
 - Yorug'lik: HDRI kechki osmon, oy, neon key/rim chiroqlar, hajmli tuman,
   bloom, yumshoq soyalar va akslar. Legacy EEVEE'da bilvosita yorug'lik
   irradiance volume'ga bake qilinadi.
-- Ish stoli GPU'si uchun byudjet: 2,5 mln uchburchak va 1024 MB tekstura.
+- Ish stoli GPU'si uchun byudjet: 2,5 mln uchburchak, 1024 MB tekstura va
+  240 m ko'rinish masofasi.
 
 ```bash
 blender -b scripts/startup/bl_app_templates_system/BlendEngine/startup.blend \
@@ -98,13 +116,14 @@ blender -b scripts/startup/bl_app_templates_system/BlendEngine/startup.blend \
 ```
 
 Natija: `NeonQuarantineHD.blend` (Play Mode bilan o'ynaladi; o'rnatilgan
-teksturalar sababli ~140 MB) va `fps.png`, `third_person.png`, `street.png`.
+teksturalar sababli ~140 MB) va `fps.png`, `third_person.png`, `street.png`,
+`zombie.png`.
 O'rta darajadagi GPU uchun `--max-texture 2048` dan foydalaning: tekstura
 xotirasi ~706 MB dan ~178 MB gacha tushadi.
 
 Rasmlar Linuxda Blender 4.0.2 (Ubuntu paketi), EEVEE, 1920×1080, 32 namuna
-bilan render qilingan. Dasturiy OpenGL (llvmpipe) da bake ~5 daqiqa, har bir
-kadr ~3,5 daqiqa davom etdi. Sahna: 1,36 mln uchburchak, ~206 draw call,
+bilan render qilingan. Dasturiy OpenGL (llvmpipe) da bake ~7 daqiqa, har bir
+kadr ~3,5 daqiqa davom etdi. Sahna: 1,49 mln uchburchak, ~300 draw call,
 4096 px teksturalar bilan ~706 MB tekstura xotirasi, 7 chiroq.
 
 ![Play Mode: HD o'yin BlendEngine ichida ishlayapti](graphics/neon_quarantine_hd_play_mode.jpg)
@@ -116,7 +135,8 @@ mo'ljallangan, ammo bu o'lchangan kafolat emas.
 
 Cheklovlar: askarda skelet va animatsiya yo'q. U statik poza bilan
 uchinchi shaxs kadrlarida ko'rinadi, o'yinda esa birinchi shaxs kamerasi
-ishlatiladi. Zombilar animatsiyasiz siljiydi. To'qnashuv javobi yo'q.
+ishlatiladi. Zombilar animatsiyasiz, "zombi pozasi"da siljiydi. To'qnashuv
+javobi yo'q. Zombi teksturalari protsedural: ular asl rassom teksturasi emas.
 
 ## Tekshirish
 

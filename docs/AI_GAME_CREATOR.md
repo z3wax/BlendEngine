@@ -24,11 +24,36 @@ BlendEngine qo'shimchasi va app template bilan olingan, shuning uchun
 BlendEngine build'idagi C/C++ o'zgarishlari (masalan, maxsus top bar) bu
 rasmlarda yo'q.
 
-| AI Game Creator paneli | G'oyadan qurilgan o'yin (EEVEE rendered ko'rinish) |
-|---|---|
-| ![AI Game Creator paneli](ai/ui_ai_panel.jpg) | ![Rendered viewport](ai/ui_rendered_viewport.jpg) |
+**1. Top Bar menyusi:** BlendEngine > AI Create Game.
 
-![Studio: g'oya yozildi va o'yin qurildi](ai/ui_ai_game_creator.jpg)
+![Top Bar menyusi](ai/ui_menu.jpg)
+
+**2. Yaratish dialogi:** g'oya istalgan tilda yoziladi; qaysi rejalashtiruvchi
+ishlashi ko'rsatiladi.
+
+![AI Create Game dialogi](ai/ui_dialog.jpg)
+
+**3. Natija:** yon paneldagi AI Game Creator bo'limida o'yin nomi, maqsad,
+obyektlar soni, dizayn izohlari, Play / New Layout / Spec tugmalari va
+"Change something" maydoni. Rasmdagi o'yin "Kosmosda 90 soniya omon qolish..."
+g'oyasidan qurilgan, so'ng `ko'proq dushman, tunda bo'lsin va lava qo'sh`
+so'rovi bilan o'zgartirilgan: nom va dunyo saqlangan, dushmanlar 5 tadan 8 taga
+ko'paygan, lazer to'siqlariga lava qo'shilgan.
+
+| AI Game Creator paneli | Studio: o'yin EEVEE rendered ko'rinishda |
+|---|---|
+| ![AI Game Creator paneli](ai/ui_ai_panel.jpg) | ![Natija](ai/ui_result.jpg) |
+
+**4. Spec:** o'yinning JSON tavsifi Text Editor'da; qo'lda tahrirlab
+**Rebuild From Spec Text** bilan qayta qurish mumkin.
+
+![Spec JSON](ai/ui_spec.jpg)
+
+**5. Claude sozlamalari:** Edit > Preferences > Add-ons > BlendEngine.
+
+![Add-on sozlamalari](ai/ui_preferences.jpg)
+
+**6. Play Mode:** HUD maqsad, yig'ilganlar, vaqt va sog'liqni ko'rsatadi.
 
 ![Play Mode HUD: maqsad, yig'ilganlar, vaqt, sog'liq](ai/ui_play_mode.jpg)
 
