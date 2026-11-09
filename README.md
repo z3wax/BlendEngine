@@ -22,7 +22,7 @@ Blender manba kodiga tayangan, o'yin ishlab chiqish va interaktiv 3D ish jarayon
 
 Claude (Anthropic API kaliti bilan) yoki internet talab qilmaydigan offline rejalashtiruvchi (o'zbek, ingliz, rus kalit so'zlari) ishlatiladi. Batafsil: [docs/AI_GAME_CREATOR.md](docs/AI_GAME_CREATOR.md).
 
-**Grafika:** [High/Cinematic rejimlari, namuna sahna va ishga tushirish](docs/GRAPHICS.md).
+**Grafika:** [High/Cinematic rejimlari, namuna sahna va ishga tushirish](docs/GRAPHICS.md) · [Neon Quarantine HD — realistik askar o'yini](docs/GRAPHICS.md#namuna-neon-quarantine-hd-askar-oyini).
 
 **Repozitoriy egasi:** [z3wax](https://github.com/z3wax)  
 **Asos:** Blender va uning uchinchi tomon komponentlari.

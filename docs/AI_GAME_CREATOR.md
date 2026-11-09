@@ -16,6 +16,25 @@ jangi, 2D qorli platformer va ruscha "вид сверху" vulqon o'yini. Rasm h
 muhitda Blender 4.2 Cycles (CPU, 40 namuna) bilan render qilingan; o'yinning
 o'zi Play Mode'da EEVEE bilan ishlaydi.
 
+## Interfeys
+
+Quyidagi rasmlar haqiqiy Blender oynasidan olingan screenshotlar: Linux,
+Xvfb, dasturiy OpenGL (llvmpipe). Ular Ubuntu'ning Blender 4.0.2 paketida
+BlendEngine qo'shimchasi va app template bilan olingan, shuning uchun
+BlendEngine build'idagi C/C++ o'zgarishlari (masalan, maxsus top bar) bu
+rasmlarda yo'q.
+
+| AI Game Creator paneli | G'oyadan qurilgan o'yin (EEVEE rendered ko'rinish) |
+|---|---|
+| ![AI Game Creator paneli](ai/ui_ai_panel.jpg) | ![Rendered viewport](ai/ui_rendered_viewport.jpg) |
+
+![Studio: g'oya yozildi va o'yin qurildi](ai/ui_ai_game_creator.jpg)
+
+![Play Mode HUD: maqsad, yig'ilganlar, vaqt, sog'liq](ai/ui_play_mode.jpg)
+
+Play Mode rasmidagi `FPS 1` qiymati bulutdagi CPU dasturiy grafikasiga
+tegishli. Bu GPU'li kompyuterdagi tezlikni ko'rsatmaydi.
+
 ## Ishlatish
 
 1. BlendEngine qo'shimchasini yoqing. 3D View yon panelidagi **BlendEngine**

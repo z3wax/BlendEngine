@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Neon Quarantine HD
+
+- `tools/blendengine/create_realistic_soldier_showcase.py`: askar o'yinining GPU'li kompyuterlar uchun HD versiyasini yaratadi. Unda to'liq teksturali shahar real masshtabda, PBR materiallar, askar pozasi, kadrga chiqarilgan miltiq, HDRI, tuman va bake qilingan yorug'lik bor. Zombilar Play Mode'da o'yinchiga yuzi bilan yuradi.
+- `docs/GRAPHICS.md` ga HD renderlar va Play Mode screenshoti qo'shildi; `docs/AI_GAME_CREATOR.md` ga haqiqiy interfeys screenshotlari qo'shildi.
+
 ### AI Game Creator
 
 - G'oyadan o'ynaladigan o'yin yaratish: **AI Game Creator** paneli, Top Bar va Studio tugmalari, o'zgartirish so'rovi, yangi joylashuv va spec'dan qayta qurish.
