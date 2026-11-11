@@ -81,7 +81,7 @@ blender -b --factory-startup --python-exit-code 1 \
 ```
 
 Rasm: Blender 4.3.0 EEVEE Next, 1280×720, 16 namuna, dasturiy render. Sahna:
-2697 obyekt, 523 ming uchburchak, 18 ta mesh (daraxt, o't va toshlar bitta
+2697 obyekt, 529 ming uchburchak, 18 ta mesh (daraxt, o't va toshlar bitta
 mesh'ni ulashadi), tekstura xotirasi 0 MB. `--optimize` bilan Smart Optimizer
 47 ta ko'rinmas obyektni va 14 ming uchburchakni olib tashlaydi (sahna
 boshidanoq instancing bilan qurilgani uchun tejam kichik) va occlusion
