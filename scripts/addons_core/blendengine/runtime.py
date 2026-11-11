@@ -7,7 +7,7 @@ import time
 
 from mathutils import Vector
 
-from . import performance, utils
+from . import performance, runtime_optimizer, utils
 
 
 ACTIVE_SESSION = None
@@ -186,6 +186,8 @@ class GameSession:
         self._timer_state = {}
         self._trigger_overlaps = set()
         self._collision_overlaps = set()
+        self._culler = None
+        self._governor = None
 
         for obj in self.scene.objects:
             self._ground_z[obj.name] = obj.location.z
@@ -201,6 +203,10 @@ class GameSession:
         self._prepare_play_view()
         self._set_first_person_player_visibility(False)
         _add_hud_handler()
+        self._culler = runtime_optimizer.SceneCuller(self.scene)
+        if self.scene.blendengine_optimization.dynamic_resolution:
+            target_fps = getattr(self.scene.blendengine_performance_budget, "target_fps", 60)
+            self._governor = runtime_optimizer.QualityGovernor(self.scene, target_fps)
         self.log("Test Run started for %s." % project.game_title)
         self.execute_behaviors("ON_START", 0.0)
         self._update_runtime_metrics(force=True)
@@ -210,6 +216,12 @@ class GameSession:
         project = self.scene.blendengine_project
         project.test_running = False
         project.test_status = status
+        if self._culler is not None:
+            self._culler.restore()
+            self._culler = None
+        if self._governor is not None:
+            self._governor.restore()
+            self._governor = None
         self._set_first_person_player_visibility(True)
         _remove_hud_handler()
         self.log("Test Run %s." % status.lower())
@@ -296,6 +308,11 @@ class GameSession:
         self._update_camera()
         if self.frame % 5 == 0:
             self._update_visibility_culling()
+        if self._governor is not None:
+            emergency = self.scene.blendengine_optimization.emergency_quality_drop
+            level = self._governor.update(self.frame_ms, emergency)
+            if level is not None:
+                self.log("Quality governor: level %d (%.1f ms average frame)." % (level, self._governor.average))
         if self.frame % 10 == 0:
             self._update_runtime_metrics()
         if self.frame % 15 == 0:
@@ -312,7 +329,7 @@ class GameSession:
                 hidden = obj.hide_get()
             except Exception:
                 hidden = obj.hide_viewport
-            if hidden:
+            if hidden or not getattr(obj, "visible_camera", True):
                 continue
             visible_objects += 1
             if obj.type == "MESH" and obj.data is not None:
@@ -422,39 +439,11 @@ class GameSession:
         camera.rotation_euler = direction.to_track_quat("-Z", "Y").to_euler()
 
     def _update_visibility_culling(self):
-        optimization = self.scene.blendengine_optimization
-        if not optimization.camera_frustum_generation and not optimization.hide_behind_camera:
-            return
+        """Hand the renderer only what the camera can see from where it is now."""
         camera = self.scene.camera
-        player = utils.find_player_object(self.scene)
-        if camera is None:
+        if camera is None or self._culler is None:
             return
-        camera_forward = camera.matrix_world.to_quaternion() @ Vector((0.0, 0.0, -1.0))
-        max_distance = max(optimization.world_cell_size * (optimization.visible_cell_radius + 1), 24.0)
-        visible_count = 0
-        for obj in self.scene.objects:
-            if obj == camera or obj == player or obj.type in {"CAMERA", "EMPTY"}:
-                continue
-            if obj.blendengine_object.object_tag in {"Weapon", "FirstPersonArms"}:
-                continue
-            settings = obj.blendengine_object
-            if settings.optimization.dynamic_object and settings.player_controller.enabled:
-                continue
-            hidden = False
-            to_obj = obj.location - camera.location
-            distance = to_obj.length
-            if optimization.hide_behind_camera and distance > 0.001:
-                hidden = camera_forward.dot(to_obj.normalized()) < -0.08
-            if not hidden and optimization.camera_frustum_generation:
-                hidden = distance > max_distance
-            if visible_count >= optimization.max_visible_objects and settings.optimization.disable_when_far:
-                hidden = True
-            if not hidden:
-                visible_count += 1
-            try:
-                obj.hide_set(hidden)
-            except Exception:
-                obj.hide_viewport = hidden
+        self._culler.update(camera, self.scene.blendengine_optimization)
 
     def _update_npcs(self, dt):
         player = utils.find_player_object(self.scene)

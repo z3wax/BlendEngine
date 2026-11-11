@@ -9,6 +9,7 @@ from bpy.types import Operator
 from . import (
     ai_system,
     animation_system,
+    cinematic,
     components,
     export_system,
     input_system,
@@ -16,6 +17,7 @@ from . import (
     performance,
     properties,
     runtime,
+    smart_optimizer,
     templates,
     utils,
 )
@@ -953,6 +955,116 @@ class BE_OT_generate_lod_placeholders(Operator):
         return {"FINISHED"}
 
 
+def _write_text_block(name, text):
+    datablock = bpy.data.texts.get(name)
+    if datablock is None:
+        datablock = bpy.data.texts.new(name)
+    datablock.clear()
+    datablock.write(text)
+
+
+class BE_OT_smart_optimize(Operator):
+    bl_idname = "blendengine.smart_optimize"
+    bl_label = "Smart Optimize Scene"
+    bl_description = (
+        "Measure what the game camera can see and resolve, then remove hidden geometry, "
+        "unused materials and texture detail no screen pixel can show. Originals are kept for Restore"
+    )
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        if context.mode != "OBJECT":
+            self.report({"ERROR"}, "Switch to Object Mode before optimizing.")
+            return {"CANCELLED"}
+        if runtime.ACTIVE_SESSION is not None:
+            self.report({"ERROR"}, "Stop the Test Run before optimizing.")
+            return {"CANCELLED"}
+        window_manager = context.window_manager
+        window_manager.progress_begin(0.0, 1.0)
+        try:
+            report = smart_optimizer.optimize(context, progress=window_manager.progress_update)
+        finally:
+            window_manager.progress_end()
+        _write_text_block("BlendEngine Smart Optimizer", smart_optimizer.report_text(report))
+        performance.analyze_scene(context.scene, store_report=True)
+        context.scene.blendengine_smart.last_summary = smart_optimizer.summary(report)
+        self.report({"INFO"}, smart_optimizer.summary(report))
+        return {"FINISHED"}
+
+
+class BE_OT_smart_restore(Operator):
+    bl_idname = "blendengine.smart_restore"
+    bl_label = "Restore Originals"
+    bl_description = "Put back the original meshes, images and hidden objects kept by the Smart Optimizer"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        restored = smart_optimizer.restore(context.scene)
+        context.scene.blendengine_smart.last_summary = "Originals restored."
+        self.report({"INFO"}, "Restored %(meshes)d mesh(es), %(images)d image(s), %(objects)d object(s)." % restored)
+        return {"FINISHED"}
+
+
+class BE_OT_smart_purge_backups(Operator):
+    bl_idname = "blendengine.smart_purge_backups"
+    bl_label = "Discard Originals"
+    bl_description = "Delete the kept originals so the saved file only contains optimized data. Cannot be restored"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_confirm(self, event)
+
+    def execute(self, context):
+        removed = smart_optimizer.purge_backups(context.scene)
+        self.report({"INFO"}, "Discarded %d kept original(s)." % removed)
+        return {"FINISHED"}
+
+
+class BE_OT_apply_cinematic_look(Operator):
+    bl_idname = "blendengine.apply_cinematic_look"
+    bl_label = "Apply Cinematic Look"
+    bl_description = (
+        "Apply the Cinematic profile, focus the camera lens on the player and add bloom, "
+        "lens dispersion and a vignette to an unedited compositor"
+    )
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        scene = context.scene
+        settings = scene.blendengine_smart
+        optimization.apply_preset(scene, "CINEMATIC")
+        result = cinematic.apply_look(
+            scene,
+            fstop=settings.cinematic_fstop,
+            bloom=settings.cinematic_bloom,
+            vignette=settings.cinematic_vignette,
+            dispersion=settings.cinematic_dispersion,
+            depth_of_field=settings.cinematic_depth_of_field,
+        )
+        if result["skipped"]:
+            self.report({"WARNING"}, "Select EEVEE to apply the cinematic look.")
+            return {"CANCELLED"}
+        if "compositor.bloom" in result["applied"] or "compositor.vignette" in result["applied"]:
+            cinematic.show_post_in_viewport(context)
+        for item in result["unsupported"]:
+            print("[BlendEngine] Cinematic look: " + item)
+        self.report({"INFO"}, "Cinematic look applied (%d setting(s), %d not available)." % (
+            len(result["applied"]), len(result["unsupported"])))
+        return {"FINISHED"}
+
+
+class BE_OT_remove_cinematic_post(Operator):
+    bl_idname = "blendengine.remove_cinematic_post"
+    bl_label = "Remove Cinematic Post Effects"
+    bl_description = "Remove the bloom, dispersion and vignette nodes added by Apply Cinematic Look"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        removed = cinematic.remove_post(context.scene)
+        self.report({"INFO"}, "Removed %d compositor node(s)." % removed)
+        return {"FINISHED"}
+
+
 class BE_OT_prepare_build(Operator):
     bl_idname = "blendengine.prepare_build"
     bl_label = "Prepare Build Package"
@@ -1019,6 +1131,11 @@ classes = (
     BE_OT_mark_instancing_candidate,
     BE_OT_mark_baked_lighting_candidate,
     BE_OT_generate_lod_placeholders,
+    BE_OT_smart_optimize,
+    BE_OT_smart_restore,
+    BE_OT_smart_purge_backups,
+    BE_OT_apply_cinematic_look,
+    BE_OT_remove_cinematic_post,
     BE_OT_prepare_build,
 )
 

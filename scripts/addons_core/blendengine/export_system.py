@@ -9,7 +9,7 @@ import stat
 
 import bpy
 
-from . import performance, utils
+from . import performance, smart_optimizer, utils
 
 
 def _safe_name(value, fallback="BlendEngineBuild"):
@@ -252,6 +252,7 @@ def serialize_game_data(scene):
             "level_streaming": optimization.level_streaming,
             "async_asset_loading": optimization.async_asset_loading,
         },
+        "smart_optimizer": smart_optimizer.export_summary(scene),
         "editor_tools": {
             "object_snap": editor.object_snap,
             "grid_snap": editor.grid_snap,

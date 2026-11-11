@@ -35,6 +35,8 @@ class TOPBAR_MT_blendengine(Menu):
             layout.operator("blendengine.test_run_scene", text="Run Game", icon="PLAY")
         layout.operator("blendengine.prepare_build", text="Build", icon="EXPORT")
         layout.separator()
+        layout.operator("blendengine.smart_optimize", text="Smart Optimize Scene", icon="MOD_DECIM")
+        layout.operator("blendengine.apply_cinematic_look", text="Cinematic Look", icon="CAMERA_DATA")
         layout.operator("blendengine.optimize_for_one_gb", text="1GB Auto Optimize", icon="MOD_SIMPLIFY")
         layout.operator("blendengine.analyze_scene_performance", text="Analyze Project", icon="INFO")
         layout.operator_context = "INVOKE_DEFAULT"
@@ -1243,6 +1245,75 @@ class VIEW3D_PT_blendengine_multiplayer(BE_View3DPanel, Panel):
         _draw_multiplayer(self.layout, context.scene)
 
 
+def _draw_smart_optimizer(layout, scene):
+    settings = scene.blendengine_smart
+    layout.label(text="Keeps what the camera can see and resolve.", icon="HIDE_OFF")
+    row = layout.row()
+    row.scale_y = 1.4
+    row.operator("blendengine.smart_optimize", icon="MOD_DECIM")
+    layout.label(text=settings.last_summary)
+    row = layout.row(align=True)
+    row.operator("blendengine.smart_restore", icon="LOOP_BACK")
+    row.operator("blendengine.smart_purge_backups", icon="TRASH")
+
+    layout.use_property_split = True
+    layout.use_property_decorate = False
+    column = layout.column(heading="Picture Unchanged")
+    column.prop(settings, "clean_materials")
+    column.prop(settings, "share_meshes")
+    column.prop(settings, "remove_hidden_faces")
+    column.prop(settings, "hide_unseen_objects")
+    column.prop(settings, "fit_textures")
+    column.prop(settings, "bake_pvs")
+    column = layout.column(heading="Bounded Trade-off")
+    column.prop(settings, "build_lods")
+    column.prop(settings, "allow_lossy")
+
+    layout.separator()
+    layout.prop(settings, "viewpoint_mode")
+    layout.prop(settings, "vantage_spacing")
+    layout.prop(settings, "max_vantages")
+    layout.prop(settings, "climb_height")
+    layout.prop(settings, "min_approach")
+    layout.prop(settings, "frame_step")
+    layout.prop(settings, "safety_rings")
+    layout.prop(settings, "target_width")
+    layout.prop(settings, "target_height")
+    layout.prop(settings, "texel_quality")
+    layout.prop(settings, "min_texture_size")
+    layout.prop(settings, "lod_min_triangles")
+
+
+def _draw_cinematic(layout, scene):
+    settings = scene.blendengine_smart
+    layout.operator("blendengine.apply_cinematic_look", icon="CAMERA_DATA")
+    layout.use_property_split = True
+    layout.use_property_decorate = False
+    layout.prop(settings, "cinematic_depth_of_field")
+    layout.prop(settings, "cinematic_fstop")
+    layout.prop(settings, "cinematic_bloom")
+    layout.prop(settings, "cinematic_vignette")
+    layout.prop(settings, "cinematic_dispersion")
+    layout.operator("blendengine.remove_cinematic_post", icon="X")
+
+
+class VIEW3D_PT_blendengine_smart_optimizer(BE_View3DPanel, Panel):
+    bl_label = "Smart Optimizer"
+    bl_category = "Optimize"
+
+    def draw(self, context):
+        _draw_smart_optimizer(self.layout, context.scene)
+
+
+class VIEW3D_PT_blendengine_cinematic(BE_View3DPanel, Panel):
+    bl_label = "Cinematic Look"
+    bl_category = "Optimize"
+    bl_options = {"DEFAULT_CLOSED"}
+
+    def draw(self, context):
+        _draw_cinematic(self.layout, context.scene)
+
+
 class VIEW3D_PT_blendengine_optimization(BE_View3DPanel, Panel):
     bl_label = "Streaming + Culling"
     bl_category = "Optimize"
@@ -1446,6 +1517,8 @@ classes = (
     VIEW3D_PT_blendengine_health,
     VIEW3D_PT_blendengine_input,
     VIEW3D_PT_blendengine_multiplayer,
+    VIEW3D_PT_blendengine_smart_optimizer,
+    VIEW3D_PT_blendengine_cinematic,
     VIEW3D_PT_blendengine_optimization,
     VIEW3D_PT_blendengine_budget,
     VIEW3D_PT_blendengine_analyzer,

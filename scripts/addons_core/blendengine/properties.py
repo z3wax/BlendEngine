@@ -1022,6 +1022,115 @@ class BE_OptimizationSettings(PropertyGroup):
     )
 
 
+class BE_SmartOptimizerSettings(PropertyGroup):
+    viewpoint_mode: bpy.props.EnumProperty(
+        name="Viewpoints",
+        items=(
+            ("AUTO", "Automatic", "Play area when the scene has a player, otherwise the animated camera"),
+            ("PLAY_AREA", "Play Area", "Everywhere a player can stand, looking in any direction"),
+            ("CAMERA_PATH", "Camera Path", "Only what the scene camera frames over the frame range"),
+        ),
+        default="AUTO",
+        description="Where the game camera can be; only data unseen from all of these places is removed",
+    )
+    vantage_spacing: bpy.props.FloatProperty(
+        name="Viewpoint Spacing", default=2.0, min=0.25, subtype="DISTANCE",
+        description="Grid distance between sampled player positions. Smaller is safer and slower",
+    )
+    max_vantages: bpy.props.IntProperty(
+        name="Max Viewpoints", default=96, min=1, max=2048,
+        description="Spacing grows until the play area fits in this many viewpoints",
+    )
+    eye_height: bpy.props.FloatProperty(
+        name="Eye Height", default=1.6, min=0.1, subtype="DISTANCE",
+        description="Camera height above the ground when the scene has no player to measure",
+    )
+    climb_height: bpy.props.FloatProperty(
+        name="Climb Height", default=1.2, min=0.0, subtype="DISTANCE",
+        description="Tallest step or jump between neighbouring floor areas the player can get onto",
+    )
+    frame_step: bpy.props.IntProperty(
+        name="Frame Step", default=1, min=1,
+        description="Sample the animated camera every N frames",
+    )
+    min_approach: bpy.props.FloatProperty(
+        name="Closest Approach", default=0.5, min=0.01, subtype="DISTANCE",
+        description="Nearest the camera can get to a surface or moving object in the play area",
+    )
+    sample_spacing: bpy.props.FloatProperty(
+        name="Surface Probe Spacing", default=0.75, min=0.05, subtype="DISTANCE",
+        description="Large faces are probed for visibility about this far apart",
+    )
+    safety_rings: bpy.props.IntProperty(
+        name="Safety Margin", default=1, min=0, max=4,
+        description="Rings of neighbouring faces kept around every visible face",
+    )
+    target_width: bpy.props.IntProperty(
+        name="Screen Width", default=0, min=0,
+        description="Game screen width in pixels. 0 uses the project and render resolution",
+    )
+    target_height: bpy.props.IntProperty(
+        name="Screen Height", default=0, min=0,
+        description="Game screen height in pixels. 0 uses the project and render resolution",
+    )
+    texel_quality: bpy.props.FloatProperty(
+        name="Texels Per Pixel", default=1.0, min=0.25, max=4.0,
+        description="Texture detail kept per screen pixel at the closest approach. 1 keeps every pixel sharp",
+    )
+    min_texture_size: bpy.props.IntProperty(
+        name="Smallest Texture", default=16, min=1,
+        description="Images are never reduced below this size",
+    )
+    lod_min_triangles: bpy.props.IntProperty(
+        name="LOD From Triangles", default=1500, min=100,
+        description="Static meshes with at least this many triangles get distance LODs",
+    )
+    clean_materials: bpy.props.BoolProperty(
+        name="Merge Materials", default=True,
+        description="Merge identical materials and images and remove material slots no face uses",
+    )
+    share_meshes: bpy.props.BoolProperty(
+        name="Share Identical Meshes", default=True,
+        description="Objects with identical geometry reuse one mesh so they are drawn as instances",
+    )
+    remove_hidden_faces: bpy.props.BoolProperty(
+        name="Remove Hidden Faces", default=True,
+        description="Delete faces of static meshes that no viewpoint, light or probe can see",
+    )
+    hide_unseen_objects: bpy.props.BoolProperty(
+        name="Skip Unseen Objects", default=True,
+        description="Exclude static objects that are never in sight from rendering",
+    )
+    fit_textures: bpy.props.BoolProperty(
+        name="Fit Textures To Screen", default=True,
+        description="Resize each image to the detail a screen pixel can resolve at the closest approach",
+    )
+    bake_pvs: bpy.props.BoolProperty(
+        name="Bake Occlusion Culling", default=True,
+        description="Store which objects each play-area cell can see so the runtime skips the rest",
+    )
+    build_lods: bpy.props.BoolProperty(
+        name="Build LODs", default=True,
+        description="Create simplified meshes used only where they keep one triangle per few pixels",
+    )
+    allow_lossy: bpy.props.BoolProperty(
+        name="Allow Visible Trade-offs", default=False,
+        description="If a budget is still exceeded, lower texture detail evenly across the screen",
+    )
+    cinematic_fstop: bpy.props.FloatProperty(
+        name="F-Stop", default=2.8, min=0.5, max=32.0,
+        description="Lens aperture of the cinematic look. Lower blurs the background more",
+    )
+    cinematic_bloom: bpy.props.FloatProperty(name="Bloom", default=0.35, min=0.0, max=1.0)
+    cinematic_vignette: bpy.props.FloatProperty(name="Vignette", default=0.35, min=0.0, max=1.0)
+    cinematic_dispersion: bpy.props.FloatProperty(name="Lens Dispersion", default=0.012, min=0.0, max=0.2)
+    cinematic_depth_of_field: bpy.props.BoolProperty(
+        name="Depth of Field", default=True,
+        description="Focus the scene camera on the player with a film lens aperture",
+    )
+    last_summary: bpy.props.StringProperty(name="Last Run", default="Not run yet.")
+
+
 class BE_PerformanceReportMessage(PropertyGroup):
     severity: bpy.props.EnumProperty(
         name="Status",
@@ -1125,6 +1234,7 @@ classes = (
     BE_GameQualityProfile,
     BE_PerformanceBudget,
     BE_OptimizationSettings,
+    BE_SmartOptimizerSettings,
     BE_PerformanceReportMessage,
     BE_PerformanceReport,
     BE_EditorToolSettings,
@@ -1142,6 +1252,7 @@ def register():
     bpy.types.Scene.blendengine_quality_profile = bpy.props.PointerProperty(type=BE_GameQualityProfile)
     bpy.types.Scene.blendengine_performance_budget = bpy.props.PointerProperty(type=BE_PerformanceBudget)
     bpy.types.Scene.blendengine_optimization = bpy.props.PointerProperty(type=BE_OptimizationSettings)
+    bpy.types.Scene.blendengine_smart = bpy.props.PointerProperty(type=BE_SmartOptimizerSettings)
     bpy.types.Scene.blendengine_performance_report = bpy.props.PointerProperty(type=BE_PerformanceReport)
     bpy.types.Scene.blendengine_editor = bpy.props.PointerProperty(type=BE_EditorToolSettings)
     bpy.types.Scene.blendengine_multiplayer = bpy.props.PointerProperty(type=BE_MultiplayerSettings)
@@ -1156,6 +1267,7 @@ def unregister():
         "blendengine_quality_profile",
         "blendengine_performance_budget",
         "blendengine_optimization",
+        "blendengine_smart",
         "blendengine_performance_report",
         "blendengine_editor",
         "blendengine_multiplayer",
