@@ -1,0 +1,52 @@
+name: Z3WAX Android device QA
+on:
+  push:
+    branches: [feat/z3wax-disland]
+    paths: ['native/z3wax/**', 'tools/z3wax/**', '.github/workflows/z3wax-android.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: z3wax-android
+  cancel-in-progress: true
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Enable KVM for native Android tests
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Install Godot and export templates
+        run: |
+          curl -fL https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_linux.x86_64.zip -o /tmp/godot.zip
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          chmod +x /tmp/godot/Godot_v4.6.3-stable_linux.x86_64
+          echo "GODOT_BIN=/tmp/godot/Godot_v4.6.3-stable_linux.x86_64" >> "$GITHUB_ENV"
+          bash tools/android/setup_toolchain.sh
+      - name: Build current native Android APK
+        env:
+          Z3WAX_PROJECT_DIR: ${{ github.workspace }}/native/z3wax
+        run: bash tools/android/build_apk.sh "$PWD/dist/z3wax/Z3WAX-0.1.0-debug.apk"
+      - uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 24
+          target: default
+          arch: x86_64
+          profile: Nexus 5
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
+          disable-animations: true
+          script: python3 tools/z3wax/android_qa.py dist/z3wax/Z3WAX-0.1.0-debug.apk dist/z3wax/proof
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Z3WAX-Android-field-test
+          path: dist/z3wax/
+          if-no-files-found: error

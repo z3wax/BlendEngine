@@ -368,3 +368,14 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventScreenDrag:
 		if event.index==stick_index:touch_move=((event.position-stick_origin)/70).limit_length()
 		elif event.index==look_index:yaw=wrapf(yaw-event.relative.x*.005,-PI,PI);pitch=clampf(pitch-event.relative.y*.005,-.8,.8)
+
+func _process(dt: float) -> void:
+	if server_mode:return
+	ui_timer+=dt
+	if ui_timer<.25:return
+	ui_timer=0
+	var report={"mode":mode,"actors":actors.size(),"time":match_time,"sectors":world.sectors.size(),"smoke":smoke}
+	if actors.has(local_id):
+		var a=actors[local_id];report.merge({"position":[a.position.x,a.position.y,a.position.z],"health":a.health,"ammo":a.ammo,"reload":a.reload_left,"floor":a.is_on_floor(),"animation":a.last_animation})
+	var file=FileAccess.open("user://qa_state.json",FileAccess.WRITE)
+	if file:file.store_string(JSON.stringify(report))
