@@ -665,6 +665,7 @@ def _draw_game_creation(layout, scene):
     op.page = "STUDIO"
     col = layout.column(align=True)
     col.operator("blendengine.generate_cyberpunk_shooter_template", text="Cyberpunk Zombie Shooter", icon="OUTLINER_OB_ARMATURE")
+    col.operator("blendengine.generate_highland_patrol", text="Highland Patrol (Outdoor FPS)", icon="WORLD")
     col.operator("blendengine.generate_basic_template", text="3D Starter World", icon="SCENE_DATA")
     col.operator("blendengine.generate_2d_template", text="2D Platformer", icon="IMAGE_DATA")
     col.operator("blendengine.input_defaults", text="Reset Controls", icon="EVENT_W")

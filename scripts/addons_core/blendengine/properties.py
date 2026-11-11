@@ -23,6 +23,8 @@ GAME_DIMENSION_ITEMS = (
 EASY_GAME_TEMPLATE_ITEMS = (
     ("THREE_D_ADVENTURE", "3D Adventure", "One-click 3D starter game"),
     ("CYBERPUNK_SHOOTER", "Cyberpunk Zombie Shooter", "Import provided models and create a first-person gun game"),
+    ("HIGHLAND_PATROL", "Highland Patrol",
+     "Generated outdoor first-person shooter: valley, rocks, forest, rifle, enemies"),
     ("TWO_D_PLATFORMER", "2D Platformer", "One-click 2D side-view starter game"),
     ("MOBILE_3D", "Mobile 3D", "One-click touch-friendly 3D starter game"),
 )

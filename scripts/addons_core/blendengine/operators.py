@@ -12,6 +12,7 @@ from . import (
     cinematic,
     components,
     export_system,
+    highland,
     input_system,
     optimization,
     performance,
@@ -146,6 +147,31 @@ class BE_OT_generate_cyberpunk_shooter_template(Operator):
         return {"FINISHED"}
 
 
+class BE_OT_generate_highland_patrol(Operator):
+    bl_idname = "blendengine.generate_highland_patrol"
+    bl_label = "Create Highland Patrol"
+    bl_description = (
+        "Create an outdoor first-person shooter: a generated mountain valley with rocks, "
+        "conifers, grass, a rifle and enemy patrols. Uses no model or texture files"
+    )
+    bl_options = {"REGISTER", "UNDO"}
+
+    clean_scene: BoolProperty(
+        name="Clean Current Scene",
+        default=True,
+        description="Remove current scene objects before creating the level",
+    )
+
+    def execute(self, context):
+        try:
+            created = highland.generate_highland_patrol(context, clean_scene=self.clean_scene)
+        except Exception as ex:
+            self.report({"ERROR"}, "Highland Patrol failed: %s" % ex)
+            return {"CANCELLED"}
+        self.report({"INFO"}, "Highland Patrol ready with %d enemies." % created["enemy_count"])
+        return {"FINISHED"}
+
+
 class BE_OT_generate_2d_template(Operator):
     bl_idname = "blendengine.generate_2d_template"
     bl_label = "Create 2D Game"
@@ -193,6 +219,8 @@ class BE_OT_easy_create_game(Operator):
             created = templates.generate_2d_game_template(context, clean_scene=True)
         elif self.template == "CYBERPUNK_SHOOTER":
             created = templates.generate_cyberpunk_shooter_template(context, clean_scene=True)
+        elif self.template == "HIGHLAND_PATROL":
+            created = highland.generate_highland_patrol(context, clean_scene=True)
         else:
             created = templates.generate_basic_game_template(context, clean_scene=True)
             context.scene.blendengine_project.game_dimension = "THREE_D"
@@ -1094,6 +1122,7 @@ classes = (
     BE_OT_open_play_mode_workspace,
     BE_OT_generate_basic_template,
     BE_OT_generate_cyberpunk_shooter_template,
+    BE_OT_generate_highland_patrol,
     BE_OT_generate_2d_template,
     BE_OT_easy_create_game,
     BE_OT_apply_platform_profile,

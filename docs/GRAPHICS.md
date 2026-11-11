@@ -59,6 +59,39 @@ Kinematik sozlamada o'yin yengil qolishi uchun sahnani
 [Smart Optimizer](OPTIMIZER.md) bilan tayyorlang: u renderer sifatiga tegmaydi,
 faqat kamera ko'rmaydigan va ekran ajrata olmaydigan ma'lumotni olib tashlaydi.
 
+## Namuna o'yin: Highland Patrol
+
+![Highland Patrol: birinchi shaxs ko'rinishi](graphics/highland_patrol.png)
+
+Ochiq maydondagi birinchi shaxs shooter shabloni: tog' vodiysi, qoya,
+qarag'aylar, o't, past quyosh, qo'ldagi miltiq va patrul qilayotgan 6 dushman.
+Hammasi `scripts/addons_core/blendengine/highland.py` ichida koddan yaratiladi —
+model yoki tekstura fayli yo'q. Bu boshqa o'yinning nusxasi emas: relyef, qurol
+va figuralar shu repoda yozilgan.
+
+Editor'da: **Quick Start → Highland Patrol (Outdoor FPS)** yoki **Magic Create**
+ro'yxatidan. Keyin **Test Run**: WASD — yurish, sichqonchaning chap tugmasi yoki
+F — otish. O'yinchi `Ground` tegli relyef bo'ylab yuradi; o'q dushmanga
+ray cast bilan tegadi.
+
+```bash
+blender -b --factory-startup --python-exit-code 1 \
+  --python tools/blendengine/create_highland_patrol.py -- \
+  --output-dir /tmp/highland --render
+```
+
+Rasm: Blender 4.3.0 EEVEE Next, 1280×720, 16 namuna, dasturiy render. Sahna:
+2697 obyekt, 523 ming uchburchak, 18 ta mesh (daraxt, o't va toshlar bitta
+mesh'ni ulashadi), tekstura xotirasi 0 MB. `--optimize` bilan Smart Optimizer
+47 ta ko'rinmas obyektni va 14 ming uchburchakni olib tashlaydi (sahna
+boshidanoq instancing bilan qurilgani uchun tejam kichik) va occlusion
+to'plamlarini tayyorlaydi; bu sahnada tahlil taxminan 2 daqiqa.
+
+Chegaralar: dushmanlar va qurol sodda geometrik shakllar, animatsiya yo'q;
+o'yinchi daraxt va toshlardan o'tib ketadi (runtime to'qnashuvni to'xtatmaydi);
+dushman relyef balandligiga ergashmaydi. FPS o'lchanmagan (GPU'siz muhit).
+Sinov: `tests/python/blendengine_highland.py` (6 test, Blender 4.3.0).
+
 ## Namuna: Aperture Hall
 
 ![EEVEE yordamida render qilingan Aperture Hall](graphics/aperture_hall.png)

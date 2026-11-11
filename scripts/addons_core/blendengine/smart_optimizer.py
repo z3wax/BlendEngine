@@ -829,6 +829,8 @@ def build_lods(scene, analysis, settings):
         obj = entry.obj
         if entry.dynamic or obj.get(CULLED) or LOD_MESHES in obj or len(obj.modifiers):
             continue
+        if obj.blendengine_object.object_tag == "Ground":
+            continue  # The player's ground ray cast must always meet the real surface.
         mesh = obj.data
         triangles = _triangles(mesh)
         if triangles < settings.lod_min_triangles or analysis.ortho_ppm:
