@@ -16,6 +16,8 @@ Blender manba kodiga tayangan, o'yin ishlab chiqish va interaktiv 3D ish jarayon
 
 **Grafika:** [High/Cinematic rejimlari, namuna sahna va ishga tushirish](docs/GRAPHICS.md).
 
+**Optimizatsiya:** [Smart Optimizer: ko'rinmas geometriya, ekranga mos teksturalar, occlusion culling, LOD](docs/OPTIMIZER.md).
+
 **Repozitoriy egasi:** [z3wax](https://github.com/z3wax)  
 **Asos:** Blender va uning uchinchi tomon komponentlari.
 

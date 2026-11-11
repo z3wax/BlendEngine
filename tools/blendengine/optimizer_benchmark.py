@@ -35,11 +35,15 @@ import blendengine
 from blendengine import cinematic, components, optimization, runtime_optimizer, smart_optimizer
 
 
-# Player positions and view directions (degrees, 0 = +Y) used for the comparison.
+# Player positions used for the comparison: (name, (x, y), heading, tilt) in degrees,
+# heading 0 = +Y and tilt 90 = level. "sign" stands at the plaza edge under Sign00,
+# one of the images the optimizer halves, and looks up at it: the closest that
+# resized texture can ever be seen.
 VIEWS = (
-    ("street", (0.0, -14.0), 0.0),
-    ("crates", (-7.0, -6.0), -42.0),
-    ("statues", (4.0, 2.0), 59.0),
+    ("street", (0.0, -14.0), 0.0, 88.0),
+    ("crates", (-7.0, -6.0), -42.0, 88.0),
+    ("statues", (4.0, 2.0), 59.0, 88.0),
+    ("sign", (17.8, 0.0), 90.0, 112.0),
 )
 EYE = 1.62
 
@@ -240,17 +244,19 @@ def build_level(texture_size=4096):
 
 
 def place_camera(scene, view):
-    _name, (x, y), heading = view
+    _name, (x, y), heading, tilt = view
     camera = scene.camera
     camera.location = (x, y, EYE)
-    camera.rotation_euler = (math.radians(88.0), 0.0, math.radians(-heading))
+    camera.rotation_euler = (math.radians(tilt), 0.0, math.radians(-heading))
     bpy.context.view_layer.update()
 
 
-def render_views(scene, folder, tag):
+def render_views(scene, folder, tag, names):
     frames = {}
     seconds = {}
     for view in VIEWS:
+        if view[0] not in names:
+            continue
         place_camera(scene, view)
         path = os.path.join(folder, "%s_%s.png" % (view[0], tag))
         scene.render.filepath = path
@@ -286,7 +292,7 @@ def walk_culling(scene):
     total_objects = total_triangles = sent_objects = sent_triangles = 0
     for step in range(48):
         angle = step / 48.0 * math.tau
-        place_camera(scene, ("walk", (math.cos(angle) * 9.0, math.sin(angle) * 9.0), math.degrees(angle) * 3.0))
+        place_camera(scene, ("walk", (math.cos(angle) * 9.0, math.sin(angle) * 9.0), math.degrees(angle) * 3.0, 88.0))
         culler.update(scene.camera, scene.blendengine_optimization)
         for obj, _center, _radius, _slot in culler.items:
             if obj.type != "MESH":
@@ -317,6 +323,8 @@ def main():
     parser.add_argument("--texture-size", type=int, default=4096)
     parser.add_argument("--depth-of-field", action="store_true",
                         help="keep the lens blur; off by default so the comparison is as sharp as possible")
+    parser.add_argument("--views", default=",".join(view[0] for view in VIEWS),
+                        help="comma separated view names to render")
     parser.add_argument("--save-blend", action="store_true")
     options = parser.parse_args(arguments)
     os.makedirs(options.output_dir, exist_ok=True)
@@ -349,7 +357,7 @@ def main():
     }
     before_frames = None
     if options.render:
-        before_frames, before_seconds = render_views(scene, options.output_dir, "before")
+        before_frames, before_seconds = render_views(scene, options.output_dir, "before", options.views.split(","))
         result["render_seconds_before"] = before_seconds
 
     place_camera(scene, VIEWS[0])
@@ -365,7 +373,7 @@ def main():
     print(smart_optimizer.report_text(report))
 
     if options.render:
-        after_frames, after_seconds = render_views(scene, options.output_dir, "after")
+        after_frames, after_seconds = render_views(scene, options.output_dir, "after", options.views.split(","))
         result["render_seconds_after"] = after_seconds
         result["picture"] = compare(before_frames, after_frames)
     result["runtime_walk"] = walk_culling(scene)

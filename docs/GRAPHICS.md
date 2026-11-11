@@ -34,6 +34,31 @@ o'chirmaydi. Android/iOS uchun mavjud yengil profil saqlangan. Oldingi faylda
 Starter sahnalardagi tosh, yer, devor, yog'och va asfalt materiallarida
 procedural rang, roughness va bump mavjud. Tashqi tekstura fayllari kerak emas.
 
+## Cinematic Look
+
+Sifat profili renderer qancha hisoblashini tanlaydi. **Optimize → Cinematic
+Look → Apply Cinematic Look** esa kadrni kino ko'rinishiga keltiradi:
+
+- Cinematic profilini qo'llaydi;
+- sahna kamerasiga obyektiv beradi: depth of field, `F-Stop` (standart 2.8).
+  Uchinchi shaxsda fokus o'yinchida. Birinchi shaxsda kamera o'yinchining
+  ichida bo'lgani uchun fokus obyekti qo'yilmaydi, muallif bergan masofa qoladi;
+- overscan (ekran chetida screen-space effektlar so'nmasligi uchun), yumshoq va
+  jitter'li soyalar, past `light_threshold`, yuqori sifatli normallar, aniq
+  (jittered) bokeh;
+- compositor'ga bloom, yengil linza dispersiyasi va vinyetka qo'shadi va
+  rendered viewport'da compositor'ni yoqadi.
+
+Compositor tugunlari faqat tegilmagan grafga (Render Layers → Composite)
+qo'shiladi; muallif yozgan graf o'zgartirilmaydi. **Remove Cinematic Post
+Effects** qo'shilgan tugunlarni olib tashlaydi. Blender 5.x compositor API'si
+boshqacha: u yerda obyektiv va renderer sozlamalari qo'llanadi, post effektlar
+"not available" deb xabar qilinadi.
+
+Kinematik sozlamada o'yin yengil qolishi uchun sahnani
+[Smart Optimizer](OPTIMIZER.md) bilan tayyorlang: u renderer sifatiga tegmaydi,
+faqat kamera ko'rmaydigan va ekran ajrata olmaydigan ma'lumotni olib tashlaydi.
+
 ## Namuna: Aperture Hall
 
 ![EEVEE yordamida render qilingan Aperture Hall](graphics/aperture_hall.png)
