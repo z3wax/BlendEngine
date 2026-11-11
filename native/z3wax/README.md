@@ -8,7 +8,7 @@ Original native third-person combat prototype built on BlendEngine's Godot 4.6.3
 
 Start Training runs one human and seven server-simulated bots. WASD moves, mouse looks, left-click fires, Space jumps, R reloads, M opens the map, Escape releases/captures the pointer. Android/iOS provide independent move/look fingers and fire/jump/reload regions. Lobby returns to the menu. The closing perimeter damages players outside it; the last survivor wins.
 
-The world coordinates cover 16 × 16 km. Relay Nine is the authored, playable 440 m combat sector. Other named regions are coarse terrain and map landmarks, **not completed cities, forests or airports**. A 16 km battlefield with 100 players, vehicles, parachutes, looting, squads, inventory progression and matchmaking is not implemented. The first match intentionally uses the small finished combat sector.
+The world coordinates cover 16 × 16 km. Relay Nine is the authored, playable 440 m combat sector. Other named regions are coarse terrain and map landmarks, **not completed cities, forests or airports**. A 16 km battlefield with 100 players, vehicles, parachutes, looting, squads, inventory progression and matchmaking is not implemented. This field test is currently silent (no music or weapon SFX). The first match intentionally uses the small finished combat sector.
 
 ## Assets and animation
 

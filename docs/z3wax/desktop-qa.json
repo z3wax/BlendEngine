@@ -1,0 +1,47 @@
+{
+  "source_commit": "c7b1e7150d86cbc908bb9e8a3f9800684b26cb4b",
+  "godot": "4.6.3",
+  "blender": "4.3.2",
+  "desktop_physics": [
+    "movement",
+    "jump",
+    "grounding",
+    "reload"
+  ],
+  "desktop_combat": [
+    "damage",
+    "cadence",
+    "reload_fire_lock",
+    "ammo",
+    "wall_occlusion",
+    "kill_credit",
+    "winner"
+  ],
+  "network": {
+    "transport": "ENet UDP",
+    "processes": 3,
+    "clients": 2,
+    "snapshots_per_client": 20,
+    "passed": true
+  },
+  "skeletal_animation": {
+    "bones": 58,
+    "bones_changed": 41,
+    "clip": "run",
+    "artist": "Kenney"
+  },
+  "world": {
+    "extent_metres": [
+      16000,
+      16000
+    ],
+    "client_loaded_sectors": 9,
+    "authored_combat_diameter_metres": 440,
+    "all_named_regions_fully_authored": false
+  },
+  "desktop_renderer": "Mesa llvmpipe OpenGL; not a phone FPS benchmark",
+  "physical_android_tested": false,
+  "physical_iphone_tested": false,
+  "public_server_deployed": false,
+  "production_ready": false
+}
