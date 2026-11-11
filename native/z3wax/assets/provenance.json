@@ -4,7 +4,8 @@
     "license": "CC0-1.0",
     "source": "https://kenney.nl/assets/animated-characters-protagonists",
     "animation_source": "Original idle/run/jump FBX clips",
-    "generative_ai": false
+    "generative_ai": false,
+    "retargeting": "Original clips baked in Blender into model rest-pose space"
   },
   "weapons": {
     "author": "Kenney",
@@ -15,7 +16,7 @@
   "terrain_and_outpost": "Original scripted Blender/Godot geometry",
   "sha256": {
     "rifle.glb": "d6d6fe0ec5baf21d7717449220799d45b95d2d663ace7b22612b255dc1a8b308",
-    "character.glb": "6d59a9c843b2e8069d8dd8bbff4b649745e3eefa0d424f8f96a920d4408dbe18",
+    "character.glb": "003fb4e48d6e20a3bf9935f33f023c0c310ed2bfdb43747db154905736767bf1",
     "sidearm.glb": "ff3f1196f2e9acabbdc44143dc3b93f79f4c5e8176e54514479bd2b788477c80",
     "outpost.glb": "509ed7b6a6c1fdba7d3ef078685e0b1d79b67c3040409f37ad381742d7b502d1"
   }

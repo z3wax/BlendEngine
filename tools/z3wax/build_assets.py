@@ -10,15 +10,30 @@ bpy.ops.wm.read_factory_settings(use_empty=True)
 bpy.ops.import_scene.fbx(filepath=str(SRC/'animated-characters-protagonists/Model/characterMedium.fbx'))
 rig=next(o for o in bpy.data.objects if o.type=='ARMATURE')
 original=set(bpy.data.objects)
+baked=[]
 for name in ['idle','run','jump']:
  before=set(bpy.data.actions)
  bpy.ops.import_scene.fbx(filepath=str(SRC/f'animated-characters-protagonists/Animations/{name}.fbx'))
+ source=next(o for o in set(bpy.data.objects)-original if o.type=='ARMATURE')
  action=next(a for a in set(bpy.data.actions)-before if name.lower() in a.name.lower())
- action.name=name; action.use_fake_user=True
- if not rig.animation_data: rig.animation_data_create()
- track=rig.animation_data.nla_tracks.new();track.name=name
- track.strips.new(name,1,action)
- for o in list(set(bpy.data.objects)-original): bpy.data.objects.remove(o,do_unlink=True)
+ source.animation_data.action=action
+ frames=[]
+ for f in range(int(action.frame_range[0]),int(action.frame_range[1])+1):
+  bpy.context.scene.frame_set(f);bpy.context.view_layer.update()
+  frames.append({p.name: rig.matrix_world.inverted() @ source.matrix_world @ p.matrix for p in source.pose.bones})
+ for o in list(set(bpy.data.objects)-original):bpy.data.objects.remove(o,do_unlink=True)
+ rig.animation_data_clear();rig.animation_data_create()
+ target=bpy.data.actions.new(name);target.use_fake_user=True;rig.animation_data.action=target
+ for f,poses in enumerate(frames,1):
+  bpy.context.scene.frame_set(f)
+  for bone in rig.pose.bones:
+   if bone.name not in poses:continue
+   bone.matrix=poses[bone.name];bpy.context.view_layer.update()
+   bone.keyframe_insert('location',frame=f);bone.keyframe_insert('rotation_quaternion',frame=f);bone.keyframe_insert('scale',frame=f)
+ baked.append((name,target))
+rig.animation_data.action=None
+for name,action in baked:
+ track=rig.animation_data.nla_tracks.new();track.name=name;track.strips.new(name,1,action)
 for mat in bpy.data.materials:
  mat.use_nodes=True
  bs=mat.node_tree.nodes.get('Principled BSDF');bs.inputs['Roughness'].default_value=.8;bs.inputs['Alpha'].default_value=1.0;mat.diffuse_color=(1,1,1,1)
