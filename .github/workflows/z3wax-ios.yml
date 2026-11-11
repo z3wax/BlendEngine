@@ -1,0 +1,32 @@
+name: Z3WAX native iOS field test
+on:
+  push:
+    branches: [feat/z3wax-disland]
+    paths: ['native/z3wax/**', 'tools/z3wax/**', '.github/workflows/z3wax-ios.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ios:
+    runs-on: macos-15-intel
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Godot and native iOS template
+        run: python3 tools/ios/setup_toolchain.py --github-env "$GITHUB_ENV"
+      - name: Test simulation and protocol
+        run: |
+          "$GODOT_BIN" --headless --path native/z3wax --import
+          "$GODOT_BIN" --headless --path native/z3wax --script tests/protocol.gd
+          "$GODOT_BIN" --headless --path native/z3wax -- --smoke-test
+      - name: Compile ARM64 iOS application and validate unsigned IPA
+        run: >-
+          python3 tools/z3wax/build_ios.py --project native/z3wax
+          --output dist/z3wax/Z3WAX-0.1.0-unsigned.ipa
+          --bundle-id org.z3wax.disland --version 0.1.0 --build 1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Z3WAX-iOS-field-test
+          path: dist/z3wax/
+          if-no-files-found: error

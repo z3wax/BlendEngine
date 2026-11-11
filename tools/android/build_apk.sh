@@ -2,7 +2,7 @@
 # Build a signed development APK using the native Godot Android runtime.
 set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-PROJECT_DIR="$REPO_ROOT/native/android_game"
+PROJECT_DIR="${Z3WAX_PROJECT_DIR:-$REPO_ROOT/native/android_game}"
 GODOT_BIN="${GODOT_BIN:-godot}"
 SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
 if [[ -z "$SDK_ROOT" ]]; then
