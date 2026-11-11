@@ -87,9 +87,41 @@ mesh'ni ulashadi), tekstura xotirasi 0 MB. `--optimize` bilan Smart Optimizer
 boshidanoq instancing bilan qurilgani uchun tejam kichik) va occlusion
 to'plamlarini tayyorlaydi; bu sahnada tahlil taxminan 2 daqiqa.
 
-Chegaralar: dushmanlar va qurol sodda geometrik shakllar, animatsiya yo'q;
+Miltiq — umumiy zamonaviy karabin (aniq bir haqiqiy qurol nusxasi emas):
+yuqori va pastki korpus, sakkiz qirrali tsevyo, ustki rels, naycha optika,
+egri magazin, priklad va uni ushlab turgan qo'lqopli ikki qo'l; 6800 uchburchak.
+
+### FPS
+
+`tools/blendengine/measure_fps.py` kamerani so'qmoq bo'ylab yurgizib, har qadamda
+1 namunali kadr render qiladi va o'rtacha vaqtni chiqaradi:
+
+```bash
+blender -b --factory-startup --python-exit-code 1 \
+  --python tools/blendengine/measure_fps.py -- --width 1920 --height 1080
+```
+
+GPU'siz o'lchov (4 yadroli Xeon 2.1 GHz, Mesa llvmpipe dasturiy rasterizator,
+Blender 4.3.0, 529 ming uchburchak, 2854 draw call):
+
+| O'lcham | Profil | Kadr vaqti | FPS |
+|---|---|---:|---:|
+| 1280×720 | Cinematic | 23.1 s | 0.04 |
+| 1280×720 | Low | 5.0 s | 0.20 |
+| 640×360 | Low | 4.0 s | 0.25 |
+| 640×360 | Ultra Low | 1.7 s | 0.58 |
+| 320×180 | Ultra Low | 1.6 s | 0.64 |
+
+Xulosa: EEVEE GPU uchun yozilgan, CPU'da o'ynab bo'lmaydi. O'lchamni 16 marta
+kichraytirish kadrni deyarli tezlashtirmadi, ya'ni CPU'da vaqtni piksellar emas,
+geometriya va obyektlar soni yeydi. **GPU'da o'lchanmagan** — bu muhitda GPU
+yo'q; yuqoridagi buyruqni o'z kompyuteringizda ishga tushiring, u qaysi
+renderer ishlaganini ham yozadi. Bu to'liq offline kadr vaqti (rasmni qayta
+o'qish bilan), shuning uchun interaktiv viewport odatda biroz tezroq bo'ladi.
+
+Chegaralar: dushmanlar sodda geometrik shakllar, animatsiya yo'q;
 o'yinchi daraxt va toshlardan o'tib ketadi (runtime to'qnashuvni to'xtatmaydi);
-dushman relyef balandligiga ergashmaydi. FPS o'lchanmagan (GPU'siz muhit).
+dushman relyef balandligiga ergashmaydi.
 Sinov: `tests/python/blendengine_highland.py` (6 test, Blender 4.3.0).
 
 ## Namuna: Aperture Hall

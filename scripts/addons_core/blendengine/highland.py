@@ -456,38 +456,213 @@ def _add_tube(bm, radius, length, center, material_index=0, segments=12, axis="Y
         face.smooth = len(face.verts) == 4
 
 
-def rifle_mesh(body, metal):
-    """A generic carbine in camera space: +Y is forward, built around the origin at the grip."""
+def _part(bm, size, center, material_index=0, bevel=0.0, rotation=None):
+    """A box with softened edges, so its faces catch highlights the way machined parts do."""
+    matrix = Matrix.Translation(center)
+    if rotation is not None:
+        matrix = matrix @ rotation
+    result = bmesh.ops.create_cube(bm, size=1.0, matrix=matrix @ Matrix.Diagonal((size[0], size[1], size[2], 1.0)))
+    verts = result["verts"]
+    if bevel > 0.0:
+        edges = list({edge for vert in verts for edge in vert.link_edges})
+        beveled = bmesh.ops.bevel(bm, geom=edges, offset=min(bevel, min(size) * 0.45), segments=2,
+                                  affect="EDGES", profile=0.5)
+        faces = beveled["faces"]
+        faces += [face for vert in beveled["verts"] for face in vert.link_faces]
+    else:
+        faces = [face for vert in verts for face in vert.link_faces]
+    for face in set(faces):
+        face.material_index = material_index
+        face.smooth = bevel > 0.0
+    return verts
+
+
+def _rod(bm, start, end, radius_start, radius_end=None, material_index=0, segments=14, caps=True):
+    """A round bar between two points; different radii make a taper."""
+    start, end = Vector(start), Vector(end)
+    radius_end = radius_start if radius_end is None else radius_end
+    axis = end - start
+    matrix = (Matrix.Translation((start + end) * 0.5)
+              @ axis.to_track_quat("Z", "Y").to_matrix().to_4x4())
+    result = bmesh.ops.create_cone(bm, cap_ends=caps, segments=segments, radius1=radius_start,
+                                   radius2=radius_end, depth=axis.length, matrix=matrix)
+    for face in {face for vert in result["verts"] for face in vert.link_faces}:
+        face.material_index = material_index
+        face.smooth = len(face.verts) == 4
+    return result["verts"]
+
+
+# Material slots of the first-person rifle.
+POLYMER, STEEL, GLOVE, SLEEVE, LENS = range(5)
+
+
+def rifle_mesh(materials):
+    """A generic modern carbine held in two gloved hands.
+
+    Built in its own space: +Y points down the barrel, +Z is up and the origin
+    sits where the grip meets the receiver. It is an original design made of
+    the parts every such rifle has, not a model of a particular firearm.
+    """
     bm = bmesh.new()
-    _add_box(bm, (0.052, 0.34, 0.085), (0, 0.06, 0.05))                 # receiver
-    _add_box(bm, (0.056, 0.3, 0.07), (0, 0.38, 0.05))                   # handguard
-    for offset in range(5):                                             # cooling slots
-        _add_box(bm, (0.06, 0.03, 0.022), (0, 0.27 + offset * 0.055, 0.052), 1)
-    _add_tube(bm, 0.012, 0.3, (0, 0.67, 0.052), 1)                      # barrel
-    _add_tube(bm, 0.019, 0.07, (0, 0.82, 0.052), 1)                     # muzzle device
-    _add_box(bm, (0.03, 0.44, 0.014), (0, 0.2, 0.1), 1)                 # top rail
-    _add_box(bm, (0.04, 0.26, 0.07), (0, -0.25, 0.035))                 # stock
-    _add_box(bm, (0.048, 0.035, 0.12), (0, -0.385, 0.02))               # butt pad
-    _add_box(bm, (0.04, 0.055, 0.12), (0, -0.04, -0.045),               # grip
-             rotation=Matrix.Rotation(math.radians(-16), 4, "X"))
-    _add_box(bm, (0.034, 0.075, 0.2), (0, 0.11, -0.085), 1,             # magazine
-             rotation=Matrix.Rotation(math.radians(9), 4, "X"))
-    _add_box(bm, (0.012, 0.09, 0.012), (0, 0.035, -0.012), 1)           # trigger guard
-    # Ring sight: a short open tube on a post.
-    ring_matrix = Matrix.Translation((0, 0.12, 0.148)) @ Matrix.Rotation(math.radians(90), 4, "X")
-    ring = bmesh.ops.create_cone(bm, cap_ends=False, segments=20, radius1=0.026, radius2=0.026, depth=0.03,
-                                 matrix=ring_matrix)
-    walls = bmesh.ops.solidify(bm, geom=list({face for vert in ring["verts"] for face in vert.link_faces}),
-                               thickness=0.004)
-    for item in walls["geom"]:
-        if isinstance(item, bmesh.types.BMFace):
-            item.material_index = 1
-    _add_box(bm, (0.02, 0.05, 0.02), (0, 0.12, 0.112), 1)               # sight base
-    _add_box(bm, (0.008, 0.008, 0.04), (0, 0.5, 0.125), 1)              # front post
+
+    def tilt(degrees):
+        return Matrix.Rotation(math.radians(degrees), 4, "X")
+
+    # Receiver: lower and upper halves, ejection port, forward assist, charging handle.
+    _part(bm, (0.040, 0.215, 0.046), (0, 0.035, 0.000), POLYMER, 0.004)
+    _part(bm, (0.044, 0.250, 0.050), (0, 0.050, 0.046), POLYMER, 0.006)
+    _part(bm, (0.003, 0.062, 0.020), (0.0225, 0.070, 0.050), STEEL)
+    _part(bm, (0.004, 0.066, 0.004), (0.0235, 0.070, 0.062), POLYMER)
+    _rod(bm, (0.024, -0.035, 0.052), (0.034, -0.050, 0.052), 0.006, 0.006, STEEL, 10)
+    _part(bm, (0.052, 0.016, 0.010), (0, -0.074, 0.066), STEEL, 0.002)
+    for pin_y in (-0.045, 0.118):
+        _rod(bm, (-0.0215, pin_y, 0.012), (0.0215, pin_y, 0.012), 0.0035, None, STEEL, 8)
+    _part(bm, (0.006, 0.020, 0.008), (0.022, -0.012, 0.016), STEEL, 0.001)        # safety lever
+
+    # Magazine well and a curved magazine made of leaning segments.
+    _part(bm, (0.036, 0.070, 0.050), (0, 0.110, -0.030), POLYMER, 0.004)
+    for step in range(5):
+        lean = 4.0 + step * 4.5
+        _part(bm, (0.026, 0.058, 0.046), (0, 0.112 + step * step * 0.0035, -0.066 - step * 0.040),
+              STEEL, 0.003, tilt(lean))
+        _part(bm, (0.028, 0.003, 0.030), (0, 0.141 + step * step * 0.0035, -0.066 - step * 0.040),
+              POLYMER, 0.0, tilt(lean))                                           # front rib
+    _part(bm, (0.030, 0.064, 0.008), (0, 0.172, -0.252), POLYMER, 0.002, tilt(24))  # floor plate
+
+    # Trigger group and grip.
+    _part(bm, (0.008, 0.078, 0.004), (0, 0.036, -0.050), POLYMER, 0.001)
+    _part(bm, (0.008, 0.004, 0.030), (0, 0.074, -0.036), POLYMER, 0.001)
+    _part(bm, (0.005, 0.007, 0.024), (0, 0.030, -0.034), STEEL, 0.001, tilt(-14))
+    _part(bm, (0.034, 0.048, 0.110), (0, -0.040, -0.072), POLYMER, 0.009, tilt(-17))
+    for groove in range(4):
+        _part(bm, (0.037, 0.050, 0.004), (0, -0.036 - groove * 0.0065, -0.050 - groove * 0.021),
+              STEEL, 0.0, tilt(-17))
+
+    # Handguard: eight-sided tube with slots along its flats, and a cap at the front.
+    _rod(bm, (0, 0.175, 0.046), (0, 0.495, 0.046), 0.031, 0.029, POLYMER, 8)
+    for index in range(5):
+        y = 0.215 + index * 0.058
+        for x in (-0.0295, 0.0295):
+            _part(bm, (0.004, 0.036, 0.011), (x, y, 0.046), STEEL, 0.002)
+        _part(bm, (0.011, 0.036, 0.004), (0, y, 0.0165), STEEL, 0.002)
+    _rod(bm, (0, 0.495, 0.046), (0, 0.503, 0.046), 0.032, 0.032, STEEL, 8)
+
+    # Barrel, gas block and a three-pronged muzzle device.
+    _rod(bm, (0, 0.495, 0.046), (0, 0.690, 0.046), 0.0095, 0.0085, STEEL, 16)
+    _part(bm, (0.024, 0.030, 0.034), (0, 0.560, 0.052), STEEL, 0.003)
+    _rod(bm, (0, 0.690, 0.046), (0, 0.708, 0.046), 0.0125, 0.0125, STEEL, 16)
+    for prong in range(3):
+        angle = prong * math.tau / 3.0 + math.pi / 2.0
+        offset = Vector((math.cos(angle), 0, math.sin(angle))) * 0.0085
+        _rod(bm, Vector((0, 0.708, 0.046)) + offset, Vector((0, 0.765, 0.046)) + offset, 0.0042, 0.0036, STEEL, 8)
+
+    # Top rail: a base with a row of cross slots from receiver to handguard tip.
+    _part(bm, (0.021, 0.560, 0.005), (0, 0.215, 0.0745), STEEL)
+    for tooth in range(46):
+        _part(bm, (0.021, 0.0062, 0.0045), (0, -0.055 + tooth * 0.0122, 0.0792), STEEL)
+
+    # Optic: a tube sight on a mount, with a tinted lens and an illuminated dot.
+    _part(bm, (0.026, 0.060, 0.016), (0, 0.075, 0.0895), STEEL, 0.002)
+    _part(bm, (0.010, 0.020, 0.012), (0.017, 0.075, 0.089), STEEL, 0.002)         # clamp knob
+    tube = bmesh.ops.create_cone(bm, cap_ends=False, segments=24, radius1=0.0215, radius2=0.0215, depth=0.082,
+                                 matrix=Matrix.Translation((0, 0.075, 0.1195)) @ tilt(90))
+    shell = bmesh.ops.solidify(bm, geom=list({face for vert in tube["verts"] for face in vert.link_faces}),
+                               thickness=0.0035)
+    for face in list({face for vert in tube["verts"] for face in vert.link_faces}) + [
+            item for item in shell["geom"] if isinstance(item, bmesh.types.BMFace)]:
+        face.material_index = STEEL
+        face.smooth = True
+    for y, radius in ((0.036, 0.0245), (0.114, 0.0245)):                           # bezels
+        _rod(bm, (0, y - 0.004, 0.1195), (0, y + 0.004, 0.1195), radius, radius, STEEL, 24, caps=False)
+    _rod(bm, (0, 0.0745, 0.143), (0, 0.0745, 0.152), 0.007, 0.007, STEEL, 12)       # elevation turret
+    _rod(bm, (0.022, 0.0745, 0.1195), (0.031, 0.0745, 0.1195), 0.007, 0.007, STEEL, 12)
+    _rod(bm, (0, 0.098, 0.1195), (0, 0.0985, 0.1195), 0.0185, 0.0185, LENS, 24)     # objective glass
+
+    # Folding front sight on the rail.
+    _part(bm, (0.018, 0.022, 0.010), (0, 0.470, 0.0865), STEEL, 0.002)
+    for x in (-0.007, 0.007):
+        _part(bm, (0.003, 0.012, 0.030), (x, 0.470, 0.105), STEEL, 0.001)
+    _rod(bm, (0, 0.470, 0.090), (0, 0.470, 0.114), 0.0014, 0.0014, STEEL, 6)
+
+    # Stock: buffer tube, body with a cheek rest, strut and a rubber butt pad.
+    _rod(bm, (0, -0.075, 0.046), (0, -0.300, 0.046), 0.0145, 0.0145, STEEL, 14)
+    _part(bm, (0.036, 0.170, 0.042), (0, -0.235, 0.050), POLYMER, 0.008)
+    _part(bm, (0.030, 0.150, 0.016), (0, -0.240, -0.006), POLYMER, 0.004, tilt(20))
+    _part(bm, (0.030, 0.030, 0.085), (0, -0.305, 0.010), POLYMER, 0.006)
+    _part(bm, (0.040, 0.014, 0.125), (0, -0.327, 0.012), GLOVE, 0.005)
+    _part(bm, (0.012, 0.016, 0.006), (0.020, -0.160, 0.040), STEEL, 0.001)        # sling swivel
+
+    # Right hand on the grip with the index finger along the receiver.
+    _part(bm, (0.058, 0.056, 0.088), (0.004, -0.044, -0.070), GLOVE, 0.016, tilt(-17))
+    _part(bm, (0.050, 0.030, 0.040), (0.006, -0.066, -0.014), GLOVE, 0.012)          # web of the thumb
+    _rod(bm, (0.028, -0.030, -0.018), (0.027, 0.050, -0.012), 0.0095, 0.008, GLOVE, 10)
+    _rod(bm, (-0.026, -0.050, -0.020), (-0.024, 0.006, -0.004), 0.0105, 0.009, GLOVE, 10)
+    _rod(bm, (0.010, -0.075, -0.110), (0.075, -0.300, -0.210), 0.036, 0.050, SLEEVE, 14)
+    _rod(bm, (0.008, -0.064, -0.100), (0.016, -0.090, -0.118), 0.039, 0.039, GLOVE, 14)   # cuff
+
+    # Left hand cradling the handguard from below.
+    _part(bm, (0.078, 0.098, 0.036), (-0.002, 0.330, 0.008), GLOVE, 0.014)
+    for finger in range(4):
+        y = 0.292 + finger * 0.025
+        _rod(bm, (0.034, y, 0.014), (0.036, y, 0.062), 0.0105, 0.009, GLOVE, 10)
+    _rod(bm, (-0.036, 0.330, 0.018), (-0.034, 0.372, 0.066), 0.012, 0.01, GLOVE, 10)       # thumb
+    _rod(bm, (-0.014, 0.296, -0.012), (-0.215, -0.020, -0.300), 0.031, 0.044, SLEEVE, 14)
+    _rod(bm, (-0.012, 0.298, -0.008), (-0.030, 0.270, -0.034), 0.034, 0.034, GLOVE, 14)
+
+    bmesh.ops.remove_doubles(bm, verts=bm.verts[:], dist=0.00005)
     mesh = _mesh_from_bmesh(PREFIX + "Rifle", bm)
-    mesh.materials.append(body)
-    mesh.materials.append(metal)
+    for material in materials:
+        mesh.materials.append(material)
     return mesh
+
+
+def rifle_materials():
+    """Polymer, steel, glove, sleeve and lens materials for the first-person rifle."""
+    def surface(name, color, roughness, metallic, grain_scale, grain_strength):
+        material, nodes, links = _new_material(name)
+        shader = nodes["Principled BSDF"]
+        shader.inputs["Base Color"].default_value = tuple(color) + (1.0,)
+        shader.inputs["Metallic"].default_value = metallic
+        coords = nodes.new("ShaderNodeTexCoord")
+        coords.location = (-1100, 0)
+        grain = _noise(nodes, grain_scale, 6.0, 0.65, (-880, 0))
+        links.new(coords.outputs["Object"], grain.inputs["Vector"])
+        # Handling polishes some spots and leaves others matte.
+        wear = nodes.new("ShaderNodeMapRange")
+        wear.inputs["To Min"].default_value = max(0.05, roughness - 0.14)
+        wear.inputs["To Max"].default_value = min(1.0, roughness + 0.12)
+        wear.location = (-600, 60)
+        links.new(grain.outputs["Fac"], wear.inputs["Value"])
+        links.new(wear.outputs["Result"], shader.inputs["Roughness"])
+        _bump(nodes, links, grain.outputs["Fac"], shader, grain_strength, 0.002)
+        material.diffuse_color = tuple(color) + (1.0,)
+        return material
+
+    polymer = surface(PREFIX + "RiflePolymer", (0.045, 0.047, 0.043), 0.56, 0.0, 900.0, 0.35)
+    steel = surface(PREFIX + "RifleSteel", (0.028, 0.029, 0.032), 0.34, 0.9, 260.0, 0.12)
+    glove = surface(PREFIX + "Glove", (0.06, 0.055, 0.045), 0.82, 0.0, 420.0, 0.6)
+    sleeve = surface(PREFIX + "Sleeve", (0.13, 0.15, 0.085), 0.9, 0.0, 300.0, 0.7)
+
+    lens, nodes, links = _new_material(PREFIX + "OpticLens")
+    shader = nodes["Principled BSDF"]
+    shader.inputs["Base Color"].default_value = (0.02, 0.05, 0.06, 1.0)
+    shader.inputs["Roughness"].default_value = 0.04
+    shader.inputs["Metallic"].default_value = 0.6
+    # A small glowing dot in the middle of the glass.
+    coords = nodes.new("ShaderNodeTexCoord")
+    gradient = nodes.new("ShaderNodeTexGradient")
+    gradient.gradient_type = "SPHERICAL"
+    mapping = nodes.new("ShaderNodeMapping")
+    mapping.inputs["Location"].default_value = (0.0, -0.098, -0.1195)
+    mapping.inputs["Scale"].default_value = (260.0, 260.0, 260.0)
+    dot = _ramp(nodes, ((0.0, (0.0, 0.0, 0.0)), (0.55, (1.0, 0.05, 0.02))), (-300, -300))
+    links.new(coords.outputs["Object"], mapping.inputs["Vector"])
+    links.new(mapping.outputs["Vector"], gradient.inputs["Vector"])
+    links.new(gradient.outputs["Fac"], dot.inputs["Fac"])
+    emission = shader.inputs.get("Emission Color") or shader.inputs.get("Emission")
+    links.new(dot.outputs["Color"], emission)
+    shader.inputs["Emission Strength"].default_value = 6.0
+    return [polymer, steel, glove, sleeve, lens]
 
 
 def soldier_mesh(name, cloth, gear):
@@ -707,13 +882,11 @@ def generate_highland_patrol(context, clean_scene=True, seed=4, grass_tufts=2400
     controller.camera_follow = camera
     utils.ensure_component(camera, "CAMERA_CONTROLLER", tag="MainCamera")
 
-    body = _plain_material(PREFIX + "RiflePolymer", (0.11, 0.1, 0.08), 0.62)
-    metal = _plain_material(PREFIX + "RifleSteel", (0.035, 0.037, 0.04), 0.38, 0.85)
-    rifle = _link(context, PREFIX + "Rifle", rifle_mesh(body, metal))
+    rifle = _link(context, PREFIX + "Rifle", rifle_mesh(rifle_materials()))
     rifle.parent = camera
     # Camera space looks down -Z; lay the rifle's +Y along it, low and to the right.
-    rifle.location = (0.14, -0.19, -0.52)
-    rifle.rotation_euler = (math.radians(-88.0), math.radians(2.0), math.radians(-3.5))
+    rifle.location = (0.105, -0.155, -0.36)
+    rifle.rotation_euler = (math.radians(-87.0), math.radians(1.5), math.radians(-4.5))
     rifle.blendengine_object.object_tag = "Weapon"
     utils.ensure_component(rifle, "WEAPON", tag="Weapon")
     optimization.mark_dynamic_object(rifle)
