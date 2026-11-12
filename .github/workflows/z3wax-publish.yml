@@ -12,8 +12,8 @@ jobs:
     timeout-minutes: 25
     env:
       GH_TOKEN: ${{ github.token }}
-      ANDROID_RUN: '43173138905'
-      IOS_RUN: '43172056453'
+      ANDROID_RUN: '43173754647'
+      IOS_RUN: '43173754614'
       TAG: z3wax-disland-v0.1.0
     steps:
       - uses: actions/checkout@v4
@@ -71,4 +71,4 @@ jobs:
                   dist/z3wax/Z3WAX-validation.zip
                   dist/z3wax/SHA256SUMS)
           gh release upload "$TAG" "${assets[@]}" --repo "$GITHUB_REPOSITORY" --clobber
-          gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --draft=false --prerelease --notes-file docs/z3wax/RELEASE_NOTES.md
+          gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --draft=false --prerelease --notes-file docs/z3wax/RELEASE_NOTES.md
