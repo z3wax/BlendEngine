@@ -34,6 +34,7 @@ var stick_index=-1
 var look_index=-1
 var stick_origin=Vector2.ZERO
 var touch_fire=false
+var fire_pending=false
 var jump_pending=false
 var reload_pending=false
 var server_token=""
@@ -131,9 +132,11 @@ func _setup_ui() -> void:
 	var cross=_label("+",27);cross.set_anchors_and_offsets_preset(Control.PRESET_CENTER);cross.position-=Vector2(9,18);hud.add_child(cross)
 	var exit_button=_button("LOBBY",func():_disconnect("Match ended."));exit_button.position=Vector2(1060,20);hud.add_child(exit_button)
 	var map_button=_button("MAP",func():map_panel.visible=not map_panel.visible);map_button.position=Vector2(1060,80);hud.add_child(map_button)
-	var fire=_button("FIRE",func():pass);fire.position=Vector2(1080,530);fire.custom_minimum_size=Vector2(160,100);fire.button_down.connect(func():touch_fire=true);fire.button_up.connect(func():touch_fire=false);hud.add_child(fire)
-	var jump=_button("JUMP",func():jump_pending=true);jump.position=Vector2(880,600);hud.add_child(jump)
-	var reload_button=_button("RELOAD",func():reload_pending=true);reload_button.position=Vector2(880,540);hud.add_child(reload_button)
+	var fire=_button("FIRE",func():pass);fire.position=Vector2(1080,530);fire.custom_minimum_size=Vector2(160,100);fire.button_down.connect(func():touch_fire=true;fire_pending=true);fire.button_up.connect(func():touch_fire=false);hud.add_child(fire)
+	var jump=_button("JUMP",func():
+		if not OS.has_feature("mobile"):jump_pending=true);jump.position=Vector2(880,600);hud.add_child(jump)
+	var reload_button=_button("RELOAD",func():
+		if not OS.has_feature("mobile"):reload_pending=true);reload_button.position=Vector2(880,540);hud.add_child(reload_button)
 	var stick_hint=_label("MOVE\n◀  ●  ▶",24,Color(.5,.8,.75,.7));stick_hint.position=Vector2(80,565);stick_hint.mouse_filter=Control.MOUSE_FILTER_IGNORE;hud.add_child(stick_hint)
 	map_panel=PanelContainer.new();map_panel.position=Vector2(270,90);map_panel.size=Vector2(740,540);map_panel.add_theme_stylebox_override("panel",_style(Color(.02,.06,.08)));root.add_child(map_panel)
 	var map_box=VBoxContainer.new();map_panel.add_child(map_box)
@@ -211,6 +214,9 @@ func snapshot(data: Array, elapsed: float, radius: float, phase: String) -> void
 	if actors.has(local_id):lobby.hide();hud.show()
 
 func _physics_process(dt: float) -> void:
+	if server_mode:
+		for id in pending_since.keys():
+			if Time.get_ticks_msec()-pending_since[id]>10000:multiplayer.multiplayer_peer.disconnect_peer(id);pending_since.erase(id)
 	if mode=="CONNECTING":
 		sector_tick+=dt
 		if sector_tick>10:_disconnect("Connection timed out.")
@@ -219,14 +225,14 @@ func _physics_process(dt: float) -> void:
 	if actors.has(local_id) and not server_mode:
 		var move=Input.get_vector("left","right","forward","back")+touch_move
 		var jump=jump_pending or Input.is_action_just_pressed("jump");var reload_weapon=reload_pending or Input.is_action_just_pressed("reload")
-		var fire=touch_fire or (Input.mouse_mode==Input.MOUSE_MODE_CAPTURED and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT))
+		var fire=touch_fire or fire_pending or (Input.mouse_mode==Input.MOUSE_MODE_CAPTURED and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT))
 		if smoke:move=Vector2(0,-1) if smoke_steps<100 else Vector2.ZERO;fire=false;jump=smoke_steps==20
 		if networked:
 			net_tick+=dt
-			jump_pending=jump;reload_pending=reload_weapon
+			jump_pending=jump;reload_pending=reload_weapon;fire_pending=fire_pending or fire
 			if net_tick>=1.0/30:
-				net_tick=0;sequence+=1;command.rpc_id(1,sequence,move.limit_length(),yaw,pitch,fire,jump,reload_weapon);jump_pending=false;reload_pending=false
-		else:_set_input(actors[local_id],move,yaw,pitch,fire,jump,reload_weapon);jump_pending=false;reload_pending=false
+				net_tick=0;sequence+=1;command.rpc_id(1,sequence,move.limit_length(),yaw,pitch,fire,jump,reload_weapon);jump_pending=false;reload_pending=false;fire_pending=false
+		else:_set_input(actors[local_id],move,yaw,pitch,fire,jump,reload_weapon);jump_pending=false;reload_pending=false;fire_pending=false
 	if not networked or server_mode:
 		if mode=="PLAYING":
 			match_time+=dt;zone_radius=lerpf(220,12,clampf((match_time-30)/210,0,1))
@@ -246,8 +252,6 @@ func _physics_process(dt: float) -> void:
 				for id in actors:
 					var a=actors[id];data.append([id,a.position,a.velocity,a.health,a.ammo,a.reserve,a.aim_yaw,a.reload_left,a.kills])
 				snapshot.rpc(data,match_time,zone_radius,mode)
-			for id in pending_since.keys():
-				if Time.get_ticks_msec()-pending_since[id]>10000:multiplayer.multiplayer_peer.disconnect_peer(id);pending_since.erase(id)
 	else:
 		for a in actors.values():a.position=a.position.lerp(a.target_position,1-exp(-dt*18));a.animate()
 	sector_tick+=dt
@@ -328,11 +332,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		yaw=wrapf(yaw-event.relative.x*.003,-PI,PI);pitch=clampf(pitch-event.relative.y*.003,-.8,.8)
 func _notification(what: int) -> void:
 	if what==NOTIFICATION_APPLICATION_FOCUS_OUT or what==NOTIFICATION_WM_GO_BACK_REQUEST:
-		touch_move=Vector2.ZERO;touch_fire=false;stick_index=-1;look_index=-1;jump_pending=false;reload_pending=false;Input.mouse_mode=Input.MOUSE_MODE_VISIBLE
+		touch_move=Vector2.ZERO;touch_fire=false;fire_pending=false;stick_index=-1;look_index=-1;jump_pending=false;reload_pending=false;Input.mouse_mode=Input.MOUSE_MODE_VISIBLE
 func _clear_actors() -> void:
 	for a in actors.values():a.queue_free()
 	actors.clear()
 func _disconnect(message: String) -> void:
+	touch_fire=false;fire_pending=false;touch_move=Vector2.ZERO;touches.clear()
 	multiplayer.multiplayer_peer=OfflineMultiplayerPeer.new();networked=false;mode="LOBBY";_clear_actors();Input.mouse_mode=Input.MOUSE_MODE_VISIBLE
 	if lobby:lobby.show();hud.hide();notice.text=message;map_panel.hide()
 func _smoke() -> void:
@@ -360,7 +365,7 @@ func _input(event: InputEvent) -> void:
 	if map_panel.visible:return
 	if event is InputEventScreenTouch and event.pressed:
 		var p=event.position
-		if Rect2(1080,530,170,110).has_point(p):touches[event.index]="fire";touch_fire=true
+		if Rect2(1080,530,170,110).has_point(p):touches[event.index]="fire";touch_fire=true;fire_pending=true
 		elif Rect2(880,600,180,60).has_point(p):jump_pending=true
 		elif Rect2(880,540,180,55).has_point(p):reload_pending=true
 		elif p.x<400 and p.y>350 and stick_index<0:stick_index=event.index;stick_origin=p

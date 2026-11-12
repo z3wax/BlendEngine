@@ -22,9 +22,10 @@ report={'passed':False,'sha256':hashlib.sha256(apk.read_bytes()).hexdigest(),'ph
 try:
  call('install','-r',apk);call('shell','wm','size','1280x720');call('shell','wm','density','160')
  call('shell','settings','put','system','accelerometer_rotation','0')
+ call('shell','settings','put','secure','immersive_mode_confirmations','confirmed')
  call('shell','input','keyevent','82');call('logcat','-c')
  call('shell','monkey','-p',pkg,'-c','android.intent.category.LAUNCHER','1')
- wait(lambda s:s.get('mode')=='LOBBY');report['checks'].append('normal_launcher')
+ wait(lambda s:s.get('mode')=='LOBBY');time.sleep(8);report['checks'].append('normal_launcher')
  (out/'android-lobby.png').write_bytes(call('exec-out','screencap','-p'))
  tap(1090,480);start=wait(lambda s:s.get('mode')=='PLAYING');report['checks'].append('touch_start')
  call('shell','input','swipe','160','590','160','480','1800')
@@ -45,7 +46,9 @@ try:
   if 'smoke failed' in log:raise RuntimeError(log[-2000:])
   time.sleep(2)
  else:raise RuntimeError('Installed APK physics test timed out')
- report['checks'].append('installed_apk_movement_jump_grounding_reload');report['passed']=True
+ report['checks'].append('installed_apk_movement_jump_grounding_reload')
+ assert 'Program linking failed' not in log and 'SCRIPT ERROR' not in log, 'Native renderer/script errors in installed APK'
+ report['passed']=True
 finally:
  (out/'android-qa.json').write_text(json.dumps(report,indent=2)+'\n')
  (out/'android-logcat.txt').write_bytes(call('logcat','-d',check=False))

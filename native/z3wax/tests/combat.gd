@@ -19,5 +19,8 @@ func test() -> void:
 	a.shot_left=0;game._fire(1);assert(a.kills==1) # no duplicate kill credit
 	game.mode="PLAYING";await physics_frame;await physics_frame
 	assert(game.mode=="FINISHED")
+	game.mode="PLAYING";game.fire_pending=true;game.touch_fire=false;a.ammo=30;a.shot_left=0
+	await physics_frame;await physics_frame
+	assert(a.ammo==29)
 	print("Z3WAX_COMBAT_PASS damage,cadence,reload,ammo,occlusion,kill,winner")
 	quit()
