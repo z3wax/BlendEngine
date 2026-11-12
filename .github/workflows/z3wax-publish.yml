@@ -1,0 +1,74 @@
+name: Publish verified Z3WAX field test
+on:
+  push:
+    branches: [release/z3wax-disland]
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      GH_TOKEN: ${{ github.token }}
+      ANDROID_RUN: '43173138905'
+      IOS_RUN: '43172056453'
+      TAG: z3wax-disland-v0.1.0
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require green builds and identical native source
+        shell: bash
+        run: |
+          set -euo pipefail
+          for run in "$ANDROID_RUN" "$IOS_RUN"; do
+            gh run watch "$run" --repo "$GITHUB_REPOSITORY" --exit-status --interval 20
+            sha=$(gh run view "$run" --repo "$GITHUB_REPOSITORY" --json headSha --jq .headSha)
+            git fetch --depth 1 origin "$sha"
+            test "$(git rev-parse HEAD:native/z3wax)" = "$(git rev-parse "$sha":native/z3wax)"
+          done
+      - name: Download exact tested binaries
+        run: |
+          gh run download "$ANDROID_RUN" --repo "$GITHUB_REPOSITORY" --name Z3WAX-Android-field-test --dir dist/z3wax/android
+          gh run download "$IOS_RUN" --repo "$GITHUB_REPOSITORY" --name Z3WAX-iOS-field-test --dir dist/z3wax/ios
+      - name: Validate signatures, QA and device IPA structure
+        shell: bash
+        run: |
+          set -euo pipefail
+          signer=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -n 1)
+          "$signer" verify --verbose dist/z3wax/android/Z3WAX-0.1.0-debug.apk
+          python3 - <<'PY'
+          import sys,json,hashlib,pathlib,zipfile
+          sys.path.insert(0,'tools/ios')
+          from build_ios import validate_ipa
+          root=pathlib.Path('dist/z3wax')
+          qa=json.loads((root/'android/proof/android-qa.json').read_text())
+          apk=root/'android/Z3WAX-0.1.0-debug.apk'
+          assert qa['passed'] and qa['sha256']==hashlib.sha256(apk.read_bytes()).hexdigest()
+          ipa=root/'ios/Z3WAX-0.1.0-unsigned.ipa'
+          validated=validate_ipa(ipa,'org.z3wax.disland')
+          assert validated['sha256']==json.loads((root/'ios/ipa_validation.json').read_text())['sha256']
+          with zipfile.ZipFile(root/'Z3WAX-Blender-scenes.zip','w',zipfile.ZIP_DEFLATED) as z:
+            for f in ['builds/Z3WAX/character.blend','builds/Z3WAX/disland_outpost.blend','tools/z3wax/build_assets.py','native/z3wax/assets/provenance.json','native/z3wax/assets/licenses/KENNEY-CHARACTERS.txt','native/z3wax/assets/licenses/KENNEY-BLASTERS.txt','COPYING']:
+              z.write(f)
+          with zipfile.ZipFile(root/'Z3WAX-validation.zip','w',zipfile.ZIP_DEFLATED) as z:
+            for folder in [root/'android/proof',root/'ios/ios-proof']:
+              for f in folder.rglob('*'):
+                if f.is_file():z.write(f,f.relative_to(root))
+          files=[apk,ipa,root/'Z3WAX-Blender-scenes.zip',root/'Z3WAX-validation.zip']
+          (root/'SHA256SUMS').write_text('\n'.join(hashlib.sha256(f.read_bytes()).hexdigest()+'  '+f.name for f in files)+'\n')
+          PY
+      - name: Publish the draft as a clearly labeled prerelease
+        shell: bash
+        run: |
+          set -euo pipefail
+          assets=(dist/z3wax/ios/Z3WAX-0.1.0-unsigned.ipa
+                  dist/z3wax/ios/ipa_validation.json
+                  dist/z3wax/android/Z3WAX-0.1.0-debug.apk
+                  dist/z3wax/android/proof/android-qa.json
+                  dist/z3wax/android/proof/android-game.png
+                  dist/z3wax/Z3WAX-Blender-scenes.zip
+                  dist/z3wax/Z3WAX-validation.zip
+                  dist/z3wax/SHA256SUMS)
+          gh release upload "$TAG" "${assets[@]}" --repo "$GITHUB_REPOSITORY" --clobber
+          gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --draft=false --prerelease --notes-file docs/z3wax/RELEASE_NOTES.md

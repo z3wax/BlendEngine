@@ -11,4 +11,4 @@ A playable original third-person combat prototype, with source Blender scenes an
 
 Desktop checks cover movement/jump/grounding/reload, hits and wall occlusion, cadence/ammo, winner resolution, two simultaneous network clients and actual skeletal pose changes. Platform-specific test evidence is attached separately; build success alone does not establish phone compatibility. Physical ARM64 Android and physical iPhone testing have not been performed. No claim of a flawless release, realistic tactical animation set, low-end-phone performance, complete 16 km content or production multiplayer security is made.
 
-Source package contains the Blender scenes, native game, build tools, server instructions and licenses. There is currently no music/SFX, account progression, squads, loot/inventory system, vehicles or matchmaking.
+The Blender archive contains source scenes, their export script and licenses. The LAN server package is distributed separately. There is currently no music/SFX, account progression, squads, loot/inventory system, vehicles or matchmaking.
