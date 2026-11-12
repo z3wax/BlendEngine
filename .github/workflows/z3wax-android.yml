@@ -31,6 +31,7 @@ jobs:
           chmod +x /tmp/godot/Godot_v4.6.3-stable_linux.x86_64
           echo "GODOT_BIN=/tmp/godot/Godot_v4.6.3-stable_linux.x86_64" >> "$GITHUB_ENV"
           bash tools/android/setup_toolchain.sh
+          python3 -m pip install Pillow
       - name: Build current native Android APK
         env:
           Z3WAX_PROJECT_DIR: ${{ github.workspace }}/native/z3wax
@@ -41,7 +42,9 @@ jobs:
           target: default
           arch: x86_64
           profile: Nexus 5
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
+          disk-size: 4G
+          ram-size: 2048M
+          emulator-options: -no-window -gpu swiftshader -noaudio -no-boot-anim -no-snapshot
           disable-animations: true
           script: python3 tools/z3wax/android_qa.py dist/z3wax/Z3WAX-0.1.0-debug.apk dist/z3wax/proof
       - uses: actions/upload-artifact@v4

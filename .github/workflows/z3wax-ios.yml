@@ -2,7 +2,7 @@ name: Z3WAX native iOS field test
 on:
   push:
     branches: [feat/z3wax-disland]
-    paths: ['native/z3wax/**', 'tools/z3wax/**', '.github/workflows/z3wax-ios.yml']
+    paths: ['native/z3wax/**', 'tools/z3wax/build_ios.py', '.github/workflows/z3wax-ios.yml']
   workflow_dispatch:
 permissions:
   contents: read
