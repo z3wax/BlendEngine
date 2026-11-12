@@ -113,3 +113,8 @@ node_modules/
 /builds/**/platform_config.json
 /builds/**/run_game.*
 /builds/**/README.txt
+
+/native/z3wax/.godot/
+/native/z3wax/**/*.import
+/native/z3wax/build/
+/dist/z3wax/
