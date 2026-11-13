@@ -1,3 +1,5 @@
+> **Release blocked — visual requirements not met.** The stylized field test below was rejected. The [realistic visual pass](ART_REVIEW.md) is now integrated into the playable prototype, but it does not yet meet the supplied reference or release requirements.
+
 # Z3WAX / Disland — 0.1 field test
 
 Original native third-person combat prototype built on BlendEngine's Godot 4.6.3 Android/iOS export pipeline. **This is an early field test, not a completed PUBG-scale game or a production anti-cheat service.**
@@ -8,13 +10,25 @@ Original native third-person combat prototype built on BlendEngine's Godot 4.6.3
 
 Start Training runs one human and seven server-simulated bots. WASD moves, mouse looks, left-click fires, Space jumps, R reloads, M opens the map, Escape releases/captures the pointer. Android/iOS provide independent move/look fingers and fire/jump/reload regions. Lobby returns to the menu. The closing perimeter damages players outside it; the last survivor wins.
 
-The world coordinates cover 16 × 16 km. Relay Nine is the authored, playable 440 m combat sector. Other named regions are coarse terrain and map landmarks, **not completed cities, forests or airports**. A 16 km battlefield with 100 players, vehicles, parachutes, looting, squads, inventory progression and matchmaking is not implemented. This field test is currently silent (no music or weapon SFX). The first match intentionally uses the small finished combat sector.
+The world coordinates cover 16 × 16 km. Relay Nine is the authored, playable 440 m combat sector. Other named regions are coarse terrain and map landmarks, **not completed cities, forests or airports**. A 16 km battlefield with 100 players, vehicles, parachutes, looting, squads, inventory progression and matchmaking is not implemented. The first match uses the existing small combat layout; its environmental art is still unfinished. Recorded rifle and reload sounds are included; music, full ambience and footstep audio are not.
 
 ## Assets and animation
 
-Kenney's Animated Characters Protagonists and Blaster Kit are CC0. Character/weapon meshes and idle/run/jump skeletal clips are artist-made source assets, not AI-generated characters. The character is stylized; animation blending does not constitute motion capture, realistic tactical gun handling, foot IK or a complete combat animation set. Original source links and file hashes are in `assets/provenance.json`; licenses ship with the game.
+The active operator is **DanlyVostok's Military Tactical Suit**, and the rifle is
+**Firewarden3D's M4A1**, both CC BY 4.0. These are attributed artist-created meshes.
+The current character/weapon are not the rejected Kenney prototype models.
+Source links, modifications and licenses are in [the credits](assets/realistic/CREDITS.md).
 
-`builds/Z3WAX/character.blend` (packed skin texture) and `disland_outpost.blend` are the Blender source scenes. `tools/z3wax/build_assets.py` imports the Kenney FBXs and exports GLBs. The runtime is native Godot/OpenGL ES, **not Blender EEVEE running on a phone**.
+Walk/run legs use the recorded **100STYLE** dataset (CC BY 4.0), combined with
+Quaternius's authored armed upper-body clips (CC0). Blender reconstructs the
+neutral bind rig and retargets nine clips, including standing/moving reloads.
+The rifle follows a right-hand bone socket. This is not a claim of complete
+foot IK, perfect grips, or all final combat transitions.
+
+Blender sources are in `art_source/`; the build scripts are in `tools/z3wax/art/`.
+The runtime is native Godot/OpenGL ES, not Blender EEVEE running on a phone.
+The new lobby starts offline training and opens a working server connection form.
+The map derives from the actual terrain and explicitly marks unfinished settlements.
 
 ## Dedicated server
 
@@ -30,7 +44,7 @@ Manual bans: before starting a server, put a JSON array of banned IP addresses i
 
 ## Optimization
 
-Only nearby 1 km sectors have terrain/collision (3 × 3 on a single client). Servers keep the union around players. Static Blender outpost geometry is merged by material (four batches), with frustum/distance culling and bounded shadow distance. Textures are kept at source resolution. No claim of lossless performance scaling on every phone, trained AI optimizer, 100-player load stability or measured low-end phone FPS is made.
+Only nearby 1 km sectors have terrain/collision (3 × 3 on a single client). Servers keep the union around players. Static Blender outpost geometry is merged by material (four batches), with frustum/distance culling and bounded shadow distance. Distant lobby rocks use a 2,000-triangle LOD instead of 97,964 triangles; close rocks retain the original mesh. Off-screen operator animations stop updating. Mipmaps reduce distant texture aliasing; input texture resolution is retained. No claim of lossless performance scaling on every phone, trained AI optimizer, 100-player load stability or measured low-end phone FPS is made.
 
 ## Validate and build
 

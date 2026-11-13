@@ -42,3 +42,8 @@ common/physics_ticks_per_second=60
 
 [audio]
 driver/enable_input=false
+
+[importer_defaults]
+texture={
+"mipmaps/generate": true
+}
