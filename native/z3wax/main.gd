@@ -16,6 +16,11 @@ var zone_radius=220.0
 var sequence=0
 var net_tick=0.0
 var sector_tick=0.0
+var lobby_stage: Node3D
+var match_environment: WorldEnvironment
+var match_lighting: Environment
+var match_sun: DirectionalLight3D
+var in_match_view=false
 var camera: Camera3D
 var yaw=0.0
 var pitch=-.16
@@ -45,6 +50,8 @@ var smoke_steps=0
 var smoke_peak=0.0
 var tracer: MeshInstance3D
 var tracer_time=0.0
+var shot_audio: Array[AudioStreamPlayer3D]=[]
+var shot_audio_index=0
 var ui_timer=0.0
 var snapshot_count=0
 
@@ -81,15 +88,18 @@ func _setup_input() -> void:
 		var e=InputEventKey.new();e.physical_keycode={"left":KEY_A,"right":KEY_D,"forward":KEY_W,"back":KEY_S,"jump":KEY_SPACE,"reload":KEY_R,"map":KEY_M,"pause":KEY_ESCAPE}[action];InputMap.action_add_event(action,e)
 
 func _setup_scene() -> void:
-	var environment=WorldEnvironment.new();var e=Environment.new();environment.environment=e
-	e.background_mode=Environment.BG_SKY
-	var sky=Sky.new();var sky_mat=ProceduralSkyMaterial.new();sky_mat.sky_top_color=Color(.09,.19,.27);sky_mat.sky_horizon_color=Color(.79,.60,.40);sky_mat.ground_horizon_color=Color(.68,.51,.35);sky.sky_material=sky_mat;e.sky=sky
-	e.ambient_light_source=Environment.AMBIENT_SOURCE_COLOR;e.ambient_light_color=Color(.50,.65,.77);e.ambient_light_energy=.4
-	e.tonemap_mode=Environment.TONE_MAPPER_FILMIC
-	e.fog_enabled=true;e.fog_light_color=Color(.30,.36,.39);e.fog_density=.0004
-	add_child(environment)
-	var sun=DirectionalLight3D.new();sun.rotation_degrees=Vector3(-28,-38,0);sun.light_color=Color(1,.77,.52);sun.light_energy=1.1;sun.shadow_enabled=true;sun.directional_shadow_max_distance=130;add_child(sun)
+	# One persistent environment avoids rebuilding sky resources at every lobby transition.
+	match_environment=WorldEnvironment.new();add_child(match_environment)
+	match_sun=DirectionalLight3D.new();match_sun.rotation_degrees=Vector3(-16,-125,0);match_sun.light_color=Color(1,.83,.65);match_sun.light_energy=1.1;match_sun.shadow_enabled=true;match_sun.directional_shadow_max_distance=130;add_child(match_sun)
 	camera=Camera3D.new();camera.far=2300;camera.fov=65;add_child(camera);camera.position=Vector3(24,14,32);camera.look_at(Vector3(0,15,0))
+	if not server_mode and DisplayServer.get_name()!="headless":
+		lobby_stage=load("res://art_review.gd").new();lobby_stage.embedded=true;add_child(lobby_stage)
+		match_lighting=lobby_stage.lighting;world.visible=false;match_sun.hide()
+		lobby_stage.training_requested.connect(_start_training)
+		lobby_stage.connect_requested.connect(func(host, token):address.text=host;token_field.text=token;_join())
+		lobby_stage.map_requested.connect(func():map_panel.show())
+	else:match_lighting=Environment.new()
+	match_environment.environment=match_lighting
 
 func _style(bg: Color, edge: Color=Color(.22,.36,.38)) -> StyleBoxFlat:
 	var s=StyleBoxFlat.new();s.bg_color=bg;s.border_color=edge;s.set_border_width_all(1);s.set_corner_radius_all(3);s.content_margin_left=18;s.content_margin_right=18;s.content_margin_top=10;s.content_margin_bottom=10;return s
@@ -100,6 +110,7 @@ func _button(text: String, action: Callable) -> Button:
 func _setup_ui() -> void:
 	var layer=CanvasLayer.new();add_child(layer)
 	var root=Control.new();root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);layer.add_child(root);root.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	root.theme=Theme.new();root.theme.default_font=load("res://assets/realistic/BarlowCondensed-SemiBold.ttf")
 	lobby=Control.new();lobby.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);root.add_child(lobby)
 	var margin=MarginContainer.new();margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	for side in ["left","right","top","bottom"]:margin.add_theme_constant_override("margin_"+side,32)
@@ -132,17 +143,20 @@ func _setup_ui() -> void:
 	var cross=_label("+",27);cross.set_anchors_and_offsets_preset(Control.PRESET_CENTER);cross.position-=Vector2(9,18);hud.add_child(cross)
 	var exit_button=_button("LOBBY",func():_disconnect("Match ended."));exit_button.position=Vector2(1060,20);hud.add_child(exit_button)
 	var map_button=_button("MAP",func():map_panel.visible=not map_panel.visible);map_button.position=Vector2(1060,80);hud.add_child(map_button)
-	var fire=_button("FIRE",func():pass);fire.position=Vector2(1080,530);fire.custom_minimum_size=Vector2(160,100);fire.button_down.connect(func():touch_fire=true;fire_pending=true);fire.button_up.connect(func():touch_fire=false);hud.add_child(fire)
+	var fire=_button("FIRE",func():pass);fire.position=Vector2(1080,530);fire.custom_minimum_size=Vector2(160,100);fire.button_down.connect(func():touch_fire=true;fire_pending=true);fire.button_up.connect(func():touch_fire=false);hud.add_child(fire);fire.visible=OS.has_feature("mobile")
 	var jump=_button("JUMP",func():
-		if not OS.has_feature("mobile"):jump_pending=true);jump.position=Vector2(880,600);hud.add_child(jump)
+		if not OS.has_feature("mobile"):jump_pending=true);jump.position=Vector2(880,600);hud.add_child(jump);jump.visible=OS.has_feature("mobile")
 	var reload_button=_button("RELOAD",func():
-		if not OS.has_feature("mobile"):reload_pending=true);reload_button.position=Vector2(880,540);hud.add_child(reload_button)
-	var stick_hint=_label("MOVE\n◀  ●  ▶",24,Color(.5,.8,.75,.7));stick_hint.position=Vector2(80,565);stick_hint.mouse_filter=Control.MOUSE_FILTER_IGNORE;hud.add_child(stick_hint)
-	map_panel=PanelContainer.new();map_panel.position=Vector2(270,90);map_panel.size=Vector2(740,540);map_panel.add_theme_stylebox_override("panel",_style(Color(.02,.06,.08)));root.add_child(map_panel)
+		if not OS.has_feature("mobile"):reload_pending=true);reload_button.position=Vector2(880,540);hud.add_child(reload_button);reload_button.visible=OS.has_feature("mobile")
+	var stick_hint=_label("MOVE\n◀  ●  ▶",24,Color(.5,.8,.75,.7));stick_hint.position=Vector2(80,565);stick_hint.mouse_filter=Control.MOUSE_FILTER_IGNORE;hud.add_child(stick_hint);stick_hint.visible=OS.has_feature("mobile")
+	map_panel=PanelContainer.new();map_panel.position=Vector2(72,48);map_panel.size=Vector2(1136,620);map_panel.add_theme_stylebox_override("panel",_style(Color(.02,.06,.08)));root.add_child(map_panel)
 	var map_box=VBoxContainer.new();map_panel.add_child(map_box)
-	map_box.add_child(_label("DISLAND  /  16 × 16 KM",24))
-	map_view=load("res://map.gd").new();map_view.custom_minimum_size=Vector2(700,430);map_box.add_child(map_view)
+	map_box.add_child(_label("DISLAND  /  16 × 16 KM  /  DEVELOPMENT TERRAIN",24))
+	map_view=load("res://map.gd").new();map_view.custom_minimum_size=Vector2(1100,510);map_box.add_child(map_view)
 	map_box.add_child(_button("CLOSE",func():map_panel.hide()));map_panel.hide()
+	if lobby_stage:
+		lobby.queue_free();lobby=lobby_stage.ui;notice=lobby_stage.notice
+		address=lobby_stage.server_address;token_field=lobby_stage.server_token
 
 func _tab(tab: String) -> void:
 	if tab=="MAP":map_panel.show()
@@ -155,6 +169,7 @@ func _spawn(id: int, point: Vector3, bot: bool=false) -> void:
 	var actor=Actor.new();actor.name="Ranger_"+str(id);actor.bot=bot;actor.display_name=("Scout " if bot else "Ranger ")+str(abs(id));add_child(actor);actor.position=point;actor.target_position=point;actors[id]=actor
 
 func _start_training() -> void:
+	_match_view(true)
 	_clear_actors();multiplayer.multiplayer_peer=OfflineMultiplayerPeer.new();networked=false;local_id=1;match_time=0;zone_radius=220;mode="PLAYING";_spawn(1,Vector3(20,8.1,25))
 	for i in range(7):
 		var angle=i*TAU/7;_spawn(-i-1,Vector3(cos(angle)*90,8.1,sin(angle)*90),true)
@@ -211,7 +226,7 @@ func snapshot(data: Array, elapsed: float, radius: float, phase: String) -> void
 		var a=actors[id];a.target_position=entry[1];a.velocity=entry[2];a.health=entry[3];a.ammo=entry[4];a.reserve=entry[5];a.aim_yaw=entry[6];a.reload_left=entry[7];a.kills=entry[8]
 	for id in actors.keys():
 		if id not in ids:actors[id].queue_free();actors.erase(id)
-	if actors.has(local_id):lobby.hide();hud.show()
+	if actors.has(local_id):_match_view(true);lobby.hide();hud.show()
 
 func _physics_process(dt: float) -> void:
 	if server_mode:
@@ -300,6 +315,10 @@ func _fire(id: int) -> void:
 @rpc("authority","call_remote","unreliable")
 func shot_visual(from: Vector3, to: Vector3) -> void:
 	if DisplayServer.get_name()=="headless":return
+	if shot_audio.is_empty():
+		for i in range(8):
+			var sound=AudioStreamPlayer3D.new();sound.stream=load("res://assets/realistic/audio/rifle_shot.wav");sound.max_distance=120;sound.unit_size=6;sound.volume_db=-9;add_child(sound);shot_audio.append(sound)
+	var sound=shot_audio[shot_audio_index];shot_audio_index=(shot_audio_index+1)%shot_audio.size();sound.global_position=from;sound.play()
 	if is_instance_valid(tracer):tracer.queue_free()
 	tracer=MeshInstance3D.new();var line=ImmediateMesh.new();line.surface_begin(Mesh.PRIMITIVE_LINES);line.surface_add_vertex(from);line.surface_add_vertex(to);line.surface_end();tracer.mesh=line
 	var mat=StandardMaterial3D.new();mat.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED;mat.albedo_color=Color(1,.76,.25);tracer.material_override=mat;add_child(tracer);tracer_time=.05
@@ -307,7 +326,7 @@ func shot_visual(from: Vector3, to: Vector3) -> void:
 func _update_camera(dt: float) -> void:
 	if not actors.has(local_id):return
 	var a=actors[local_id];var focus=a.position+Vector3(0,1.5,0)
-	var offset=Vector3(.65,1.2,4.5).rotated(Vector3.RIGHT,pitch).rotated(Vector3.UP,yaw)
+	var offset=Vector3(.55,.2,2.8).rotated(Vector3.RIGHT,pitch).rotated(Vector3.UP,yaw)
 	var desired=focus+offset
 	var hit=get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(focus,desired,1,[a.get_rid()]))
 	if hit:desired=hit.position+(focus-hit.position).normalized()*.2
@@ -326,7 +345,7 @@ func _update_hud() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if server_mode:return
 	if event.is_action_pressed("map"):map_panel.visible=not map_panel.visible
-	if event.is_action_pressed("pause"):
+	if event.is_action_pressed("pause") and mode in ["PLAYING","FINISHED"]:
 		Input.mouse_mode=Input.MOUSE_MODE_VISIBLE if Input.mouse_mode==Input.MOUSE_MODE_CAPTURED else Input.MOUSE_MODE_CAPTURED
 	if event is InputEventMouseMotion and Input.mouse_mode==Input.MOUSE_MODE_CAPTURED:
 		yaw=wrapf(yaw-event.relative.x*.003,-PI,PI);pitch=clampf(pitch-event.relative.y*.003,-.8,.8)
@@ -337,9 +356,18 @@ func _clear_actors() -> void:
 	for a in actors.values():a.queue_free()
 	actors.clear()
 func _disconnect(message: String) -> void:
+	_match_view(false)
 	touch_fire=false;fire_pending=false;touch_move=Vector2.ZERO;touches.clear()
 	multiplayer.multiplayer_peer=OfflineMultiplayerPeer.new();networked=false;mode="LOBBY";_clear_actors();Input.mouse_mode=Input.MOUSE_MODE_VISIBLE
 	if lobby:lobby.show();hud.hide();notice.text=message;map_panel.hide()
+func _match_view(active: bool) -> void:
+	if not lobby_stage or in_match_view==active:return
+	in_match_view=active
+	if active:
+		lobby_stage.set_active(false);camera.current=true;world.show();match_sun.show()
+	else:
+		world.hide();match_sun.hide();lobby_stage.set_active(true)
+
 func _smoke() -> void:
 	smoke_steps+=1
 	smoke_peak=maxf(smoke_peak,actors[1].position.y)

@@ -119,3 +119,11 @@ if(WITH_CYCLES_STANDALONE)
     $<TARGET_FILE:cycles>
     DESTINATION ${CMAKE_INSTALL_PREFIX})
 endif()
+
+# Local game-host integration; shares the exact standalone Cycles libraries.
+if(WITH_CYCLES_STANDALONE AND UNIX AND NOT APPLE)
+  add_executable(cycles_game_worker cycles_game_worker.cpp cycles_xml.cpp)
+  target_link_libraries(cycles_game_worker PRIVATE ${LIB})
+  set_target_properties(cycles_game_worker PROPERTIES INSTALL_RPATH "$ORIGIN/lib")
+  install(TARGETS cycles_game_worker RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX})
+endif()
