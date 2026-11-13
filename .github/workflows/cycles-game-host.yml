@@ -1,0 +1,52 @@
+name: Cycles game host reference QA
+on:
+  workflow_dispatch:
+  push:
+    branches: [feat/z3wax-realistic-visuals]
+    paths:
+      - 'intern/cycles/app/**'
+      - 'native/cycles/**'
+      - 'native/z3wax/render/**'
+      - 'native/z3wax/tests/cycles_bridge.gd'
+      - 'tools/z3wax/cycles/**'
+      - '.github/workflows/cycles-game-host.yml'
+permissions:
+  contents: read
+jobs:
+  cpu-reference:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install build and reference-image dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake ninja-build libopenimageio-dev \
+            libboost-filesystem-dev libboost-regex-dev libboost-thread-dev \
+            libboost-date-time-dev libboost-system-dev libtbb-dev libpugixml-dev \
+            libopenexr-dev libimath-dev libjpeg-dev libpng-dev libtiff-dev \
+            libwebp-dev libzstd-dev libfmt-dev libepoxy-dev libfreetype-dev \
+            zlib1g-dev python3-numpy python3-openimageio
+      - name: Build repository Cycles and persistent host
+        run: bash tools/z3wax/cycles/build.sh "$RUNNER_TEMP/cycles-build"
+      - name: Check float output, transforms, instancing and normal maps
+        run: |
+          /usr/bin/python3 native/cycles/tests/verify_worker.py --bin-dir "$RUNNER_TEMP/cycles-build/bin" --output "$RUNNER_TEMP/cycles-proof"
+          /usr/bin/python3 native/cycles/tests/verify_instancing.py --bin-dir "$RUNNER_TEMP/cycles-build/bin" --output "$RUNNER_TEMP/cycles-proof"
+      - name: Test actual frames through Godot
+        run: |
+          curl -fL https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_linux.x86_64.zip -o "$RUNNER_TEMP/godot.zip"
+          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
+          chmod +x "$RUNNER_TEMP/godot/Godot_v4.6.3-stable_linux.x86_64"
+          export Z3WAX_CYCLES_WORKER="$RUNNER_TEMP/cycles-build/bin/cycles_game_worker"
+          export Z3WAX_CYCLES_SCENE="$PWD/native/cycles/tests/reference.xml"
+          export Z3WAX_CYCLES_OUTPUT="$RUNNER_TEMP/cycles-godot-proof"
+          "$RUNNER_TEMP/godot/Godot_v4.6.3-stable_linux.x86_64" --headless --path native/z3wax --editor --import
+          timeout 180 "$RUNNER_TEMP/godot/Godot_v4.6.3-stable_linux.x86_64" --headless --path native/z3wax --script res://tests/cycles_bridge.gd
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cycles-reference-proof-ubuntu24
+          path: |
+            ${{ runner.temp }}/cycles-proof/
+            ${{ runner.temp }}/cycles-godot-proof/

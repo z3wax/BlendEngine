@@ -56,7 +56,7 @@ uses fixed simulation steps; its encoded frame rate is not phone-performance evi
 
 Still unfinished:
 
-- Repository Cycles renderer integration. Current screenshots/runtime use Godot Compatibility rasterization; they are not Cycles renders.
+- Full Cycles game renderer replacement. An experimental Linux CPU worker, float32 Godot bridge and static Cycles lobby viewer now exist in `../cycles/README.md`. The normal game and screenshots 06–08 still use Godot Compatibility; screenshot 09 is explicitly a Cycles CPU snapshot. Mobile/live-animation Cycles integration is unfinished.
 
 - Exact reference character, exposed face/helmet/camouflage, vehicles, weapon designs,
   lighting and environment detail; grip/foot/contact polish for all transitions.

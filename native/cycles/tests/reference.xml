@@ -1,0 +1,33 @@
+<cycles>
+  <integrator seed="41" use_adaptive_sampling="false" use_denoise="false"
+    max_bounce="12" max_diffuse_bounce="12" max_glossy_bounce="12"
+    max_transmission_bounce="12" max_volume_bounce="12"
+    transparent_max_bounce="12" sample_clamp_direct="0" sample_clamp_indirect="0"/>
+  <camera width="96" height="64" fov="0.85"/>
+  <background>
+    <background name="sky" color="0.12 0.2 0.4" strength="0.5"/>
+    <connect from="sky background" to="output surface"/>
+  </background>
+  <shader name="copper">
+    <principled_bsdf name="p" base_color="0.8 0.23 0.08" metallic="0.75" roughness="0.16" specular="0.5" ior="1.45"/>
+    <connect from="p BSDF" to="output surface"/>
+  </shader>
+  <state shader="copper">
+    <mesh P="-1 -0.8 3  1 -0.8 3  0 0.9 3" verts="0 2 1" nverts="3"/>
+  </state>
+  <shader name="floor">
+    <diffuse_bsdf name="d" color="0.6 0.65 0.7"/>
+    <connect from="d BSDF" to="output surface"/>
+  </shader>
+  <state shader="floor">
+    <mesh P="-20 -0.85 -10  20 -0.85 -10  20 -0.85 40  -20 -0.85 40" verts="0 3 2 1" nverts="4"/>
+  </state>
+  <!-- Behind the camera: retained because its light and reflections affect visible surfaces. -->
+  <shader name="emitter">
+    <emission name="e" color="1 0.75 0.5" strength="8"/>
+    <connect from="e emission" to="output surface"/>
+  </shader>
+  <state shader="emitter">
+    <mesh P="-2 1 -1  2 1 -1  2 4 -1  -2 4 -1" verts="0 1 2 3" nverts="4"/>
+  </state>
+</cycles>

@@ -57,3 +57,7 @@ Z3WAX_PROJECT_DIR="$PWD/native/z3wax" bash tools/android/build_apk.sh "$PWD/dist
 APK is development-signed, Android 7+ / API24, ARM64 and x86_64. Use a private production keystore for a store release. iOS compilation runs on macOS with Xcode through `.github/workflows/z3wax-ios.yml`. The generated **unsigned ARM64 device IPA** is validated as an actual Mach-O app and Godot resource pack. It needs your Apple signing certificate/profile for normal iPhone installation. An unsigned IPA is not an App Store/TestFlight submission, and a successful build is not a physical device test.
 
 Release evidence explicitly distinguishes desktop, emulator, simulator, and physical-device checks. Never label an untested device or a future feature as passed.
+
+## Experimental repository Cycles host
+
+See [Cycles integration](../cycles/README.md) for the Linux CPU build, actual float32 reference tests and the static Cycles lobby viewer. The normal game renderer remains Godot Compatibility; this experimental path is not a mobile or release-ready replacement.
