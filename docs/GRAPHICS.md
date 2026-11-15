@@ -61,6 +61,41 @@ olib tashlang. Windowsda `blender.exe` va o'zingizning chiqish papkangizni
 ko'rsating. Rasm renderi uchun xotira va vaqt talab qilinadi; `--width 640
 --height 360 --samples 24` bilan tezroq tekshirish mumkin.
 
+## YouTube Shorts: Core Ignition
+
+`tools/blendengine/create_shorts_video.py` 15 soniyalik, 30 fps, vertikal (9:16)
+Shorts klipini yaratadi: mis giroskop zalda yonadi, halqalari tezlashib zarba
+to'lqinini chiqaradi, bir tekislikka qulflanadi va BlendEngine sarlavhasini ochadi.
+Sahna, materiallar, kalit kadrlar va ovoz shu skriptda yaratiladi; tashqi model,
+tekstura yoki musiqa ishlatilmaydi. Aperture Hall'ning procedural PBR
+yordamchilari va BlendEngine **Cinematic** profili qayta ishlatiladi.
+
+Repo ildizidan:
+
+```bash
+blender -b --factory-startup --python-exit-code 1 \
+  --python tools/blendengine/create_shorts_video.py -- \
+  --output-dir /tmp/blendengine-short --render --encode
+```
+
+Natijalar: `core_ignition_short.blend`, `frames/frame_####.png`, `soundtrack.wav`
+va `blendengine_short.mp4` (1080×1920, H.264 + AAC, taxminan -14 LUFS).
+`--encode` uchun `ffmpeg` kerak. Tayyor kadrlar qayta render qilinmaydi, shuning
+uchun to'xtatilgan renderni xuddi shu buyruq bilan davom ettirish mumkin.
+`--stills 1,215,450 --scale 50` faqat tekshiruv kadrlarini chiqaradi.
+
+GPU bo'lmagan kompyuterda (Mesa llvmpipe) quyidagilarni qo'shing:
+
+```bash
+--width 720 --height 1280 --samples 8 --budget software
+```
+
+`--budget software` Cinematic profilidagi soya, fast GI va akslar uchun nur va
+qadam sonini kamaytiradi; MP4 1080×1920 ga Lanczos bilan kattalashtiriladi.
+Namunadagi klip `bpy` 4.3.0 Python moduli, EEVEE Next va 4 yadroli CPU'da shu
+sozlamalar bilan render qilindi: kadr boshiga taxminan 19 soniya. Skript
+Blender 4.3 bilan tekshirilgan; 3.6 da ishga tushirilmagan.
+
 ## Tekshirish
 
 ```bash

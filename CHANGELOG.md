@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Graphics
+
+- `tools/blendengine/create_shorts_video.py`: vertikal 1080×1920 YouTube Shorts klipi
+  ("Core Ignition") uchun procedural sahna, animatsiya, ovoz va MP4 eksporti qo'shildi.
+
 ### Documentation
 
 - Loyiha banneri va monogramma, arxitektura xaritasi, boshlang‘ich misol va navigatsiya qo‘shildi.
