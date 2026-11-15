@@ -82,7 +82,7 @@ func _ready() -> void:
 		var distant=model("rock/distant.glb",Vector3((i-6)*20,-3,-100-rng.randf_range(0,25)),rng.randf_range(0,TAU),rng.randf_range(9,17))
 		for mesh in distant.find_children("*","MeshInstance3D",true,false):mesh.material_override=rock_material;mesh.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	soldier=load("res://operator_visual.gd").new();add_child(soldier);soldier.rotation.y=.45
-	rifle=model("rifle_real.glb",Vector3(.02,1.28,.35),-PI/2,.55)
+	rifle=model("rifle_batched.glb",Vector3(.02,1.28,.35),-PI/2,.55)
 	rifle.basis=Basis(Vector3.BACK,-.35)*Basis(Vector3.UP,-PI/2)*.55;rifle.hide()
 	camera=Camera3D.new();camera.fov=34;camera.near=.05;camera.far=400;add_child(camera);camera.current=true;update_camera()
 	build_ui()

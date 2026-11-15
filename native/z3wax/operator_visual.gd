@@ -23,7 +23,7 @@ func _ready() -> void:
 	# Coordinates refer to the actual rifle model's pistol grip, not its bounding-box center.
 	var rifle_pose=Transform3D(basis,grip-basis*Vector3(0,-.16,.25))
 	socket=BoneAttachment3D.new();socket.bone_name=skeleton.get_bone_name(hand);skeleton.add_child(socket)
-	weapon=load("res://assets/realistic/rifle_real.glb").instantiate();socket.add_child(weapon)
+	weapon=load("res://assets/realistic/rifle_batched.glb").instantiate();socket.add_child(weapon)
 	weapon.transform=hand_pose.affine_inverse()*rifle_pose
 	if DisplayServer.get_name()!="headless":
 		var visibility=VisibleOnScreenNotifier3D.new();visibility.aabb=AABB(Vector3(-.9,-.2,-.9),Vector3(1.8,2.6,1.8));add_child(visibility)

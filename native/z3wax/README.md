@@ -61,3 +61,27 @@ Release evidence explicitly distinguishes desktop, emulator, simulator, and phys
 ## Experimental repository Cycles host
 
 See [Cycles integration](../cycles/README.md) for the Linux CPU build, actual float32 reference tests and the static Cycles lobby viewer. The normal game renderer remains Godot Compatibility; this experimental path is not a mobile or release-ready replacement.
+
+## Playable Ubuntu alpha and live frame budgets
+
+The actual match uses Godot's real-time raster renderer; Cycles is not launched.
+`tools/z3wax/realtime/package_ubuntu.sh OUTPUT GODOT_BINARY` packages the game,
+official runtime, licenses, `play.sh`, `play-speed.sh` and a local `server.sh`.
+See `tools/z3wax/realtime/README-UZ.txt` for controls and LAN setup.
+
+Static outpost surfaces are grouped by shared material in 32-metre cells while
+retaining their collision bodies. The rifle's four static parts are joined into
+one surface without decimation. `Native` retains 100% resolution and original
+shadow range. `Balanced` and `Speed` explicitly reduce 3D resolution/shadow range
+under load; texture assets and UI resolution are retained. This is a deterministic
+frame-budget controller, not a trained AI optimizer or a no-quality-loss claim.
+
+Actual unpaced 1280×720 gameplay on the development machine's **llvmpipe software
+renderer** measured approximately 2.8 FPS before, 3.0 FPS in optimized Native and
+12.0 FPS in Speed (50% 3D resolution). Native peak draw calls decreased from 286 to
+214 in the short scripted route. These are single-run diagnostic results, not
+GPU/phone performance predictions or a 30/60 FPS release qualification.
+
+`tests/realtime_playtest.gd` runs against the exported pack in a real graphics
+window, verifies movement/jump/fire/reload and captures the actual viewport.
+Video capture uses wall-clock screen recording, not fixed-step MovieWriter.

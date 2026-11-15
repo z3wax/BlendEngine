@@ -5,6 +5,7 @@ const TILE = 1000.0
 const POIS = {"Snowy Heights":Vector2(-4600,-5200), "Verdant Forest":Vector2(-5000,-1600), "Dust Bowl":Vector2(2300,-4800), "Metro City":Vector2(5600,-1800), "Lake District":Vector2(0,-1500), "Marshlands":Vector2(-1800,3300), "Savanna Industry":Vector2(3700,3300), "Jungle Base":Vector2(-5100,3200), "Relay Nine":Vector2.ZERO, "Coastal Town":Vector2(5600,5200)}
 var sectors: Dictionary = {}
 var material: StandardMaterial3D
+var batch_report: Dictionary = {}
 var headless = DisplayServer.get_name() == "headless"
 
 static func height_at(x: float, z: float) -> float:
@@ -37,6 +38,7 @@ func _ready() -> void:
 		sea.material_override=water;sea.position.y=-6;add_child(sea)
 	var outpost = load("res://assets/outpost.glb").instantiate()
 	add_child(outpost);outpost.position.y=8
+	var surface_cache: Dictionary = {}
 	for node in outpost.find_children("*","MeshInstance3D",true,false):
 		node.create_trimesh_collision()
 		node.visibility_range_end=650.0
@@ -44,12 +46,17 @@ func _ready() -> void:
 		if headless: node.visible=false
 		else:
 			var original=node.mesh.surface_get_material(0)
+			var category="plaster" if original and "plaster" in original.resource_name.to_lower() else "metal"
+			if surface_cache.has(category):
+				node.material_override=surface_cache[category];continue
 			var surface=StandardMaterial3D.new();surface.roughness=.9
 			if original and "plaster" in original.resource_name.to_lower():
 				surface.albedo_texture=load("res://assets/realistic/wall_color.jpg");surface.normal_enabled=true;surface.normal_texture=load("res://assets/realistic/wall_normal.jpg")
 			else:
 				surface.albedo_texture=load("res://assets/realistic/RustyCorrugated_Color.webp");surface.normal_enabled=true;surface.normal_texture=load("res://assets/realistic/RustyCorrugated_NormalGL.webp")
-			surface.uv1_triplanar=true;surface.uv1_world_triplanar=true;surface.uv1_scale=Vector3.ONE*.35;node.material_override=surface
+			surface.uv1_triplanar=true;surface.uv1_world_triplanar=true;surface.uv1_scale=Vector3.ONE*.35;node.material_override=surface;surface_cache[category]=surface
+	if not headless:
+		batch_report=load("res://render/static_batch.gd").combine(outpost)
 	update_sectors(Vector3.ZERO)
 
 func update_sectors(point: Vector3) -> void:

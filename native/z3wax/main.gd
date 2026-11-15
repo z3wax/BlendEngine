@@ -54,6 +54,7 @@ var shot_audio: Array[AudioStreamPlayer3D]=[]
 var shot_audio_index=0
 var ui_timer=0.0
 var snapshot_count=0
+var render_budget: Node
 
 func _ready() -> void:
 	get_tree().quit_on_go_back=false
@@ -68,6 +69,8 @@ func _ready() -> void:
 	world=World.new();add_child(world)
 	_setup_scene()
 	if not server_mode:_setup_ui()
+	if not server_mode and DisplayServer.get_name()!="headless":
+		render_budget=load("res://render/realtime_budget.gd").new();add_child(render_budget)
 	multiplayer.peer_connected.connect(_peer_connected)
 	multiplayer.peer_disconnected.connect(_peer_disconnected)
 	multiplayer.connected_to_server.connect(_connected)
@@ -160,8 +163,8 @@ func _setup_ui() -> void:
 
 func _tab(tab: String) -> void:
 	if tab=="MAP":map_panel.show()
-	elif tab=="ARMORY":notice.text="A1 / Kenney Blaster · 30 rounds · 120 reserve\nServer validates cadence, ammunition and raycast hits."
-	elif tab=="CREDITS":notice.text="Character, skeletal animations and blasters: Kenney / CC0.\nScene: Blender → glTF. Runtime: Godot 4.6.3 / MIT."
+	elif tab=="ARMORY":notice.text="M4A1 / Firewarden3D · 30 rounds · 120 reserve\nServer validates cadence, ammunition and raycast hits."
+	elif tab=="CREDITS":notice.text="Operator: DanlyVostok / CC BY 4.0. Weapon: Firewarden3D / CC BY 4.0.\nScene: Blender → glTF. Runtime: Godot 4.6.3 / MIT."
 	else:notice.text="Training is local. Online requires a reachable server."
 
 func _spawn(id: int, point: Vector3, bot: bool=false) -> void:
@@ -407,6 +410,7 @@ func _process(dt: float) -> void:
 	ui_timer+=dt
 	if ui_timer<.25:return
 	ui_timer=0
+	if not smoke and "--preview" not in OS.get_cmdline_user_args() and "--network-test" not in OS.get_cmdline_user_args():return
 	var report={"mode":mode,"actors":actors.size(),"time":match_time,"sectors":world.sectors.size(),"smoke":smoke}
 	if actors.has(local_id):
 		var a=actors[local_id];report.merge({"position":[a.position.x,a.position.y,a.position.z],"health":a.health,"ammo":a.ammo,"reload":a.reload_left,"floor":a.is_on_floor(),"animation":a.last_animation})

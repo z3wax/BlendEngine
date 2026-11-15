@@ -3,7 +3,7 @@
   "mirror_commit": "130ac2a5c856401ec36e7d35afcfefe40c5801f4",
   "files": {
     "BarlowCondensed-SemiBold.ttf": "7b619d14bc2327509a9ef32b0890f709626f7ecc9ff61191c2a4314c5499d2d9",
-    "CREDITS.md": "c8ddb2bebb6821a3e5bcc87d819bac31e8c2d02f9d28ed2eb176cd4207fbf505",
+    "CREDITS.md": "2c8dfbdffbe9d01c6657049569e01bd1db09c41171797356b5d14b2f5c7a1122",
     "OFL.txt": "186d750eb496a4c17a76385f82be6aea2ac1cf2de074a811d63786cf374ea73f",
     "RustyCorrugated_Color.webp": "958e16e6c808e83a03918945e9725ef82cf10562b0713eb085055a0aff5653a3",
     "RustyCorrugated_NormalGL.webp": "da4188632928e71f03b1b93ebeeeaf8b184abcb1a73c06928f79037f532684bf",
@@ -32,6 +32,7 @@
     "sunset.hdr": "63ece1716a4a6f598f243efa3484b2e47773e9add9cba6d1677a5ec4b2ee6ef8",
     "wall_color.jpg": "222d4d2e7d5c425c97e5a66790852388cec7706714d773f769fba6bfe08cea4e",
     "wall_normal.jpg": "7f5cbecd6766f44034f3b78b4addb1559e12bdd5a77501bd418a736609e7cedc",
-    "wall_rough.jpg": "a76e2307d8ec47d1be1d4710851fc4545db7aecfa176333738a6756358b64767"
+    "wall_rough.jpg": "a76e2307d8ec47d1be1d4710851fc4545db7aecfa176333738a6756358b64767",
+    "rifle_batched.glb": "43f539e7b9705a1611bc1d3a27dc169672f5c28f275d657a2588c503c28818e6"
   }
 }
