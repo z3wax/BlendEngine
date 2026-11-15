@@ -63,6 +63,8 @@ ko'rsating. Rasm renderi uchun xotira va vaqt talab qilinadi; `--width 640
 
 ## YouTube Shorts: Core Ignition
 
+![Core Ignition Shorts klipidagi sarlavha kadri](graphics/core_ignition_short.png)
+
 `tools/blendengine/create_shorts_video.py` 15 soniyalik, 30 fps, vertikal (9:16)
 Shorts klipini yaratadi: mis giroskop zalda yonadi, halqalari tezlashib zarba
 to'lqinini chiqaradi, bir tekislikka qulflanadi va BlendEngine sarlavhasini ochadi.
@@ -92,9 +94,10 @@ GPU bo'lmagan kompyuterda (Mesa llvmpipe) quyidagilarni qo'shing:
 
 `--budget software` Cinematic profilidagi soya, fast GI va akslar uchun nur va
 qadam sonini kamaytiradi; MP4 1080×1920 ga Lanczos bilan kattalashtiriladi.
-Namunadagi klip `bpy` 4.3.0 Python moduli, EEVEE Next va 4 yadroli CPU'da shu
-sozlamalar bilan render qilindi: kadr boshiga taxminan 19 soniya. Skript
-Blender 4.3 bilan tekshirilgan; 3.6 da ishga tushirilmagan.
+Namunadagi klip `bpy` 4.3.0 Python moduli, EEVEE Next va GPU'siz 4 yadroli
+CPU'da shu sozlamalar bilan render qilindi: kadr boshiga o'rtacha 20 soniya,
+ya'ni 450 kadr uchun taxminan 2,5 soat. Rasmdagi kadr 13-soniyadan olingan.
+Skript Blender 4.3 bilan tekshirilgan; 3.6 da ishga tushirilmagan.
 
 ## Tekshirish
 
