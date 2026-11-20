@@ -19,27 +19,18 @@ var last_input=0
 var target_position=Vector3.ZERO
 var last_animation=""
 var hit_flash=0.0
+var reload_audio: AudioStreamPlayer3D
+var was_reloading=false
+var magazine_inserted=false
 
 func _ready() -> void:
 	collision_layer=2;collision_mask=1|2
 	var shape=CollisionShape3D.new();var capsule=CapsuleShape3D.new();capsule.radius=.35;capsule.height=1.8;shape.shape=capsule;shape.position.y=.9;add_child(shape)
 	floor_snap_length=.4
 	if DisplayServer.get_name()!="headless":
-		visual=load("res://assets/character.glb").instantiate();add_child(visual);visual.scale=Vector3.ONE*.48
-		for n in visual.find_children("*","AnimationPlayer",true,false): animation=n
-		if animation:
-			for a in animation.get_animation_list():
-				if "idle" in a.to_lower() or "run" in a.to_lower(): animation.get_animation(a).loop_mode=Animation.LOOP_LINEAR
-		var gun=load("res://assets/rifle.glb").instantiate()
-		# Attach the artist-made weapon to the right hand when available.
-		var attached=false
-		for skeleton in visual.find_children("*","Skeleton3D",true,false):
-			for i in range(skeleton.get_bone_count()):
-				var bone=skeleton.get_bone_name(i).to_lower()
-				if "hand" in bone and ("right" in bone or ".r" in bone):
-					var socket=BoneAttachment3D.new();socket.bone_name=skeleton.get_bone_name(i);skeleton.add_child(socket);socket.add_child(gun);gun.scale=Vector3.ONE*.9;attached=true;break
-			if attached: break
-		if not attached: add_child(gun);gun.position=Vector3(.32,1.1,-.3);gun.scale=Vector3.ONE*.45
+		visual=load("res://operator_visual.gd").new();add_child(visual)
+		animation=visual.animation
+		reload_audio=AudioStreamPlayer3D.new();reload_audio.position.y=1.2;reload_audio.max_distance=25;reload_audio.unit_size=3;reload_audio.volume_db=-10;add_child(reload_audio)
 
 func simulate(dt: float) -> void:
 	shot_left=maxf(0,shot_left-dt)
@@ -51,8 +42,8 @@ func simulate(dt: float) -> void:
 	wants_reload=false
 	if health<=0: velocity=Vector3.ZERO;return
 	var direction=Vector3(input_move.x,0,input_move.y).rotated(Vector3.UP,aim_yaw)
-	velocity.x=move_toward(velocity.x,direction.x*6.5,dt*28)
-	velocity.z=move_toward(velocity.z,direction.z*6.5,dt*28)
+	velocity.x=move_toward(velocity.x,direction.x*4.8,dt*28)
+	velocity.z=move_toward(velocity.z,direction.z*4.8,dt*28)
 	if not is_on_floor(): velocity.y-=22*dt
 	elif wants_jump: velocity.y=7.2
 	wants_jump=false
@@ -66,7 +57,17 @@ func animate() -> void:
 		visual.rotation.y=lerp_angle(visual.rotation.y,aim_yaw+PI,.18)
 		visual.visible=health>0
 	if not animation: return
-	var desired="jump" if not is_on_floor() and absf(velocity.y)>1 else ("run" if Vector2(velocity.x,velocity.z).length()>.2 else "idle")
-	if desired==last_animation:return
-	for a in animation.get_animation_list():
-		if desired in a.to_lower(): animation.play(a,.18);last_animation=desired;break
+	if health<=0:animation.pause();return
+	var speed=Vector2(velocity.x,velocity.z).length()
+	var desired="jump" if not is_on_floor() and absf(velocity.y)>1 else ("run" if speed>2.0 else ("walk" if speed>.2 else "idle"))
+	if reload_left>0:desired="run_reload" if speed>2 else ("walk_reload" if speed>.2 else "reload")
+	elif shot_left>0 and speed<.2:desired="aim"
+	var rate=speed/2.8652 if desired=="run" else (speed/1.1733 if desired=="walk" else 1.0)
+	visual.set_motion(desired,rate);last_animation=desired
+	if reload_left>0:
+		animation.seek((1.0-reload_left/1.8)*animation.get_animation(desired).length,true)
+		if not was_reloading:
+			reload_audio.stream=load("res://assets/realistic/audio/rifle_magout.wav");reload_audio.play();magazine_inserted=false
+		if reload_left<.55 and not magazine_inserted:
+			reload_audio.stream=load("res://assets/realistic/audio/rifle_magin.wav");reload_audio.play();magazine_inserted=true
+	was_reloading=reload_left>0

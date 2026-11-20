@@ -5,6 +5,7 @@ const TILE = 1000.0
 const POIS = {"Snowy Heights":Vector2(-4600,-5200), "Verdant Forest":Vector2(-5000,-1600), "Dust Bowl":Vector2(2300,-4800), "Metro City":Vector2(5600,-1800), "Lake District":Vector2(0,-1500), "Marshlands":Vector2(-1800,3300), "Savanna Industry":Vector2(3700,3300), "Jungle Base":Vector2(-5100,3200), "Relay Nine":Vector2.ZERO, "Coastal Town":Vector2(5600,5200)}
 var sectors: Dictionary = {}
 var material: StandardMaterial3D
+var batch_report: Dictionary = {}
 var headless = DisplayServer.get_name() == "headless"
 
 static func height_at(x: float, z: float) -> float:
@@ -26,17 +27,36 @@ func _ready() -> void:
 	material.vertex_color_use_as_albedo = true
 	material.roughness = .95
 	if not headless:
+		material.albedo_texture=load("res://assets/realistic/ground_color.jpg")
+		material.normal_enabled=true;material.normal_texture=load("res://assets/realistic/ground_normal.jpg")
+		material.roughness_texture=load("res://assets/realistic/ground_rough.jpg")
+		material.texture_filter=BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
+	if not headless:
 		var sea = MeshInstance3D.new()
 		var plane = PlaneMesh.new(); plane.size = Vector2(24000,24000);sea.mesh=plane
 		var water = StandardMaterial3D.new();water.albedo_color=Color(.07,.25,.30);water.roughness=.32;water.metallic=.4
 		sea.material_override=water;sea.position.y=-6;add_child(sea)
 	var outpost = load("res://assets/outpost.glb").instantiate()
 	add_child(outpost);outpost.position.y=8
+	var surface_cache: Dictionary = {}
 	for node in outpost.find_children("*","MeshInstance3D",true,false):
 		node.create_trimesh_collision()
 		node.visibility_range_end=650.0
 		node.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 		if headless: node.visible=false
+		else:
+			var original=node.mesh.surface_get_material(0)
+			var category="plaster" if original and "plaster" in original.resource_name.to_lower() else "metal"
+			if surface_cache.has(category):
+				node.material_override=surface_cache[category];continue
+			var surface=StandardMaterial3D.new();surface.roughness=.9
+			if original and "plaster" in original.resource_name.to_lower():
+				surface.albedo_texture=load("res://assets/realistic/wall_color.jpg");surface.normal_enabled=true;surface.normal_texture=load("res://assets/realistic/wall_normal.jpg")
+			else:
+				surface.albedo_texture=load("res://assets/realistic/RustyCorrugated_Color.webp");surface.normal_enabled=true;surface.normal_texture=load("res://assets/realistic/RustyCorrugated_NormalGL.webp")
+			surface.uv1_triplanar=true;surface.uv1_world_triplanar=true;surface.uv1_scale=Vector3.ONE*.35;node.material_override=surface;surface_cache[category]=surface
+	if not headless:
+		batch_report=load("res://render/static_batch.gd").combine(outpost)
 	update_sectors(Vector3.ZERO)
 
 func update_sectors(point: Vector3) -> void:
@@ -60,6 +80,6 @@ func _make_sector(key: Vector2i) -> void:
 		for z in range(16):
 			var a=origin+Vector2(x,z)*62.5
 			for offset in [Vector2(0,0),Vector2(62.5,0),Vector2(0,62.5),Vector2(62.5,0),Vector2(62.5,62.5),Vector2(0,62.5)]:
-				var p=a+offset;st.set_color(biome(p.x,p.y));st.add_vertex(Vector3(p.x,height_at(p.x,p.y),p.y))
+				var p=a+offset;st.set_color(biome(p.x,p.y).lerp(Color.WHITE,.5));st.set_uv(p/8.0);st.add_vertex(Vector3(p.x,height_at(p.x,p.y),p.y))
 	st.generate_normals();var mesh=MeshInstance3D.new();mesh.mesh=st.commit();mesh.material_override=material
 	add_child(mesh);mesh.create_trimesh_collision();mesh.visible=not headless;sectors[key]=mesh

@@ -12,6 +12,8 @@ Hujjatlar CI holati dastur yoki model testlari holatidan alohida.
 
 # BlendEngine
 
+**Native core UI:** [Blender yadrosidagi UI tuzatishlari va build holati](docs/NATIVE_CORE_UI.md).
+
 Blender manba kodiga tayangan, o'yin ishlab chiqish va interaktiv 3D ish jarayonlarini o'rganishga yo'naltirilgan engine loyihasi.
 
 **Grafika:** [High/Cinematic rejimlari, namuna sahna va ishga tushirish](docs/GRAPHICS.md).

@@ -1,3 +1,5 @@
+> Historical add-on guide: the native editor no longer enables this add-on or exposes its Run/Ship controls. See [current core UI status](../../../../docs/NATIVE_CORE_UI.md). The features below describe the legacy workflow.
+
 # BlendEngine Game Creation Guide
 
 BlendEngine is a beginner-friendly game editor built on top of the Blender runtime. The goal is simple: open the editor, build a world, add rules, press Play Mode, then export a package.

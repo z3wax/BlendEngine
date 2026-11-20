@@ -1,0 +1,55 @@
+name: Z3WAX playable Ubuntu QA
+on:
+  workflow_dispatch:
+  push:
+    branches: [feat/z3wax-realistic-visuals]
+    paths:
+      - 'native/z3wax/**'
+      - 'tools/z3wax/realtime/**'
+      - 'tools/z3wax/art/batch_rifle.py'
+      - '.github/workflows/z3wax-realtime.yml'
+permissions:
+  contents: read
+jobs:
+  ubuntu-game:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install graphics test dependencies and Godot
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb libgl1-mesa-dri libxkbcommon0 libxrandr2 libasound2t64
+          curl -fL https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_linux.x86_64.zip -o "$RUNNER_TEMP/godot.zip"
+          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
+          chmod +x "$RUNNER_TEMP/godot/Godot_v4.6.3-stable_linux.x86_64"
+          ln -s "$RUNNER_TEMP/godot/Godot_v4.6.3-stable_linux.x86_64" "$RUNNER_TEMP/godot/godot"
+          echo "$RUNNER_TEMP/godot" >> "$GITHUB_PATH"
+      - name: Check live game mechanics
+        run: bash tools/z3wax/test.sh
+      - name: Package playable game and local server
+        run: |
+          bash tools/z3wax/realtime/package_ubuntu.sh "$RUNNER_TEMP/Z3WAX-Ubuntu-Realtime" "$RUNNER_TEMP/godot/godot"
+          git archive --format=tar.gz --output="$RUNNER_TEMP/Z3WAX-Ubuntu-Realtime/Game-source.tar.gz" HEAD native/z3wax tools/z3wax doc/license/GPL-license.txt
+          git rev-parse HEAD > "$RUNNER_TEMP/Z3WAX-Ubuntu-Realtime/SOURCE-COMMIT.txt"
+      - name: Validate the exported pack
+        run: timeout 60 "$RUNNER_TEMP/Z3WAX-Ubuntu-Realtime/play.sh" --headless -- --smoke-test
+      - name: Play the exported game in a rendered window
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          Z3WAX_RENDER_PROFILE: speed
+        run: |
+          export Z3WAX_PLAYTEST_DIR="$RUNNER_TEMP/playtest-proof"
+          timeout 180 xvfb-run -a -s '-screen 0 1280x720x24' \
+            "$RUNNER_TEMP/Z3WAX-Ubuntu-Realtime/runtime/godot" \
+            --main-pack "$RUNNER_TEMP/Z3WAX-Ubuntu-Realtime/Disland.pck" \
+            --script "$PWD/native/z3wax/tests/realtime_playtest.gd" --audio-driver Dummy
+      - name: Archive executable permissions
+        run: tar -czf "$RUNNER_TEMP/Z3WAX-Ubuntu-Realtime.tar.gz" -C "$RUNNER_TEMP" Z3WAX-Ubuntu-Realtime
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Z3WAX-Ubuntu-playable-alpha
+          path: |
+            ${{ runner.temp }}/Z3WAX-Ubuntu-Realtime.tar.gz
+            ${{ runner.temp }}/playtest-proof/

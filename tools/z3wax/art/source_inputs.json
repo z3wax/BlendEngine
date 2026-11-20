@@ -1,0 +1,27 @@
+[
+  {
+    "file": "tactical_original.glb",
+    "url": "https://raw.githubusercontent.com/cktang88/3d-fps/130ac2a5c856401ec36e7d35afcfefe40c5801f4/public/assets/models/characters/soldier_tac.glb",
+    "sha256": "fe02bc307077d7a5a74069d085893988d93751495871c84082256e60bf9bfc9e"
+  },
+  {
+    "file": "motion_source.glb",
+    "url": "https://raw.githubusercontent.com/cktang88/3d-fps/130ac2a5c856401ec36e7d35afcfefe40c5801f4/public/assets/models/characters/soldier.glb",
+    "sha256": "6f229176b1ca49ff33605718ebfcca7fcee8f65d6d311ce3c86693df9310d2d7"
+  },
+  {
+    "file": "rifle_fp.glb",
+    "url": "https://raw.githubusercontent.com/cktang88/3d-fps/130ac2a5c856401ec36e7d35afcfefe40c5801f4/public/assets/models/fp/m4a1.glb",
+    "sha256": "f66a03a316e8ac6a1505b21c3c7cf8ad4672fccaf1ce947a9ea5ed33600364fc"
+  },
+  {
+    "file": "arms_normal.webp",
+    "url": "https://raw.githubusercontent.com/cktang88/3d-fps/130ac2a5c856401ec36e7d35afcfefe40c5801f4/public/assets/models/fp/arms_normal.webp",
+    "sha256": "0500bdd5e6045621d980105cc281312dd6d7fc66a6649ddbe632fea802dba881"
+  },
+  {
+    "file": "arms_basecolor.webp",
+    "url": "https://raw.githubusercontent.com/cktang88/3d-fps/130ac2a5c856401ec36e7d35afcfefe40c5801f4/public/assets/models/fp/arms_basecolor.webp",
+    "sha256": "4657bc61099b7cf92084c5481c0c6d19a1d8219c8ee8c08e546f9f823fec6946"
+  }
+]

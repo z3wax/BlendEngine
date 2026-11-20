@@ -28,6 +28,7 @@
 #include "DNA_object_types.h"
 #include "DNA_scene_types.h"
 #include "DNA_userdef_types.h"
+#include "DNA_view3d_types.h"
 #include "DNA_workspace_types.h"
 
 #include "BKE_callbacks.h"
@@ -5729,6 +5730,69 @@ static void SCREEN_OT_workspace_cycle(wmOperatorType *ot)
 /** \} */
 
 /* -------------------------------------------------------------------- */
+/** \name Realtime View
+ *
+ * Built-in viewport control, independent of application templates and add-ons.
+ * Material preview uses Eevee; this does not replace the scene's render engine.
+ * \{ */
+
+static bool screen_realtime_view_poll(bContext *C)
+{
+  bScreen *screen = CTX_wm_screen(C);
+  if (CTX_wm_window(C) != NULL && screen != NULL) {
+    LISTBASE_FOREACH (ScrArea *, area, &screen->areabase) {
+      if (area->spacetype == SPACE_VIEW3D) {
+        return true;
+      }
+    }
+  }
+  CTX_wm_operator_poll_msg_set(C, "The current window needs a 3D Viewport");
+  return false;
+}
+
+static int screen_realtime_view_exec(bContext *C, wmOperator *op)
+{
+  bScreen *screen = CTX_wm_screen(C);
+  const int shading = RNA_enum_get(op->ptr, "shading");
+  if (shading == OB_MATERIAL && BKE_scene_uses_blender_workbench(CTX_data_scene(C))) {
+    BKE_report(op->reports, RPT_WARNING, "Workbench does not support material preview");
+    return OPERATOR_CANCELLED;
+  }
+  LISTBASE_FOREACH (ScrArea *, area, &screen->areabase) {
+    if (area->spacetype != SPACE_VIEW3D) {
+      continue;
+    }
+    View3D *v3d = area->spacedata.first;
+    PointerRNA ptr;
+    RNA_pointer_create(&screen->id, &RNA_View3DShading, &v3d->shading, &ptr);
+    PropertyRNA *prop = RNA_struct_find_property(&ptr, "type");
+    /* Run the normal RNA update path, including sculpt geometry and render-engine cleanup. */
+    RNA_property_enum_set(&ptr, prop, shading);
+    RNA_property_update(C, &ptr, prop);
+    ED_area_tag_redraw(area);
+  }
+  return OPERATOR_FINISHED;
+}
+
+static void SCREEN_OT_realtime_view(wmOperatorType *ot)
+{
+  static const EnumPropertyItem shading_items[] = {
+      {OB_MATERIAL, "MATERIAL", ICON_SHADING_TEXTURE, "Material Preview", "Eevee material preview"},
+      {OB_SOLID, "SOLID", ICON_SHADING_SOLID, "Solid View", "Solid viewport shading"},
+      {0, NULL, 0, NULL, NULL},
+  };
+  ot->name = "Realtime View";
+  ot->idname = "SCREEN_OT_realtime_view";
+  ot->description =
+      "Change shading in this window's visible 3D Viewports without changing scene render settings";
+  ot->poll = screen_realtime_view_poll;
+  ot->exec = screen_realtime_view_exec;
+  RNA_def_enum(ot->srna, "shading", shading_items, OB_MATERIAL, "Shading", "Viewport shading mode");
+}
+
+/** \} */
+
+/* -------------------------------------------------------------------- */
 /** \name Assigning Operator Types
  * \{ */
 
@@ -5741,6 +5805,7 @@ void ED_operatortypes_screen(void)
   WM_operatortype_append(SCREEN_OT_redo_last);
 
   /* Screen tools. */
+  WM_operatortype_append(SCREEN_OT_realtime_view);
   WM_operatortype_append(SCREEN_OT_area_move);
   WM_operatortype_append(SCREEN_OT_area_split);
   WM_operatortype_append(SCREEN_OT_area_join);

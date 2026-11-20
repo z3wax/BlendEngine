@@ -45,6 +45,7 @@ struct Options {
   SceneParams scene_params;
   SessionParams session_params;
   bool quiet;
+  bool dynamic_bvh;
   bool show_help, interactive, pause;
   string output_filepath;
   string output_pass;
@@ -107,6 +108,10 @@ static void scene_init()
 #endif
   {
     xml_read_file(options.scene, options.filepath.c_str());
+  }
+
+  if (options.dynamic_bvh) {
+    options.scene->params.bvh_type = BVH_TYPE_DYNAMIC;
   }
 
   /* Camera width/height override? */
@@ -399,6 +404,9 @@ static void options_parse(int argc, const char **argv)
              "--background",
              &options.session_params.background,
              "Render in background, without user interface",
+             "--dynamic-bvh",
+             &options.dynamic_bvh,
+             "Keep object transforms dynamic (game-host reference rendering)",
              "--quiet",
              &options.quiet,
              "In background mode, don't print progress messages",

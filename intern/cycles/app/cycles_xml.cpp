@@ -128,7 +128,7 @@ static bool xml_read_float3_array(vector<float3> &value, xml_node node, const ch
 {
   vector<float> array;
 
-  if (xml_read_float_array(array, node, name)) {
+  if (xml_read_float_array(array, node, name) && array.size() % 3 == 0) {
     for (size_t i = 0; i < array.size(); i += 3)
       value.push_back(make_float3(array[i + 0], array[i + 1], array[i + 2]));
 
@@ -468,6 +468,23 @@ static void xml_read_mesh(const XMLReadState &state, xml_node node)
       index_offset += nverts[i];
     }
 
+    /* Optional authored normals and tangent frames from game/Blender exporters.
+     * They preserve hard edges and normal maps instead of regenerating smooth normals. */
+    vector<float3> normals, tangents;
+    vector<float> tangent_signs;
+    if (xml_read_float3_array(normals, node, "N") && normals.size() == P.size()) {
+      Attribute *attr = mesh->attributes.add(ATTR_STD_VERTEX_NORMAL);
+      std::copy(normals.begin(), normals.end(), attr->data_float3());
+    }
+    if (xml_read_float3_array(tangents, node, "T") &&
+        xml_read_float_array(tangent_signs, node, "TS") &&
+        tangents.size() == num_triangles * 3 && tangent_signs.size() == tangents.size()) {
+      Attribute *attr = mesh->attributes.add(ATTR_STD_UV_TANGENT);
+      std::copy(tangents.begin(), tangents.end(), attr->data_float3());
+      attr = mesh->attributes.add(ATTR_STD_UV_TANGENT_SIGN);
+      std::copy(tangent_signs.begin(), tangent_signs.end(), attr->data_float());
+    }
+
     if (xml_read_float_array(UV, node, "UV")) {
       ustring name = ustring("UVMap");
       Attribute *attr = mesh->attributes.add(ATTR_STD_UV, name);
@@ -651,6 +668,19 @@ static void xml_read_scene(XMLReadState &state, xml_node scene_node)
     }
     else if (string_iequals(node.name(), "mesh")) {
       xml_read_mesh(state, node);
+    }
+    else if (string_iequals(node.name(), "instance")) {
+      /* Share geometry/BVH instead of duplicating identical game-world meshes. */
+      int source_index = -1;
+      if (!xml_read_int(&source_index, node, "object") || source_index < 0 ||
+          size_t(source_index) >= state.scene->objects.size()) {
+        fprintf(stderr, "Invalid instance source object.\n");
+        exit(EXIT_FAILURE);
+      }
+      Object *object = new Object();
+      object->set_geometry(state.scene->objects[source_index]->get_geometry());
+      object->set_tfm(state.tfm);
+      state.scene->objects.push_back(object);
     }
     else if (string_iequals(node.name(), "light")) {
       xml_read_light(state, node);

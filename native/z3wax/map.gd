@@ -1,19 +1,29 @@
 extends Control
 var player=Vector2.ZERO
 var zone_radius=7000.0
-var world_script=preload("res://world.gd")
+const World=preload("res://world.gd")
+var terrain=preload("res://assets/realistic/disland_relief.png")
 func _draw() -> void:
-	var bounds=Rect2(Vector2.ZERO,size);draw_rect(bounds,Color(.025,.09,.13))
-	var step=size/64.0
-	for x in range(64):
-		for y in range(64):
-			var p=Vector2(x/64.0,y/64.0)*16000-Vector2.ONE*8000
-			if world_script.height_at(p.x,p.y)>-6:draw_rect(Rect2(Vector2(x,y)*step,step+Vector2.ONE),world_script.biome(p.x,p.y))
+	var rect=Rect2(Vector2(24,20),size-Vector2(48,42))
+	draw_rect(Rect2(Vector2.ZERO,size),Color(.02,.045,.06))
+	draw_texture_rect(terrain,rect,false)
+	var font=get_theme_default_font()
 	for i in range(17):
-		draw_line(Vector2(i*size.x/16,0),Vector2(i*size.x/16,size.y),Color(1,1,1,.12))
-		draw_line(Vector2(0,i*size.y/16),Vector2(size.x,i*size.y/16),Color(1,1,1,.12))
-	draw_arc(size/2,zone_radius/16000*size.x,0,TAU,96,Color(.3,.9,.85),2,true)
-	for name in world_script.POIS:
-		var p=(world_script.POIS[name]+Vector2.ONE*8000)/16000*size
-		draw_circle(p,3,Color(.95,.72,.3));draw_string(ThemeDB.fallback_font,p+Vector2(6,0),name,HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color.WHITE)
-	draw_circle((player+Vector2.ONE*8000)/16000*size,5,Color.WHITE)
+		var x=rect.position.x+i*rect.size.x/16;var y=rect.position.y+i*rect.size.y/16
+		draw_line(Vector2(x,rect.position.y),Vector2(x,rect.end.y),Color(1,1,1,.16))
+		draw_line(Vector2(rect.position.x,y),Vector2(rect.end.x,y),Color(1,1,1,.16))
+		if i<16:
+			draw_string(font,Vector2(x+rect.size.x/32-4,14),String.chr(65+i),HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color(.7,.77,.78))
+			draw_string(font,Vector2(2,y+rect.size.y/32+4),str(i+1),HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color(.7,.77,.78))
+	var circle=PackedVector2Array()
+	for i in range(97):circle.append(rect.get_center()+Vector2(cos(i*TAU/96),sin(i*TAU/96))*zone_radius/World.SIZE*rect.size)
+	draw_polyline(circle,Color(.35,.9,.85),2,true)
+	for place in World.POIS:
+		var p=rect.position+(World.POIS[place]/World.SIZE+Vector2.ONE*.5)*rect.size
+		var color=Color(.98,.78,.4) if place=="Relay Nine" else Color(.8,.83,.82)
+		draw_circle(p,3,color)
+		var label=place if place=="Relay Nine" else place+" *"
+		draw_string_outline(font,p+Vector2(6,0),label,HORIZONTAL_ALIGNMENT_LEFT,-1,14,3,Color(.02,.04,.05))
+		draw_string(font,p+Vector2(6,0),label,HORIZONTAL_ALIGNMENT_LEFT,-1,14,color)
+	draw_circle(rect.position+(player/World.SIZE+Vector2.ONE*.5)*rect.size,5,Color.WHITE)
+	draw_string(font,Vector2(25,size.y-3),"* Planned settlements — this relief shows current terrain, not finished city content.",HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color(.68,.76,.78))

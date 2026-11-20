@@ -1,0 +1,5 @@
+# Godot extracts these from the embedded GLB textures on import.
+*_Image_*.webp
+barrel_Barrel_*.webp
+crate_old_military_crate_*.webp
+car_*.webp
