@@ -27,8 +27,17 @@ produce APK/IPA exports, or achieve reference-image fidelity.
 ## Build and validate
 
 Build this Blender 3.6 fork using its normal desktop dependencies and CMake
-instructions in `doc/build_systems/cmake.rst`. The optional game feature profile
-is `build_files/cmake/config/blendengine_game.cmake`. Copying Python UI files
+configuration in the root `CMakeLists.txt`. Dependency build definitions live
+in `build_files/build_environment`. With the dependencies installed, configure
+and build the optional game feature profile:
+
+```sh
+cmake -S . -B ../blendengine-game-build \
+  -C build_files/cmake/config/blendengine_game.cmake
+cmake --build ../blendengine-game-build --parallel 4
+```
+
+Copying Python UI files
 into stock Blender will not install the new C operator; rebuild the executable.
 
 Run with the compiled fork:
